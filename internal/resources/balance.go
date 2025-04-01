@@ -7,6 +7,7 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
 // BalanceMCPResource represents a handler for MCP Balance resources
@@ -22,12 +23,12 @@ func NewBalanceMCPResource(client *godo.Client) *BalanceMCPResource {
 }
 
 // GetResourceTemplate returns the template for the Balance MCP resource
-func (b *BalanceMCPResource) GetResourceTemplate() mcp.ResourceTemplate {
-	return mcp.NewResourceTemplate(
+func (b *BalanceMCPResource) GetResource() mcp.Resource {
+	return mcp.NewResource(
 		"balance://current",
-		"Balance",
-		mcp.WithTemplateDescription("Returns balance information"),
-		mcp.WithTemplateMIMEType("application/json"),
+		"Balance Information",
+		mcp.WithResourceDescription("Returns balance information"),
+		mcp.WithMIMEType("application/json"),
 	)
 }
 
@@ -53,9 +54,8 @@ func (b *BalanceMCPResource) HandleGetResource(ctx context.Context, request mcp.
 	}, nil
 }
 
-func (b *BalanceMCPResource) Resources() map[mcp.ResourceTemplate]MCPResourceHandler {
-	return map[mcp.ResourceTemplate]MCPResourceHandler{
-		b.GetResourceTemplate(): b.HandleGetResource,
+func (b *BalanceMCPResource) Resources() map[mcp.Resource]server.ResourceHandlerFunc {
+	return map[mcp.Resource]server.ResourceHandlerFunc{
+		b.GetResource(): b.HandleGetResource,
 	}
 }
-

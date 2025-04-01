@@ -27,7 +27,7 @@ func (d *DropletTool) CreateDroplet(ctx context.Context, req mcp.CallToolRequest
 	size := req.Params.Arguments["Size"].(string)
 	imageID := req.Params.Arguments["ImageID"].(float64)
 	region := req.Params.Arguments["Region"].(string)
-	backup, _ := req.Params.Arguments["Backup"].(bool) // Defaults to false
+	backup, _ := req.Params.Arguments["Backup"].(bool)         // Defaults to false
 	monitoring, _ := req.Params.Arguments["Monitoring"].(bool) // Defaults to false
 	// Create the droplet
 	dropletCreateRequest := &godo.DropletCreateRequest{
@@ -262,23 +262,6 @@ func (d *DropletTool) SnapshotDroplet(ctx context.Context, req mcp.CallToolReque
 	dropletID := req.Params.Arguments["ID"].(float64)
 	name := req.Params.Arguments["Name"].(string)
 	action, _, err := d.client.DropletActions.Snapshot(ctx, int(dropletID), name)
-	if err != nil {
-		return nil, err
-	}
-
-	jsonAction, err := json.MarshalIndent(action, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-
-	return mcp.NewToolResultText(string(jsonAction)), nil
-}
-
-// GetAction gets a droplet action by ID
-func (d *DropletTool) GetAction(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	dropletID := req.Params.Arguments["DropletID"].(float64)
-	actionID := req.Params.Arguments["ActionID"].(float64)
-	action, _, err := d.client.DropletActions.Get(ctx, int(dropletID), int(actionID))
 	if err != nil {
 		return nil, err
 	}
@@ -658,14 +641,6 @@ func (d *DropletTool) Tools() []server.ServerTool {
 				mcp.WithDescription("Take a snapshot of a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name for the snapshot")),
-			),
-		},
-		{
-			Handler: d.GetAction,
-			Tool: mcp.NewTool("digitalocean-droplet-get-action",
-				mcp.WithDescription("Get details of a droplet action"),
-				mcp.WithNumber("DropletID", mcp.Required(), mcp.Description("ID of the droplet")),
-				mcp.WithNumber("ActionID", mcp.Required(), mcp.Description("ID of the action to get details for")),
 			),
 		},
 		{

@@ -7,6 +7,7 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
 type AccountMCPResource struct {
@@ -19,12 +20,12 @@ func NewAccountMCPResource(client *godo.Client) *AccountMCPResource {
 	}
 }
 
-func (a *AccountMCPResource) GetResourceTemplate() mcp.ResourceTemplate {
-	return mcp.NewResourceTemplate(
+func (a *AccountMCPResource) GetResource() mcp.Resource {
+	return mcp.NewResource(
 		"account://current",
-		"Account",
-		mcp.WithTemplateDescription("Returns account information"),
-		mcp.WithTemplateMIMEType("application/json"),
+		"Account Information",
+		mcp.WithResourceDescription("Returns account information"),
+		mcp.WithMIMEType("application/json"),
 	)
 }
 
@@ -49,8 +50,8 @@ func (a *AccountMCPResource) HandleGetResource(ctx context.Context, request mcp.
 	}, nil
 }
 
-func (a *AccountMCPResource) Resources() map[mcp.ResourceTemplate]MCPResourceHandler {
-	return map[mcp.ResourceTemplate]MCPResourceHandler{
-		a.GetResourceTemplate(): a.HandleGetResource,
+func (a *AccountMCPResource) Resources() map[mcp.Resource]server.ResourceHandlerFunc {
+	return map[mcp.Resource]server.ResourceHandlerFunc{
+		a.GetResource(): a.HandleGetResource,
 	}
 }

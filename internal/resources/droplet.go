@@ -137,8 +137,8 @@ func (d *DropletMCPResource) HandleGetActionsResource(ctx context.Context, reque
 	}, nil
 }
 
-// Resources returns the available resources for the Droplet MCP resource
-func (d *DropletMCPResource) Resources() map[mcp.ResourceTemplate]MCPResourceHandler {
+// ResourceTemplates returns the available resource templates for the Droplet MCP resource
+func (d *DropletMCPResource) ResourceTemplates() map[mcp.ResourceTemplate]MCPResourceHandler {
 	return map[mcp.ResourceTemplate]MCPResourceHandler{
 		d.GetResourceTemplate():        d.HandleGetResource,
 		d.GetActionsResourceTemplate(): d.HandleGetActionsResource,
