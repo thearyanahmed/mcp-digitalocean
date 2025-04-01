@@ -9,8 +9,8 @@ import (
 )
 
 func RegisterTools(s *server.MCPServer, c *godo.Client) {
-	// Register droplet tools
 	s.AddTools(tools.NewDropletTool(c).Tools()...)
+	s.AddTools(tools.NewAppTool(c).Tools()...)
 }
 
 func RegisterResources(s *server.MCPServer, c *godo.Client) {
@@ -23,4 +23,25 @@ func RegisterResources(s *server.MCPServer, c *godo.Client) {
 	for template, handler := range resources.NewSizesMCPResource(c).Resources() {
 		s.AddResourceTemplate(template, handler)
 	}
+
+	// Register account resource
+	for template, handler := range resources.NewAccountMCPResource(c).Resources() {
+		s.AddResourceTemplate(template, handler)
+	}
+
+	// Register action resource
+	for template, handler := range resources.NewActionMCPResource(c).Resources() {
+		s.AddResourceTemplate(template, handler)
+	}
+
+	// Register apps resource
+	for template, handler := range resources.NewAppMCPResource(c).Resources() {
+		s.AddResourceTemplate(template, handler)
+	}
+
+	// Register balance resource
+	for template, handler := range resources.NewBalanceMCPResource(c).Resources() {
+		s.AddResourceTemplate(template, handler)
+	}
+
 }
