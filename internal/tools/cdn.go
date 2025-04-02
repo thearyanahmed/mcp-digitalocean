@@ -98,7 +98,10 @@ func (c *CDNTool) Tools() []server.ServerTool {
 			Tool: mcp.NewTool("digitalocean-cdn-flush-cache",
 				mcp.WithDescription("Flush the cache of a CDN"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the CDN")),
-				mcp.WithArray("Files", mcp.Required(), mcp.Description("List of files to flush from the cache")),
+				mcp.WithArray("Files", mcp.Required(), mcp.Description("file names to flush from the cache"), mcp.Items(map[string]any{
+					"type":        "string",
+					"description": "name of file",
+				})),
 			),
 		},
 	}

@@ -23,7 +23,6 @@ Resources are read-only entities that provide information about DigitalOcean res
 | **Certificate Resource** | `certificates://{id}`                    | Returns information about a certificate.        | Get certificate details by ID.   |
 | **Domains Resource**     | `domains://{name}`                       | Returns information about a domain.             | Get domain details by name.      |
 | **Domain Record**        | `domains://{name}/records/{record_id}`   | Returns information about a domain record.      | Get domain record details.       |
-| **Autoscale Pool**       | `autoscale://{id}`                       | Returns information about an autoscale pool.    | Get autoscale pool details.      |
 | **Firewall Resource**    | `firewalls://{id}`                       | Returns information about a firewall.           | Get firewall details by ID.      |
 | **SSH Key Resource**     | `keys://{id}`                            | Returns information about an SSH key.           | Get SSH key details by ID.       |
 | **Regions Resource**     | `regions://all`                          | Returns all available regions.                   | List all regions.                |
@@ -57,9 +56,6 @@ Tools provide actions that can be performed on DigitalOcean resources.
 | **digitalocean-certificate-create**    | Creates a new certificate.                        | `Name`, `PrivateKey`, `LeafCertificate`, `CertificateChain`                                      |
 | **digitalocean-certificate-delete**    | Deletes a certificate.                            | `ID` (string, required)                                                                          |
 | **digitalocean-certificate-get**       | Retrieves a certificate by ID.                    | `ID` (string, required)                                                                          |
-| **digitalocean-autoscale-create**      | Creates a new autoscale pool.                     | `Name`, `Config`, `DropletTemplate`                                                              |
-| **digitalocean-autoscale-delete**      | Deletes an autoscale pool.                        | `ID` (string, required)                                                                          |
-| **digitalocean-autoscale-update**      | Updates an autoscale pool.                        | `ID`, `Name`, `Config`, `DropletTemplate`                                                       |
 | **digitalocean-reserved-ip-reserve**   | Reserves a new IPv4 or IPv6.                      | `Region` (string, required), `Type` (string, required, "ipv4" or "ipv6")                       |
 | **digitalocean-reserved-ip-release**   | Releases a reserved IPv4 or IPv6.                 | `IP` (string, required), `Type` (string, required, "ipv4" or "ipv6")                          |
 | **digitalocean-reserved-ip-assign**    | Assigns a reserved IP to a droplet.               | `IP` (string, required), `DropletID` (number, required), `Type` (string, required, "ipv4" or "ipv6") |

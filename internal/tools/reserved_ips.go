@@ -27,14 +27,15 @@ func (t *ReservedIPTool) ReserveIP(ctx context.Context, req mcp.CallToolRequest)
 	region := req.Params.Arguments["Region"].(string)
 	ipType := req.Params.Arguments["Type"].(string) // "ipv4" or "ipv6"
 
-	var reservedIP interface{}
+	var reservedIP any
 	var err error
 
-	if ipType == "ipv4" {
+	switch ipType {
+	case "ipv4":
 		reservedIP, _, err = t.client.ReservedIPs.Create(ctx, &godo.ReservedIPCreateRequest{Region: region})
-	} else if ipType == "ipv6" {
+	case "ipv6":
 		reservedIP, _, err = t.client.ReservedIPV6s.Create(ctx, &godo.ReservedIPV6CreateRequest{Region: region})
-	} else {
+	default:
 		return nil, errors.New("invalid IP type. Use 'ipv4' or 'ipv6'")
 	}
 
@@ -56,11 +57,12 @@ func (t *ReservedIPTool) ReleaseIP(ctx context.Context, req mcp.CallToolRequest)
 	ipType := req.Params.Arguments["Type"].(string) // "ipv4" or "ipv6"
 
 	var err error
-	if ipType == "ipv4" {
+	switch ipType {
+	case "ipv4":
 		_, err = t.client.ReservedIPs.Delete(ctx, ip)
-	} else if ipType == "ipv6" {
+	case "ipv6":
 		_, err = t.client.ReservedIPV6s.Delete(ctx, ip)
-	} else {
+	default:
 		return nil, errors.New("invalid IP type. Use 'ipv4' or 'ipv6'")
 	}
 
@@ -80,11 +82,12 @@ func (t *ReservedIPTool) AssignIP(ctx context.Context, req mcp.CallToolRequest) 
 	var action *godo.Action
 	var err error
 
-	if ipType == "ipv4" {
+	switch ipType {
+	case "ipv4":
 		action, _, err = t.client.ReservedIPActions.Assign(ctx, ip, dropletID)
-	} else if ipType == "ipv6" {
+	case "ipv6":
 		action, _, err = t.client.ReservedIPV6Actions.Assign(ctx, ip, dropletID)
-	} else {
+	default:
 		return nil, errors.New("invalid IP type. Use 'ipv4' or 'ipv6'")
 	}
 
@@ -108,11 +111,12 @@ func (t *ReservedIPTool) UnassignIP(ctx context.Context, req mcp.CallToolRequest
 	var action *godo.Action
 	var err error
 
-	if ipType == "ipv4" {
+	switch ipType {
+	case "ipv4":
 		action, _, err = t.client.ReservedIPActions.Unassign(ctx, ip)
-	} else if ipType == "ipv6" {
+	case "ipv6":
 		action, _, err = t.client.ReservedIPV6Actions.Unassign(ctx, ip)
-	} else {
+	default:
 		return nil, errors.New("invalid IP type. Use 'ipv4' or 'ipv6'")
 	}
 

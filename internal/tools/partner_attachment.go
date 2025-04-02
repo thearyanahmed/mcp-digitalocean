@@ -85,17 +85,11 @@ func (p *PartnerAttachmentTool) GetBGPConfig(ctx context.Context, req mcp.CallTo
 func (p *PartnerAttachmentTool) UpdatePartnerAttachment(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	id := req.Params.Arguments["ID"].(string)
 	name := req.Params.Arguments["Name"].(string)
-	vpcIDs := req.Params.Arguments["VPCIDs"].([]interface{})
-
-	// Convert VPCIDs to a slice of strings
-	vpcIDsStr := make([]string, len(vpcIDs))
-	for i, v := range vpcIDs {
-		vpcIDsStr[i] = v.(string)
-	}
+	vpcIDs := req.Params.Arguments["VPCIDs"].([]string)
 
 	updateRequest := &godo.PartnerAttachmentUpdateRequest{
 		Name:   name,
-		VPCIDs: vpcIDsStr,
+		VPCIDs: vpcIDs,
 	}
 
 	attachment, _, err := p.client.PartnerAttachment.Update(ctx, id, updateRequest)
@@ -149,7 +143,10 @@ func (p *PartnerAttachmentTool) Tools() []server.ServerTool {
 				mcp.WithDescription("Update a partner attachment"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the partner attachment to update")),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("New name for the partner attachment")),
-				mcp.WithArray("VPCIDs", mcp.Required(), mcp.Description("List of VPC IDs to associate with the partner attachment")),
+				mcp.WithArray("VPCIDs", mcp.Required(), mcp.Description("VPC ID to associate with the partner attachment"), mcp.Items(map[string]any{
+					"type":        "string",
+					"description": "VPC ID to associate with Partner attachment",
+				})),
 			),
 		},
 	}

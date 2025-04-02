@@ -13,7 +13,6 @@ func RegisterTools(s *server.MCPServer, c *godo.Client) {
 	s.AddTools(tools.NewCDNTool(c).Tools()...)
 	s.AddTools(tools.NewCertificateTool(c).Tools()...)
 	s.AddTools(tools.NewDomainsTool(c).Tools()...)
-	s.AddTools(tools.NewAutoscaleTool(c).Tools()...)
 	s.AddTools(tools.NewFirewallTool(c).Tools()...)
 	s.AddTools(tools.NewKeysTool(c).Tools()...)
 	s.AddTools(tools.NewReservedIPTool(c).Tools()...)
@@ -78,12 +77,6 @@ func RegisterResources(s *server.MCPServer, c *godo.Client) {
 	// Register domains resource
 	domainsResource := resources.NewDomainsMCPResource(c)
 	for template, handler := range domainsResource.ResourceTemplates() {
-		s.AddResourceTemplate(template, handler)
-	}
-
-	// Register autoscale resource
-	autoscaleResource := resources.NewAutoscaleMCPResource(c)
-	for template, handler := range autoscaleResource.ResourceTemplates() {
 		s.AddResourceTemplate(template, handler)
 	}
 

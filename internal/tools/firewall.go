@@ -30,13 +30,12 @@ func (f *FirewallTool) CreateFirewall(ctx context.Context, req mcp.CallToolReque
 	outboundProtocol := req.Params.Arguments["OutboundProtocol"].(string)
 	outboundPortRange := req.Params.Arguments["OutboundPortRange"].(string)
 	outboundDestination := req.Params.Arguments["OutboundDestination"].(string)
-	dropletIDs, _ := req.Params.Arguments["DropletIDs"].([]int)
-	if dropletIDs == nil {
-		dropletIDs = []int{}
-	}
-	tags, _ := req.Params.Arguments["Tags"].([]string)
-	if tags == nil {
-		tags = []string{}
+	dropletIDs := req.Params.Arguments["DropletIDs"].([]float64)
+	tags := req.Params.Arguments["Tags"].([]string)
+
+	dIDs := make([]int, len(dropletIDs))
+	for i, v := range dropletIDs {
+		dIDs[i] = int(v)
 	}
 
 	inboundRule := godo.InboundRule{
@@ -55,7 +54,7 @@ func (f *FirewallTool) CreateFirewall(ctx context.Context, req mcp.CallToolReque
 		Name:          name,
 		InboundRules:  []godo.InboundRule{inboundRule},
 		OutboundRules: []godo.OutboundRule{outboundRule},
-		DropletIDs:    dropletIDs,
+		DropletIDs:    dIDs,
 		Tags:          tags,
 	}
 
@@ -96,8 +95,14 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 				mcp.WithString("OutboundProtocol", mcp.Required(), mcp.Description("Protocol for outbound rule")),
 				mcp.WithString("OutboundPortRange", mcp.Required(), mcp.Description("Port range for outbound rule")),
 				mcp.WithString("OutboundDestination", mcp.Required(), mcp.Description("Destination address for outbound rule")),
-				mcp.WithArray("DropletIDs", mcp.Description("Droplet IDs to apply the firewall to")),
-				mcp.WithArray("Tags", mcp.Description("Tags to apply the firewall to")),
+				mcp.WithArray("DropletIDs", mcp.Description("Droplet IDs to apply the firewall to"), mcp.Items(map[string]any{
+					"type":        "number",
+					"description": "droplet ID to apply the firewall to",
+				})),
+				mcp.WithArray("Tags", mcp.Description("Tags to apply the firewall to"), mcp.Items(map[string]any{
+					"type":        "string",
+					"description": "Tag to apply",
+				})),
 			),
 		},
 		{
