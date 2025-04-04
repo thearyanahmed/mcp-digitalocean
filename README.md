@@ -15,6 +15,7 @@ Resources provide read-only access to DigitalOcean entities, allowing users to r
 | **Account**              | Fetch account information.                                                     |
 | **Balance**              | View current account balance.                                                  |
 | **Billing**              | Access billing history.                                                        |
+| **Invoices**             | Retrieve a list of all invoices.                                               |
 | **Actions**              | Get details about specific actions.                                            |
 | **Images**               | Retrieve information about distribution images or specific images.             |
 | **CDNs**                 | Fetch details about CDN configurations.                                        |

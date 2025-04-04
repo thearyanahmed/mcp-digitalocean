@@ -109,6 +109,12 @@ func RegisterResources(s *server.MCPServer, c *godo.Client) {
 		s.AddResourceTemplate(template, handler)
 	}
 
+	// Register invoices resource
+	invoicesResource := resources.NewInvoicesMCPResource(c)
+	for resource, handler := range invoicesResource.Resources() {
+		s.AddResource(resource, handler)
+	}
+
 	// Register VPC resource
 	vpcResource := resources.NewVPCMCPResource(c)
 	for template, handler := range vpcResource.ResourceTemplates() {
