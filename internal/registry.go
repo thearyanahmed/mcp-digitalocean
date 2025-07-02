@@ -155,7 +155,7 @@ func registerAccountTools(s *server.MCPServer, c *godo.Client) error {
 func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, servicesToActivate ...string) error {
 	if len(servicesToActivate) == 0 {
 		logger.Warn("no services specified, loading all supported services")
-		for k, _ := range supportedServices {
+		for k := range supportedServices {
 			servicesToActivate = append(servicesToActivate, k)
 		}
 	}
