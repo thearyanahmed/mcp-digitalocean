@@ -3,7 +3,11 @@ package internal
 import (
 	"fmt"
 	"log/slog"
+	"mcp-digitalocean/internal/doks"
 	"strings"
+
+	"github.com/digitalocean/godo"
+	"github.com/mark3labs/mcp-go/server"
 
 	"mcp-digitalocean/internal/account"
 	"mcp-digitalocean/internal/apps"
@@ -20,6 +24,7 @@ import (
 
 // supportedServices is a set of services that we support in this MCP server.
 var supportedServices = map[string]struct{}{
+<<<<<<< HEAD
 	"apps":        {},
 	"networking":  {},
 	"droplets":    {},
@@ -27,6 +32,14 @@ var supportedServices = map[string]struct{}{
 	"spaces":      {},
 	"marketplace": {},
 	"insights":    {},
+=======
+	"apps":       {},
+	"networking": {},
+	"droplets":   {},
+	"accounts":   {},
+	"spaces":     {},
+	"doks":       {},
+>>>>>>> 02b4110 (adding fictional doks tool)
 }
 
 // registerAppTools registers the app platform tools with the MCP server.
@@ -97,10 +110,15 @@ func registerMarketplaceTools(s *server.MCPServer, c *godo.Client) error {
 	return nil
 }
 
-// registerInsightsTools registers the account tools with the MCP server.
+
 func registerInsightsTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(insights.NewUptimeTool(c).Tools()...)
 	s.AddTools(insights.NewUptimeCheckAlertTool(c).Tools()...)
+}
+
+
+func registerDOKSTools(s *server.MCPServer, c *godo.Client) error {
+	s.AddTools(doks.NewDoksTool(c).Tools()...)
 
 	return nil
 }
@@ -137,6 +155,7 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 			if err := registerSpacesTools(s, c); err != nil {
 				return fmt.Errorf("failed to register spaces tools: %w", err)
 			}
+<<<<<<< HEAD
 		case "marketplace":
 			if err := registerMarketplaceTools(s, c); err != nil {
 				return fmt.Errorf("failed to register marketplace tools: %w", err)
@@ -144,6 +163,11 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 		case "insights":
 			if err := registerInsightsTools(s, c); err != nil {
 				return fmt.Errorf("failed to register insights tools: %w", err)
+=======
+		case "doks":
+			if err := registerDOKSTools(s, c); err != nil {
+				return fmt.Errorf("failed to register DOKS tools: %w", err)
+>>>>>>> 02b4110 (adding fictional doks tool)
 			}
 		default:
 			return fmt.Errorf("unsupported service: %s, supported service are: %v", svc, setToString(supportedServices))
