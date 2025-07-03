@@ -169,6 +169,13 @@ func TestListApps(t *testing.T) {
 			},
 			expectError: true,
 		},
+		{
+			name: "page size not provided",
+			mock: func(app *MockAppsService, apps []*godo.App) {
+				app.EXPECT().List(gomock.Any(), &godo.ListOptions{Page: defaultPage, PerPage: defaultPageSize}).
+					Return(apps, nil, nil).Times(1)
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
