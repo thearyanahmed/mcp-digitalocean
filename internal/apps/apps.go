@@ -216,7 +216,7 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 	tools := []server.ServerTool{
 		{
 			Handler: a.GetDeploymentStatus,
-			Tool: mcp.NewTool("digitalocean-get-deployment-status",
+			Tool: mcp.NewTool("digitalocean-apps-get-deployment-status",
 				mcp.WithDescription("Retrieves the active deployment for an application on DigitalOcean App Platform. This is useful for getting the current state of an app's latest deployment."),
 				mcp.WithString("AppID", mcp.Required(), mcp.Description("The application ID of the app to retrieve active deployment for"))),
 		},
@@ -259,7 +259,7 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 	appCreateTool := server.ServerTool{
 		Handler: a.CreateAppFromAppSpec,
 		Tool: mcp.NewToolWithRawSchema(
-			"digitalocean-create-app-from-spec",
+			"digitalocean-apps-create-app-from-spec",
 			"Creates an application from a given app spec. Within the app spec, a source has to be provided. The source can be a Git repository, a Dockerfile, or a container image.",
 			appCreateSchema,
 		),
