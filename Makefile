@@ -15,6 +15,7 @@ build-bin:
 dist:
 	cp ./bin/* ./scripts/npm/dist/
 	cp ./internal/apps/spec/*.json ./scripts/npm/dist/
+	npm install --prefix ./scripts/npm/
 
 lint:
 	revive -config revive.toml ./...
