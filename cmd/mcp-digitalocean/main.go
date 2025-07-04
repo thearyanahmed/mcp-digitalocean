@@ -78,6 +78,7 @@ func main() {
 			os.Exit(0)
 		} else {
 			logger.Error("Failed to serve MCP server: " + err.Error())
+			os.Exit(1)
 		}
 	}
 }
