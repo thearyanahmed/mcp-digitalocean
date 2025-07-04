@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/server"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -54,10 +56,14 @@ func main() {
 		services = strings.Split(*serviceFlag, ",")
 	}
 
-	client := godo.NewFromToken(token)
-	s := server.NewMCPServer(mcpName, mcpVersion)
+	client, err := newGodoClientWithToken(context.Background(), token)
+	if err != nil {
+		logger.Error("Failed to create DigitalOcean client: " + err.Error())
+		os.Exit(1)
+	}
 
-	err := registry.Register(logger, s, client, services...)
+	s := server.NewMCPServer(mcpName, mcpVersion)
+	err = registry.Register(logger, s, client, services...)
 	if err != nil {
 		logger.Error("Failed to register tools: " + err.Error())
 		os.Exit(1)
@@ -72,7 +78,23 @@ func main() {
 			os.Exit(0)
 		} else {
 			logger.Error("Failed to serve MCP server: " + err.Error())
-			os.Exit(1)
 		}
 	}
+}
+
+// newGodoClientWithToken initializes a new godo client with a custom user agent.
+func newGodoClientWithToken(ctx context.Context, token string) (*godo.Client, error) {
+	cleanToken := strings.Trim(strings.TrimSpace(token), "'")
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: cleanToken})
+	oauthClient := oauth2.NewClient(ctx, ts)
+
+	retry := godo.RetryConfig{
+		RetryMax:     4,
+		RetryWaitMin: godo.PtrTo(float64(1)),
+		RetryWaitMax: godo.PtrTo(float64(30)),
+	}
+
+	return godo.New(oauthClient,
+		godo.WithRetryAndBackoffs(retry),
+		godo.SetUserAgent(fmt.Sprintf("%s/%s", mcpName, mcpVersion)))
 }
