@@ -153,6 +153,9 @@ func registerAccountTools(s *server.MCPServer, c *godo.Client) error {
 
 // registerSpacesTools registers the spaces tools and resources with the MCP server.
 func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
+	// Register the tools for spaces keys
+	s.AddTools(spaces.NewSpacesKeysTool(c).Tools()...)
+
 	// Register the resources for spaces keys
 	keysResource := spaces.NewKeysIPMCPResource(c)
 	for template, handler := range keysResource.Resources() {
