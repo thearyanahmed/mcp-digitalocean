@@ -332,25 +332,72 @@ func TestSpacesKeysTool_listSpacesKeys(t *testing.T) {
 		},
 	}
 
+	testMeta := &godo.Meta{
+		Total: 2,
+	}
+
+	testResponse := &godo.Response{
+		Meta: testMeta,
+	}
+
 	tests := []struct {
 		name        string
+		args        map[string]any
 		mockSetup   func(*MockSpacesKeysService)
 		expectError bool
 	}{
 		{
-			name: "Successful list",
+			name: "Successful list without pagination",
+			args: map[string]any{},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					List(gomock.Any(), &godo.ListOptions{}).
-					Return(testKeys, nil, nil).
+					List(gomock.Any(), &godo.ListOptions{
+						Page:    1,
+						PerPage: 10,
+					}).
+					Return(testKeys, testResponse, nil).
 					Times(1)
 			},
 		},
 		{
-			name: "API error",
+			name: "Successful list with pagination",
+			args: map[string]any{
+				"Page":    float64(1),
+				"PerPage": float64(10),
+			},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					List(gomock.Any(), &godo.ListOptions{}).
+					List(gomock.Any(), &godo.ListOptions{
+						Page:    1,
+						PerPage: 10,
+					}).
+					Return(testKeys, testResponse, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "Invalid Page type",
+			args: map[string]any{
+				"Page": "invalid",
+			},
+			expectError: true,
+		},
+		{
+			name: "Invalid PerPage type",
+			args: map[string]any{
+				"PerPage": "invalid",
+			},
+			expectError: true,
+		},
+		{
+			name: "API error",
+			args: map[string]any{},
+			mockSetup: func(m *MockSpacesKeysService) {
+				m.EXPECT().
+					List(gomock.Any(), &godo.ListOptions{
+						Page:    1,
+						PerPage: 10,
+					}).
 					Return(nil, nil, errors.New("api error")).
 					Times(1)
 			},
@@ -365,7 +412,7 @@ func TestSpacesKeysTool_listSpacesKeys(t *testing.T) {
 				tc.mockSetup(mockSpacesKeys)
 			}
 			tool := setupSpacesKeysToolWithMock(mockSpacesKeys)
-			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{}}}
+			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
 			resp, err := tool.listSpacesKeys(context.Background(), req)
 			if tc.expectError {
 				require.NotNil(t, resp)
@@ -375,11 +422,16 @@ func TestSpacesKeysTool_listSpacesKeys(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 			require.False(t, resp.IsError)
-			var outKeys []godo.SpacesKey
-			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outKeys))
-			require.Len(t, outKeys, 2)
-			require.Equal(t, testKeys[0].Name, outKeys[0].Name)
-			require.Equal(t, testKeys[1].Name, outKeys[1].Name)
+
+			var result struct {
+				Keys []*godo.SpacesKey `json:"keys"`
+				Meta *godo.Meta        `json:"meta,omitempty"`
+			}
+			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &result))
+			require.Len(t, result.Keys, 2)
+			require.Equal(t, testKeys[0].Name, result.Keys[0].Name)
+			require.Equal(t, testKeys[1].Name, result.Keys[1].Name)
+			require.Equal(t, testMeta.Total, result.Meta.Total)
 		})
 	}
 }
