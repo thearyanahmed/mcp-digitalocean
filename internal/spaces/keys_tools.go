@@ -10,22 +10,31 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-// SpacesKeysTool provides Spaces keys management tools
-type SpacesKeysTool struct {
+type KeysTool struct {
 	client *godo.Client
 }
 
-// NewSpacesKeysTool creates a new Spaces keys tool
-func NewSpacesKeysTool(client *godo.Client) *SpacesKeysTool {
-	return &SpacesKeysTool{
+func NewSpacesKeysTool(client *godo.Client) *KeysTool {
+	return &KeysTool{
 		client: client,
 	}
 }
 
-// createSpacesKey creates a new Spaces key
-func (s *SpacesKeysTool) createSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KeysTool) createSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	name := args["Name"].(string)
+	nameArg, ok := args["Name"]
+	if !ok {
+		return mcp.NewToolResultError("Name parameter is required"), nil
+	}
+
+	name, ok := nameArg.(string)
+	if !ok {
+		return mcp.NewToolResultError("Name must be a string"), nil
+	}
+
+	if name == "" {
+		return mcp.NewToolResultError("Name cannot be empty"), nil
+	}
 
 	createRequest := &godo.SpacesKeyCreateRequest{
 		Name: name,
@@ -50,17 +59,42 @@ func (s *SpacesKeysTool) createSpacesKey(ctx context.Context, req mcp.CallToolRe
 	return mcp.NewToolResultText(string(jsonKey)), nil
 }
 
-// updateSpacesKey updates an existing Spaces key
-func (s *SpacesKeysTool) updateSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KeysTool) updateSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	keyID := args["ID"].(string)
-	name := args["Name"].(string)
+
+	accessKeyArg, ok := args["AccessKey"]
+	if !ok {
+		return mcp.NewToolResultError("AccessKey parameter is required"), nil
+	}
+
+	accessKey, ok := accessKeyArg.(string)
+	if !ok {
+		return mcp.NewToolResultError("AccessKey must be a string"), nil
+	}
+
+	if accessKey == "" {
+		return mcp.NewToolResultError("AccessKey cannot be empty"), nil
+	}
+
+	nameArg, ok := args["Name"]
+	if !ok {
+		return mcp.NewToolResultError("Name parameter is required"), nil
+	}
+
+	name, ok := nameArg.(string)
+	if !ok {
+		return mcp.NewToolResultError("Name must be a string"), nil
+	}
+
+	if name == "" {
+		return mcp.NewToolResultError("Name cannot be empty"), nil
+	}
 
 	updateRequest := &godo.SpacesKeyUpdateRequest{
 		Name: name,
 	}
 
-	key, _, err := s.client.SpacesKeys.Update(ctx, keyID, updateRequest)
+	key, _, err := s.client.SpacesKeys.Update(ctx, accessKey, updateRequest)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -73,23 +107,35 @@ func (s *SpacesKeysTool) updateSpacesKey(ctx context.Context, req mcp.CallToolRe
 	return mcp.NewToolResultText(string(jsonKey)), nil
 }
 
-// deleteSpacesKey deletes a Spaces key
-func (s *SpacesKeysTool) deleteSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	keyID := req.GetArguments()["ID"].(string)
+func (s *KeysTool) deleteSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	args := req.GetArguments()
 
-	_, err := s.client.SpacesKeys.Delete(ctx, keyID)
+	accessKeyArg, ok := args["AccessKey"]
+	if !ok {
+		return mcp.NewToolResultError("AccessKey parameter is required"), nil
+	}
+
+	accessKey, ok := accessKeyArg.(string)
+	if !ok {
+		return mcp.NewToolResultError("AccessKey must be a string"), nil
+	}
+
+	if accessKey == "" {
+		return mcp.NewToolResultError("AccessKey cannot be empty"), nil
+	}
+
+	_, err := s.client.SpacesKeys.Delete(ctx, accessKey)
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("api error", err), nil
+		return mcp.NewToolResultError(err.Error()), nil
 	}
 
 	return mcp.NewToolResultText("Spaces key deleted successfully"), nil
 }
 
-// listSpacesKeys lists all Spaces keys
-func (s *SpacesKeysTool) listSpacesKeys(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KeysTool) listSpacesKeys(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	keys, _, err := s.client.SpacesKeys.List(ctx, &godo.ListOptions{})
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("api error", err), nil
+		return mcp.NewToolResultError(err.Error()), nil
 	}
 
 	jsonKeys, err := json.MarshalIndent(keys, "", "  ")
@@ -100,13 +146,26 @@ func (s *SpacesKeysTool) listSpacesKeys(ctx context.Context, req mcp.CallToolReq
 	return mcp.NewToolResultText(string(jsonKeys)), nil
 }
 
-// getSpacesKey gets a specific Spaces key by ID
-func (s *SpacesKeysTool) getSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	keyID := req.GetArguments()["ID"].(string)
+func (s *KeysTool) getSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	args := req.GetArguments()
 
-	key, _, err := s.client.SpacesKeys.Get(ctx, keyID)
+	accessKeyArg, ok := args["AccessKey"]
+	if !ok {
+		return mcp.NewToolResultError("AccessKey parameter is required"), nil
+	}
+
+	accessKey, ok := accessKeyArg.(string)
+	if !ok {
+		return mcp.NewToolResultError("AccessKey must be a string"), nil
+	}
+
+	if accessKey == "" {
+		return mcp.NewToolResultError("AccessKey cannot be empty"), nil
+	}
+
+	key, _, err := s.client.SpacesKeys.Get(ctx, accessKey)
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("api error", err), nil
+		return mcp.NewToolResultError(err.Error()), nil
 	}
 
 	jsonKey, err := json.MarshalIndent(key, "", "  ")
@@ -117,8 +176,7 @@ func (s *SpacesKeysTool) getSpacesKey(ctx context.Context, req mcp.CallToolReque
 	return mcp.NewToolResultText(string(jsonKey)), nil
 }
 
-// Tools returns a list of tool functions
-func (s *SpacesKeysTool) Tools() []server.ServerTool {
+func (s *KeysTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.listSpacesKeys,
@@ -130,7 +188,7 @@ func (s *SpacesKeysTool) Tools() []server.ServerTool {
 			Handler: s.getSpacesKey,
 			Tool: mcp.NewTool("digitalocean-spaces-key-get",
 				mcp.WithDescription("Get a specific Spaces key"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the Spaces key to retrieve")),
+				mcp.WithString("AccessKey", mcp.Required(), mcp.Description("Access Key of the Spaces key to retrieve")),
 			),
 		},
 		{
@@ -144,7 +202,7 @@ func (s *SpacesKeysTool) Tools() []server.ServerTool {
 			Handler: s.updateSpacesKey,
 			Tool: mcp.NewTool("digitalocean-spaces-key-update",
 				mcp.WithDescription("Update an existing Spaces key"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the Spaces key to update")),
+				mcp.WithString("AccessKey", mcp.Required(), mcp.Description("Access Key of the Spaces key to update")),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("New name for the Spaces key")),
 			),
 		},
@@ -152,7 +210,7 @@ func (s *SpacesKeysTool) Tools() []server.ServerTool {
 			Handler: s.deleteSpacesKey,
 			Tool: mcp.NewTool("digitalocean-spaces-key-delete",
 				mcp.WithDescription("Delete a Spaces key"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the Spaces key to delete")),
+				mcp.WithString("AccessKey", mcp.Required(), mcp.Description("Access Key of the Spaces key to delete")),
 			),
 		},
 	}

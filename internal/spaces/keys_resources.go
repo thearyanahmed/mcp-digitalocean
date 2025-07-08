@@ -26,7 +26,7 @@ func NewKeysIPMCPResource(client *godo.Client) *KeysIPMCPResource {
 
 func (r *KeysIPMCPResource) getKeysResourceTemplate() mcp.ResourceTemplate {
 	return mcp.NewResourceTemplate(
-		KeysURI+"{id}",
+		KeysURI+"{access_key}",
 		"Spaces Keys",
 		mcp.WithTemplateDescription("Returns Spaces key information"),
 		mcp.WithTemplateMIMEType("application/json"),
@@ -48,6 +48,10 @@ func (r *KeysIPMCPResource) handleGetKeysResource(ctx context.Context, request m
 		return nil, fmt.Errorf("invalid Spaces key URI: %w", err)
 	}
 
+	if keyID == "" {
+		return nil, fmt.Errorf("AccessKey cannot be empty")
+	}
+
 	key, _, err := r.client.SpacesKeys.Get(ctx, keyID)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching Spaces key: %w", err)
@@ -55,7 +59,7 @@ func (r *KeysIPMCPResource) handleGetKeysResource(ctx context.Context, request m
 
 	jsonData, err := json.MarshalIndent(key, "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("error serializing Spaces key: %w", err)
+		return nil, fmt.Errorf("error marshalling Spaces key: %w", err)
 	}
 
 	return []mcp.ResourceContents{
@@ -75,7 +79,7 @@ func (r *KeysIPMCPResource) handleGetKeysListResource(ctx context.Context, reque
 
 	jsonData, err := json.MarshalIndent(keys, "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("error serializing Spaces keys: %w", err)
+		return nil, fmt.Errorf("error marshalling Spaces keys: %w", err)
 	}
 
 	return []mcp.ResourceContents{

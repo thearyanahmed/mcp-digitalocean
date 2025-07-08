@@ -12,7 +12,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func setupSpacesKeysToolWithMock(spacesKeys *MockSpacesKeysService) *SpacesKeysTool {
+func setupSpacesKeysToolWithMock(spacesKeys *MockSpacesKeysService) *KeysTool {
 	client := &godo.Client{}
 	client.SpacesKeys = spacesKeys
 	return NewSpacesKeysTool(client)
@@ -58,6 +58,25 @@ func TestSpacesKeysTool_createSpacesKey(t *testing.T) {
 					Return(testKey, nil, nil).
 					Times(1)
 			},
+		},
+		{
+			name:        "Missing Name parameter",
+			args:        map[string]any{},
+			expectError: true,
+		},
+		{
+			name: "Invalid Name type",
+			args: map[string]any{
+				"Name": 123,
+			},
+			expectError: true,
+		},
+		{
+			name: "Empty Name",
+			args: map[string]any{
+				"Name": "",
+			},
+			expectError: true,
 		},
 		{
 			name: "API error",
@@ -125,12 +144,12 @@ func TestSpacesKeysTool_updateSpacesKey(t *testing.T) {
 		{
 			name: "Successful update",
 			args: map[string]any{
-				"ID":   "spaces-key-123",
-				"Name": "updated-key",
+				"AccessKey": "AKIA123456789",
+				"Name":      "updated-key",
 			},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					Update(gomock.Any(), "spaces-key-123", &godo.SpacesKeyUpdateRequest{
+					Update(gomock.Any(), "AKIA123456789", &godo.SpacesKeyUpdateRequest{
 						Name: "updated-key",
 					}).
 					Return(testKey, nil, nil).
@@ -138,14 +157,60 @@ func TestSpacesKeysTool_updateSpacesKey(t *testing.T) {
 			},
 		},
 		{
+			name: "Missing AccessKey parameter",
+			args: map[string]any{
+				"Name": "updated-key",
+			},
+			expectError: true,
+		},
+		{
+			name: "Missing Name parameter",
+			args: map[string]any{
+				"AccessKey": "AKIA123456789",
+			},
+			expectError: true,
+		},
+		{
+			name: "Invalid AccessKey type",
+			args: map[string]any{
+				"AccessKey": 123,
+				"Name":      "updated-key",
+			},
+			expectError: true,
+		},
+		{
+			name: "Invalid Name type",
+			args: map[string]any{
+				"AccessKey": "AKIA123456789",
+				"Name":      123,
+			},
+			expectError: true,
+		},
+		{
+			name: "Empty AccessKey",
+			args: map[string]any{
+				"AccessKey": "",
+				"Name":      "updated-key",
+			},
+			expectError: true,
+		},
+		{
+			name: "Empty Name",
+			args: map[string]any{
+				"AccessKey": "AKIA123456789",
+				"Name":      "",
+			},
+			expectError: true,
+		},
+		{
 			name: "API error",
 			args: map[string]any{
-				"ID":   "spaces-key-456",
-				"Name": "fail-key",
+				"AccessKey": "AKIA987654321",
+				"Name":      "fail-key",
 			},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					Update(gomock.Any(), "spaces-key-456", &godo.SpacesKeyUpdateRequest{
+					Update(gomock.Any(), "AKIA987654321", &godo.SpacesKeyUpdateRequest{
 						Name: "fail-key",
 					}).
 					Return(nil, nil, errors.New("api error")).
@@ -193,21 +258,36 @@ func TestSpacesKeysTool_deleteSpacesKey(t *testing.T) {
 	}{
 		{
 			name: "Successful delete",
-			args: map[string]any{"ID": "spaces-key-123"},
+			args: map[string]any{"AccessKey": "AKIA123456789"},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					Delete(gomock.Any(), "spaces-key-123").
+					Delete(gomock.Any(), "AKIA123456789").
 					Return(&godo.Response{}, nil).
 					Times(1)
 			},
 			expectText: "Spaces key deleted successfully",
 		},
 		{
+			name:        "Missing AccessKey parameter",
+			args:        map[string]any{},
+			expectError: true,
+		},
+		{
+			name:        "Invalid AccessKey type",
+			args:        map[string]any{"AccessKey": 123},
+			expectError: true,
+		},
+		{
+			name:        "Empty AccessKey",
+			args:        map[string]any{"AccessKey": ""},
+			expectError: true,
+		},
+		{
 			name: "API error",
-			args: map[string]any{"ID": "spaces-key-456"},
+			args: map[string]any{"AccessKey": "AKIA987654321"},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					Delete(gomock.Any(), "spaces-key-456").
+					Delete(gomock.Any(), "AKIA987654321").
 					Return(nil, errors.New("api error")).
 					Times(1)
 			},
@@ -322,23 +402,42 @@ func TestSpacesKeysTool_getSpacesKey(t *testing.T) {
 		{
 			name: "Successful get",
 			args: map[string]any{
-				"ID": "spaces-key-123",
+				"AccessKey": "AKIA123456789",
 			},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					Get(gomock.Any(), "spaces-key-123").
+					Get(gomock.Any(), "AKIA123456789").
 					Return(testKey, nil, nil).
 					Times(1)
 			},
 		},
 		{
+			name:        "Missing AccessKey parameter",
+			args:        map[string]any{},
+			expectError: true,
+		},
+		{
+			name: "Invalid AccessKey type",
+			args: map[string]any{
+				"AccessKey": 123,
+			},
+			expectError: true,
+		},
+		{
+			name: "Empty AccessKey",
+			args: map[string]any{
+				"AccessKey": "",
+			},
+			expectError: true,
+		},
+		{
 			name: "API error",
 			args: map[string]any{
-				"ID": "spaces-key-456",
+				"AccessKey": "AKIA987654321",
 			},
 			mockSetup: func(m *MockSpacesKeysService) {
 				m.EXPECT().
-					Get(gomock.Any(), "spaces-key-456").
+					Get(gomock.Any(), "AKIA987654321").
 					Return(nil, nil, errors.New("api error")).
 					Times(1)
 			},
