@@ -236,3 +236,137 @@ func TestSpacesKeysTool_deleteSpacesKey(t *testing.T) {
 		})
 	}
 }
+
+func TestSpacesKeysTool_listSpacesKeys(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	testKeys := []*godo.SpacesKey{
+		{
+			Name:      "test-key-1",
+			AccessKey: "AKIA123456789",
+		},
+		{
+			Name:      "test-key-2",
+			AccessKey: "AKIA987654321",
+		},
+	}
+
+	tests := []struct {
+		name        string
+		mockSetup   func(*MockSpacesKeysService)
+		expectError bool
+	}{
+		{
+			name: "Successful list",
+			mockSetup: func(m *MockSpacesKeysService) {
+				m.EXPECT().
+					List(gomock.Any(), &godo.ListOptions{}).
+					Return(testKeys, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "API error",
+			mockSetup: func(m *MockSpacesKeysService) {
+				m.EXPECT().
+					List(gomock.Any(), &godo.ListOptions{}).
+					Return(nil, nil, errors.New("api error")).
+					Times(1)
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockSpacesKeys := NewMockSpacesKeysService(ctrl)
+			if tc.mockSetup != nil {
+				tc.mockSetup(mockSpacesKeys)
+			}
+			tool := setupSpacesKeysToolWithMock(mockSpacesKeys)
+			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{}}}
+			resp, err := tool.listSpacesKeys(context.Background(), req)
+			if tc.expectError {
+				require.NotNil(t, resp)
+				require.True(t, resp.IsError)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.False(t, resp.IsError)
+			var outKeys []godo.SpacesKey
+			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outKeys))
+			require.Len(t, outKeys, 2)
+			require.Equal(t, testKeys[0].Name, outKeys[0].Name)
+			require.Equal(t, testKeys[1].Name, outKeys[1].Name)
+		})
+	}
+}
+
+func TestSpacesKeysTool_getSpacesKey(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	testKey := &godo.SpacesKey{
+		Name:      "test-key",
+		AccessKey: "AKIA123456789",
+	}
+
+	tests := []struct {
+		name        string
+		args        map[string]any
+		mockSetup   func(*MockSpacesKeysService)
+		expectError bool
+	}{
+		{
+			name: "Successful get",
+			args: map[string]any{
+				"ID": "spaces-key-123",
+			},
+			mockSetup: func(m *MockSpacesKeysService) {
+				m.EXPECT().
+					Get(gomock.Any(), "spaces-key-123").
+					Return(testKey, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "API error",
+			args: map[string]any{
+				"ID": "spaces-key-456",
+			},
+			mockSetup: func(m *MockSpacesKeysService) {
+				m.EXPECT().
+					Get(gomock.Any(), "spaces-key-456").
+					Return(nil, nil, errors.New("api error")).
+					Times(1)
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockSpacesKeys := NewMockSpacesKeysService(ctrl)
+			if tc.mockSetup != nil {
+				tc.mockSetup(mockSpacesKeys)
+			}
+			tool := setupSpacesKeysToolWithMock(mockSpacesKeys)
+			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
+			resp, err := tool.getSpacesKey(context.Background(), req)
+			if tc.expectError {
+				require.NotNil(t, resp)
+				require.True(t, resp.IsError)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.False(t, resp.IsError)
+			var outKey godo.SpacesKey
+			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outKey))
+			require.Equal(t, testKey.Name, outKey.Name)
+			require.Equal(t, testKey.AccessKey, outKey.AccessKey)
+		})
+	}
+}

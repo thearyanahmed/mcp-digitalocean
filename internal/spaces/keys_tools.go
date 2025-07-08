@@ -85,9 +85,54 @@ func (s *SpacesKeysTool) deleteSpacesKey(ctx context.Context, req mcp.CallToolRe
 	return mcp.NewToolResultText("Spaces key deleted successfully"), nil
 }
 
+// listSpacesKeys lists all Spaces keys
+func (s *SpacesKeysTool) listSpacesKeys(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	keys, _, err := s.client.SpacesKeys.List(ctx, &godo.ListOptions{})
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonKeys, err := json.MarshalIndent(keys, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(jsonKeys)), nil
+}
+
+// getSpacesKey gets a specific Spaces key by ID
+func (s *SpacesKeysTool) getSpacesKey(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	keyID := req.GetArguments()["ID"].(string)
+
+	key, _, err := s.client.SpacesKeys.Get(ctx, keyID)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonKey, err := json.MarshalIndent(key, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(jsonKey)), nil
+}
+
 // Tools returns a list of tool functions
 func (s *SpacesKeysTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
+		{
+			Handler: s.listSpacesKeys,
+			Tool: mcp.NewTool("digitalocean-spaces-key-list",
+				mcp.WithDescription("List all Spaces keys"),
+			),
+		},
+		{
+			Handler: s.getSpacesKey,
+			Tool: mcp.NewTool("digitalocean-spaces-key-get",
+				mcp.WithDescription("Get a specific Spaces key"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the Spaces key to retrieve")),
+			),
+		},
 		{
 			Handler: s.createSpacesKey,
 			Tool: mcp.NewTool("digitalocean-spaces-key-create",
