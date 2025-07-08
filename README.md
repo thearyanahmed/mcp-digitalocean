@@ -47,7 +47,7 @@ npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
                     "apps"
                 ],
                 "env": {
-                    "DIGITALOCEAN_API_TOKEN": "YOUR_API_TOKEN"    
+                    "DIGITALOCEAN_API_TOKEN": "YOUR_API_TOKEN"
                 }
             }
         }
@@ -62,22 +62,58 @@ The MCP DigitalOcean Integration supports a variety of services, allowing users 
 | **Service**    | **Description**                                                                                                     |
 |----------------|---------------------------------------------------------------------------------------------------------------------|
 | **Apps**       | Manage DigitalOcean App Platform applications, including deployments and configurations.                            |
-| **Droplets**   | Create, manage, and monitor droplets (virtual machines) on DigitalOcean.                                            |
-| **Account**    | Get information about your DigitalOcean account.                                                                    |
-| **Networking** | Secure and control the traffic to your applications with private networking, traffic filtering, and load balancing. |
+| **Droplets**   | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                          |
+| **Account**    | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                          |
+| **Networking** | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and partner attachments.            |
 
 ### Service Tools
 
 Each service provides a toolset to interact with DigitalOcean.
 
-| **Service**    | **Tools**                                                                                            |
+| **Service**    | **Tools** (examples, see per-service README for full list)                                           |
 |----------------|------------------------------------------------------------------------------------------------------|
-| **Account**    | `get-account-info`, `get-account-balance`, `get-account-usage`                                       |
-| **Apps**       | `create-app`, `get-app-info`, `update-app`, `delete-app`, `get-app-usage`, `list-apps`, `deploy-app` |
-| **Droplets**   |                                                                                                      |
-| **Networking** |                                                                                                      |
+| **Account**    | `digitalocean-key-create`, `digitalocean-key-delete`, `account://current`, `balance://current`, `billing://{last}`, `invoice://{last}`, `actions://{id}`, `keys://{id}` |
+| **Apps**       | `digitalocean-create-app-from-spec`, `digitalocean-apps-update`, `digitalocean-apps-delete`, `digitalocean-apps-get-info`, `digitalocean-apps-usage`, `digitalocean-apps-get-deployment-status`, `digitalocean-apps-list` |
+| **Droplets**   | `digitalocean-droplet-create`, `digitalocean-droplet-delete`, `digitalocean-droplet-power-cycle`, `digitalocean-droplet-resize`, `digitalocean-droplet-snapshot`, `digitalocean-droplet-enable-backups`, `digitalocean-droplet-get-neighbors`, `digitalocean-droplet-rename`, `digitalocean-droplet-rebuild`, `digitalocean-droplet-get-kernels`, ... (see [Droplet README](./internal/droplet/README.md)) |
+| **Networking** | `digitalocean-domain-create`, `digitalocean-domain-delete`, `digitalocean-domain-record-create`, `digitalocean-domain-record-delete`, `digitalocean-certificate-create`, `digitalocean-certificate-delete`, `digitalocean-firewall-create`, `digitalocean-firewall-delete`, `digitalocean-reserved-ip-reserve`, `digitalocean-reserved-ip-release`, `digitalocean-vpc-create`, `digitalocean-vpc-delete`, `digitalocean-cdn-create`, `digitalocean-cdn-delete`, `digitalocean-partner-attachment-create`, ... (see [Networking README](./internal/networking/README.md)) |
 
 ---
+## Service Documentation
+
+Each service provides a detailed README describing all available tools, resources, arguments, and example queries.
+See the following files for full documentation:
+
+- [Apps Service README](./internal/apps/README.md)
+- [Droplet Service README](./internal/droplet/README.md)
+- [Account Service README](./internal/account/README.md)
+- [Networking Service README](./internal/networking/README.md)
+
+---
+
+### Example Resource URIs
+
+Each service exposes resources that can be queried directly. Examples:
+
+- **Account:** `account://current`, `balance://current`, `billing://3`, `invoice://6`, `actions://123456`, `keys://987654`
+- **Apps:** `apps://{id}`, `apps://{id}/deployments/{deployment_id}`
+- **Droplets:** `droplets://{id}`, `droplets://{id}/actions/{action_id}`, `images://distribution`, `images://{id}`, `sizes://all`
+- **Networking:** `domains://{name}`, `domains://{name}/records/{record_id}`, `certificates://{id}`, `firewalls://{id}`, `reserved_ipv4://{ip}`, `vpcs://{id}`, `cdn://{id}`, `partner_attachment://{id}`
+
+---
+
+### Example Tool Usage
+
+- Deploy an app from a GitHub repo: `digitalocean-create-app-from-spec`
+- Resize a droplet: `digitalocean-droplet-resize`
+- Add a new SSH key: `digitalocean-key-create`
+- Create a new domain: `digitalocean-domain-create`
+- Enable backups on a droplet: `digitalocean-droplet-enable-backups`
+- Flush a CDN cache: `digitalocean-cdn-flush-cache`
+- List all available droplet sizes: `sizes://all`
+- Get account balance: `balance://current`
+
+---
+
 
 ## Configuring Tools
 
@@ -85,7 +121,7 @@ To configure tools, you use the `--services` flag to specify which service you w
 enable the services you need to reduce context size and improve accuracy.
 
 ```bash
-npx @digitalocean/mcp-digitalocean --services apps,droplets 
+npx @digitalocean/mcp-digitalocean --services apps,droplets
 ```
 
 ---
