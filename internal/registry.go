@@ -156,16 +156,6 @@ func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 	// Register the tools for spaces keys
 	s.AddTools(spaces.NewSpacesKeysTool(c).Tools()...)
 
-	// Register the resources for spaces keys
-	keysResource := spaces.NewKeysIPMCPResource(c)
-	for template, handler := range keysResource.Resources() {
-		s.AddResource(template, handler)
-	}
-
-	for template, handler := range keysResource.ResourceTemplates() {
-		s.AddResourceTemplate(template, handler)
-	}
-
 	return nil
 }
 
