@@ -79,6 +79,7 @@ func registerNetworkingTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(networking.NewReservedIPTool(c).Tools()...)
 	s.AddTools(networking.NewPartnerAttachmentTool(c).Tools()...)
 	s.AddTools(networking.NewVPCTool(c).Tools()...)
+	s.AddTools(networking.NewVPCPeeringTool(c).Tools()...)
 
 	// Register the resources for networking
 	cdnResource := networking.NewCDNMCPResource(c)
@@ -118,6 +119,12 @@ func registerNetworkingTools(s *server.MCPServer, c *godo.Client) error {
 	// Register VPC resource
 	vpcResource := networking.NewVPCMCPResource(c)
 	for template, handler := range vpcResource.ResourceTemplates() {
+		s.AddResourceTemplate(template, handler)
+	}
+
+	// Register VPC Peering resource
+	vpcPeeringResource := networking.NewVPCPeeringMCPResource(c)
+	for template, handler := range vpcPeeringResource.ResourceTemplates() {
 		s.AddResourceTemplate(template, handler)
 	}
 
