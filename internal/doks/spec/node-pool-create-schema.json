@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "size": {
+      "type": "string"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "labels": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "taints": {
+      "items": {
+        "properties": {
+          "Key": {
+            "type": "string"
+          },
+          "Value": {
+            "type": "string"
+          },
+          "Effect": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "auto_scale": {
+      "type": "boolean"
+    },
+    "min_nodes": {
+      "type": "integer"
+    },
+    "max_nodes": {
+      "type": "integer"
+    }
+  },
+  "type": "object"
+}
