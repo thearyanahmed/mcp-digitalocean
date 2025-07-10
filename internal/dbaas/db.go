@@ -8,9 +8,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) listDBs(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type DBTool struct {
+	client *godo.Client
+}
+
+func NewDBTool(client *godo.Client) *DBTool {
+	return &DBTool{
+		client: client,
+	}
+}
+
+func (s *DBTool) listDBs(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -46,7 +57,7 @@ func (s *ClusterTool) listDBs(ctx context.Context, req mcp.CallToolRequest) (*mc
 	return mcp.NewToolResultText(string(jsonDBs)), nil
 }
 
-func (s *ClusterTool) createDB(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *DBTool) createDB(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -69,7 +80,7 @@ func (s *ClusterTool) createDB(ctx context.Context, req mcp.CallToolRequest) (*m
 	return mcp.NewToolResultText(string(jsonDB)), nil
 }
 
-func (s *ClusterTool) getDB(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *DBTool) getDB(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -90,7 +101,7 @@ func (s *ClusterTool) getDB(ctx context.Context, req mcp.CallToolRequest) (*mcp.
 	return mcp.NewToolResultText(string(jsonDB)), nil
 }
 
-func (s *ClusterTool) deleteDB(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *DBTool) deleteDB(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -105,4 +116,42 @@ func (s *ClusterTool) deleteDB(ctx context.Context, req mcp.CallToolRequest) (*m
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Database deleted successfully"), nil
+}
+
+func (s *DBTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.listDBs,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-dbs",
+				mcp.WithDescription("List databases for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("page", mcp.Description("Page number for pagination")),
+				mcp.WithString("per_page", mcp.Description("Number of results per page")),
+			),
+		},
+		{
+			Handler: s.createDB,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-create-db",
+				mcp.WithDescription("Create a database for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The database name to create")),
+			),
+		},
+		{
+			Handler: s.getDB,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-db",
+				mcp.WithDescription("Get a database for a cluster by its ID and database name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The database name to get")),
+			),
+		},
+		{
+			Handler: s.deleteDB,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-db",
+				mcp.WithDescription("Delete a database for a cluster by its ID and database name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The database name to delete")),
+			),
+		},
+	}
 }

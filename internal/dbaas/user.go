@@ -8,9 +8,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) getUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type UserTool struct {
+	client *godo.Client
+}
+
+func NewUserTool(client *godo.Client) *UserTool {
+	return &UserTool{
+		client: client,
+	}
+}
+
+func (s *UserTool) getUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -32,7 +43,7 @@ func (s *ClusterTool) getUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 	return mcp.NewToolResultText(string(jsonUser)), nil
 }
 
-func (s *ClusterTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *UserTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -68,7 +79,7 @@ func (s *ClusterTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*
 	return mcp.NewToolResultText(string(jsonUsers)), nil
 }
 
-func (s *ClusterTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -105,7 +116,7 @@ func (s *ClusterTool) createUser(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText(string(jsonUser)), nil
 }
 
-func (s *ClusterTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *UserTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -138,7 +149,7 @@ func (s *ClusterTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText(string(jsonUser)), nil
 }
 
-func (s *ClusterTool) deleteUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *UserTool) deleteUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -154,4 +165,51 @@ func (s *ClusterTool) deleteUser(ctx context.Context, req mcp.CallToolRequest) (
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("User deleted successfully"), nil
+}
+func (s *UserTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.getUser,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-user",
+				mcp.WithDescription("Get a database user by cluster ID and user name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
+			),
+		},
+		{
+			Handler: s.listUsers,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-users",
+				mcp.WithDescription("List database users for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithString("page", mcp.Description("Page number for pagination (optional)")),
+				mcp.WithString("per_page", mcp.Description("Number of results per page (optional)")),
+			),
+		},
+		{
+			Handler: s.createUser,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-create-user",
+				mcp.WithDescription("Create a database user for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The user name")),
+				mcp.WithString("mysql_auth_plugin", mcp.Description("MySQL auth plugin (optional, e.g., mysql_native_password)")),
+				mcp.WithString("settings_json", mcp.Description("Raw JSON for DatabaseUserSettings (optional)")),
+			),
+		},
+		{
+			Handler: s.updateUser,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-user",
+				mcp.WithDescription("Update a database user for a cluster by its ID and user name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
+				mcp.WithString("settings_json", mcp.Description("Raw JSON for DatabaseUserSettings (optional)")),
+			),
+		},
+		{
+			Handler: s.deleteUser,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-user",
+				mcp.WithDescription("Delete a database user by cluster ID and user name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("user", mcp.Required(), mcp.Description("The user name to delete")),
+			),
+		}}
 }

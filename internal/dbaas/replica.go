@@ -9,9 +9,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) getReplica(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type ReplicaTool struct {
+	client *godo.Client
+}
+
+func NewReplicaTool(client *godo.Client) *ReplicaTool {
+	return &ReplicaTool{
+		client: client,
+	}
+}
+
+func (s *ReplicaTool) getReplica(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -32,7 +43,7 @@ func (s *ClusterTool) getReplica(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText(string(jsonReplica)), nil
 }
 
-func (s *ClusterTool) listReplicas(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *ReplicaTool) listReplicas(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -68,7 +79,7 @@ func (s *ClusterTool) listReplicas(ctx context.Context, req mcp.CallToolRequest)
 	return mcp.NewToolResultText(string(jsonReplicas)), nil
 }
 
-func (s *ClusterTool) createReplica(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *ReplicaTool) createReplica(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -121,7 +132,7 @@ func (s *ClusterTool) createReplica(ctx context.Context, req mcp.CallToolRequest
 	return mcp.NewToolResultText(string(jsonReplica)), nil
 }
 
-func (s *ClusterTool) deleteReplica(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *ReplicaTool) deleteReplica(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -138,7 +149,7 @@ func (s *ClusterTool) deleteReplica(ctx context.Context, req mcp.CallToolRequest
 	return mcp.NewToolResultText("Replica deleted successfully"), nil
 }
 
-func (s *ClusterTool) promoteReplicaToPrimary(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *ReplicaTool) promoteReplicaToPrimary(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -153,4 +164,54 @@ func (s *ClusterTool) promoteReplicaToPrimary(ctx context.Context, req mcp.CallT
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Replica promoted to primary successfully"), nil
+}
+func (s *ReplicaTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.getReplica,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-replica",
+				mcp.WithDescription("Get a replica for a cluster by its ID and replica name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The replica name to get")),
+			),
+		},
+		{
+			Handler: s.listReplicas,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-replicas",
+				mcp.WithDescription("List replicas for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("page", mcp.Description("Page number for pagination")),
+				mcp.WithString("per_page", mcp.Description("Number of results per page")),
+			),
+		},
+		{
+			Handler: s.createReplica,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-create-replica",
+				mcp.WithDescription("Create a replica for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The replica name to create")),
+				mcp.WithString("region", mcp.Required(), mcp.Description("The region for the replica")),
+				mcp.WithString("size", mcp.Required(), mcp.Description("The size slug for the replica")),
+				mcp.WithString("private_network_uuid", mcp.Description("The private network UUID (optional)")),
+				mcp.WithString("tags", mcp.Description("Comma-separated tags to apply to the replica (optional)")),
+				mcp.WithNumber("storage_size_mib", mcp.Description("The storage size in MiB (optional)")),
+			),
+		},
+		{
+			Handler: s.deleteReplica,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-replica",
+				mcp.WithDescription("Delete a replica for a cluster by its ID and replica name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The replica name to delete")),
+			),
+		},
+		{
+			Handler: s.promoteReplicaToPrimary,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-promote-replica",
+				mcp.WithDescription("Promote a replica to primary for a cluster by its ID and replica name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The replica name to promote")),
+			),
+		},
+	}
 }

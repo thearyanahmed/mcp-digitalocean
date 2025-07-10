@@ -8,9 +8,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) listPools(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type PoolTool struct {
+	client *godo.Client
+}
+
+func NewPoolTool(client *godo.Client) *PoolTool {
+	return &PoolTool{
+		client: client,
+	}
+}
+
+func (s *PoolTool) listPools(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -46,7 +57,7 @@ func (s *ClusterTool) listPools(ctx context.Context, req mcp.CallToolRequest) (*
 	return mcp.NewToolResultText(string(jsonPools)), nil
 }
 
-func (s *ClusterTool) createPool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *PoolTool) createPool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -92,7 +103,7 @@ func (s *ClusterTool) createPool(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText(string(jsonPool)), nil
 }
 
-func (s *ClusterTool) getPool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *PoolTool) getPool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -113,7 +124,7 @@ func (s *ClusterTool) getPool(ctx context.Context, req mcp.CallToolRequest) (*mc
 	return mcp.NewToolResultText(string(jsonPool)), nil
 }
 
-func (s *ClusterTool) deletePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *PoolTool) deletePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -130,7 +141,7 @@ func (s *ClusterTool) deletePool(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText("Pool deleted successfully"), nil
 }
 
-func (s *ClusterTool) updatePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *PoolTool) updatePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -166,4 +177,58 @@ func (s *ClusterTool) updatePool(ctx context.Context, req mcp.CallToolRequest) (
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Pool updated successfully"), nil
+}
+
+func (s *PoolTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.listPools,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-pools",
+				mcp.WithDescription("List connection pools for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("page", mcp.Description("Page number for pagination")),
+				mcp.WithString("per_page", mcp.Description("Number of results per page")),
+			),
+		},
+		{
+			Handler: s.createPool,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-create-pool",
+				mcp.WithDescription("Create a connection pool for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("user", mcp.Required(), mcp.Description("The user for the pool")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The pool name")),
+				mcp.WithString("database", mcp.Required(), mcp.Description("The database for the pool")),
+				mcp.WithString("mode", mcp.Required(), mcp.Description("The pool mode")),
+				mcp.WithNumber("size", mcp.Required(), mcp.Description("The pool size (number of connections)")),
+			),
+		},
+		{
+			Handler: s.getPool,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-pool",
+				mcp.WithDescription("Get a connection pool for a cluster by its ID and pool name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The pool name to get")),
+			),
+		},
+		{
+			Handler: s.deletePool,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-pool",
+				mcp.WithDescription("Delete a connection pool for a cluster by its ID and pool name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The pool name to delete")),
+			),
+		},
+		{
+			Handler: s.updatePool,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-pool",
+				mcp.WithDescription("Update a connection pool for a cluster by its ID and pool name"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The pool name to update")),
+				mcp.WithString("user", mcp.Description("The user for the pool (optional)")),
+				mcp.WithString("database", mcp.Required(), mcp.Description("The database for the pool")),
+				mcp.WithString("mode", mcp.Required(), mcp.Description("The pool mode")),
+				mcp.WithNumber("size", mcp.Required(), mcp.Description("The pool size (number of connections)")),
+			),
+		},
+	}
 }

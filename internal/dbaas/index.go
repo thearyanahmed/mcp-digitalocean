@@ -9,9 +9,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) listIndexes(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type IndexTool struct {
+	client *godo.Client
+}
+
+func NewIndexTool(client *godo.Client) *IndexTool {
+	return &IndexTool{
+		client: client,
+	}
+}
+
+func (s *IndexTool) listIndexes(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -66,7 +77,7 @@ func (s *ClusterTool) listIndexes(ctx context.Context, req mcp.CallToolRequest) 
 	return mcp.NewToolResultText(string(jsonIndexes)), nil
 }
 
-func (s *ClusterTool) deleteIndex(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *IndexTool) deleteIndex(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -81,4 +92,30 @@ func (s *ClusterTool) deleteIndex(ctx context.Context, req mcp.CallToolRequest) 
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Index deleted successfully"), nil
+}
+
+func (s *IndexTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.listIndexes,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-indexes",
+				mcp.WithDescription("List indexes for a cluster by its ID. Supports all ListOptions: page, per_page, with_projects, only_deployed, public_only, usecases (comma-separated)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
+				mcp.WithString("per_page", mcp.Description("Number of results per page (optional, integer as string)")),
+				mcp.WithString("with_projects", mcp.Description("Whether to include project_id fields (optional, bool as string)")),
+				mcp.WithString("only_deployed", mcp.Description("Only list deployed agents (optional, bool as string)")),
+				mcp.WithString("public_only", mcp.Description("Include only public models (optional, bool as string)")),
+				mcp.WithString("usecases", mcp.Description("Comma-separated usecases to filter (optional)")),
+			),
+		},
+		{
+			Handler: s.deleteIndex,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-index",
+				mcp.WithDescription("Delete an index for a cluster by its ID and index name."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The index name to delete")),
+			),
+		},
+	}
 }

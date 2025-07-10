@@ -7,9 +7,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) getFirewallRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type FirewallTool struct {
+	client *godo.Client
+}
+
+func NewFirewallTool(client *godo.Client) *FirewallTool {
+	return &FirewallTool{
+		client: client,
+	}
+}
+
+func (s *FirewallTool) getFirewallRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -26,7 +37,7 @@ func (s *ClusterTool) getFirewallRules(ctx context.Context, req mcp.CallToolRequ
 	return mcp.NewToolResultText(string(jsonRules)), nil
 }
 
-func (s *ClusterTool) updateFirewallRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *FirewallTool) updateFirewallRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -47,4 +58,23 @@ func (s *ClusterTool) updateFirewallRules(ctx context.Context, req mcp.CallToolR
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Firewall rules updated successfully"), nil
+}
+func (s *FirewallTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.getFirewallRules,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-firewall-rules",
+				mcp.WithDescription("Get the firewall rules for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+			),
+		},
+		{
+			Handler: s.updateFirewallRules,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-firewall-rules",
+				mcp.WithDescription("Update the firewall rules for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("rules_json", mcp.Required(), mcp.Description("JSON array of firewall rules to set")),
+			),
+		},
+	}
 }

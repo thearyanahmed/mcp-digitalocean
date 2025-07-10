@@ -9,9 +9,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) startOnlineMigration(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type MigrationTool struct {
+	client *godo.Client
+}
+
+func NewMigrationTool(client *godo.Client) *MigrationTool {
+	return &MigrationTool{
+		client: client,
+	}
+}
+
+func (s *MigrationTool) startOnlineMigration(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -57,7 +68,7 @@ func (s *ClusterTool) startOnlineMigration(ctx context.Context, req mcp.CallTool
 	return mcp.NewToolResultText(string(jsonStatus)), nil
 }
 
-func (s *ClusterTool) stopOnlineMigration(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *MigrationTool) stopOnlineMigration(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -74,7 +85,7 @@ func (s *ClusterTool) stopOnlineMigration(ctx context.Context, req mcp.CallToolR
 	return mcp.NewToolResultText("Online migration stopped successfully"), nil
 }
 
-func (s *ClusterTool) getOnlineMigrationStatus(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *MigrationTool) getOnlineMigrationStatus(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -89,4 +100,34 @@ func (s *ClusterTool) getOnlineMigrationStatus(ctx context.Context, req mcp.Call
 		return nil, fmt.Errorf("marshal error: %w", err)
 	}
 	return mcp.NewToolResultText(string(jsonStatus)), nil
+}
+
+func (s *MigrationTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.startOnlineMigration,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-start-online-migration",
+				mcp.WithDescription("Start an online migration for a database cluster by its ID. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as string), and ignore_dbs (optional, comma-separated)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("source_json", mcp.Required(), mcp.Description("DatabaseOnlineMigrationConfig as JSON (required)")),
+				mcp.WithString("disable_ssl", mcp.Description("Disable SSL for migration (optional, bool as string)")),
+				mcp.WithString("ignore_dbs", mcp.Description("Comma-separated list of DBs to ignore (optional)")),
+			),
+		},
+		{
+			Handler: s.stopOnlineMigration,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-stop-online-migration",
+				mcp.WithDescription("Stop an online migration for a database cluster by its ID and migration_id."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("migration_id", mcp.Required(), mcp.Description("The migration ID to stop")),
+			),
+		},
+		{
+			Handler: s.getOnlineMigrationStatus,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-online-migration-status",
+				mcp.WithDescription("Get the online migration status for a database cluster by its ID."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+			),
+		},
+	}
 }

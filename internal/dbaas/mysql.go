@@ -8,9 +8,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) getMySQLConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type MysqlTool struct {
+	client *godo.Client
+}
+
+func NewMysqlTool(client *godo.Client) *MysqlTool {
+	return &MysqlTool{
+		client: client,
+	}
+}
+
+func (s *MysqlTool) getMySQLConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -27,7 +38,7 @@ func (s *ClusterTool) getMySQLConfig(ctx context.Context, req mcp.CallToolReques
 	return mcp.NewToolResultText(string(jsonCfg)), nil
 }
 
-func (s *ClusterTool) updateMySQLConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *MysqlTool) updateMySQLConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -49,7 +60,7 @@ func (s *ClusterTool) updateMySQLConfig(ctx context.Context, req mcp.CallToolReq
 	return mcp.NewToolResultText("MySQL config updated successfully"), nil
 }
 
-func (s *ClusterTool) getSQLMode(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *MysqlTool) getSQLMode(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -62,7 +73,7 @@ func (s *ClusterTool) getSQLMode(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText(mode), nil
 }
 
-func (s *ClusterTool) setSQLMode(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *MysqlTool) setSQLMode(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -84,4 +95,39 @@ func (s *ClusterTool) setSQLMode(ctx context.Context, req mcp.CallToolRequest) (
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("SQL mode set successfully"), nil
+}
+
+func (s *MysqlTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.getMySQLConfig,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-mysql-config",
+				mcp.WithDescription("Get the MySQL config for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+			),
+		},
+		{
+			Handler: s.updateMySQLConfig,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-mysql-config",
+				mcp.WithDescription("Update the MySQL config for a cluster by its ID. Accepts a JSON string for the config."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the MySQLConfig to set")),
+			),
+		},
+		{
+			Handler: s.getSQLMode,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-sql-mode",
+				mcp.WithDescription("Get the SQL mode for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+			),
+		},
+		{
+			Handler: s.setSQLMode,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-set-sql-mode",
+				mcp.WithDescription("Set the SQL mode for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("modes", mcp.Required(), mcp.Description("Comma-separated SQL modes to set")),
+			),
+		},
+	}
 }

@@ -9,9 +9,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) getKafkaConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type KafkaTool struct {
+	client *godo.Client
+}
+
+func NewKafkaTool(client *godo.Client) *KafkaTool {
+	return &KafkaTool{
+		client: client,
+	}
+}
+
+func (s *KafkaTool) getKafkaConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -28,7 +39,7 @@ func (s *ClusterTool) getKafkaConfig(ctx context.Context, req mcp.CallToolReques
 	return mcp.NewToolResultText(string(jsonCfg)), nil
 }
 
-func (s *ClusterTool) updateKafkaConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KafkaTool) updateKafkaConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -50,7 +61,7 @@ func (s *ClusterTool) updateKafkaConfig(ctx context.Context, req mcp.CallToolReq
 	return mcp.NewToolResultText("Kafka config updated successfully"), nil
 }
 
-func (s *ClusterTool) listTopics(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KafkaTool) listTopics(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -105,7 +116,7 @@ func (s *ClusterTool) listTopics(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText(string(jsonTopics)), nil
 }
 
-func (s *ClusterTool) createTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KafkaTool) createTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -158,7 +169,7 @@ func (s *ClusterTool) createTopic(ctx context.Context, req mcp.CallToolRequest) 
 	return mcp.NewToolResultText(string(jsonTopic)), nil
 }
 
-func (s *ClusterTool) getTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KafkaTool) getTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -179,7 +190,7 @@ func (s *ClusterTool) getTopic(ctx context.Context, req mcp.CallToolRequest) (*m
 	return mcp.NewToolResultText(string(jsonTopic)), nil
 }
 
-func (s *ClusterTool) deleteTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KafkaTool) deleteTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -196,7 +207,7 @@ func (s *ClusterTool) deleteTopic(ctx context.Context, req mcp.CallToolRequest) 
 	return mcp.NewToolResultText("Topic deleted successfully"), nil
 }
 
-func (s *ClusterTool) updateTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *KafkaTool) updateTopic(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -242,4 +253,75 @@ func (s *ClusterTool) updateTopic(ctx context.Context, req mcp.CallToolRequest) 
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Topic updated successfully"), nil
+}
+
+func (s *KafkaTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.listTopics,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-topics",
+				mcp.WithDescription("List topics for a database cluster by its ID (Kafka clusters). Supports all ListOptions: page, per_page, with_projects, only_deployed, public_only, usecases (comma-separated)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
+				mcp.WithString("per_page", mcp.Description("Number of results per page (optional, integer as string)")),
+				mcp.WithString("with_projects", mcp.Description("Whether to include project_id fields (optional, bool as string)")),
+				mcp.WithString("only_deployed", mcp.Description("Only list deployed agents (optional, bool as string)")),
+				mcp.WithString("public_only", mcp.Description("Include only public models (optional, bool as string)")),
+				mcp.WithString("usecases", mcp.Description("Comma-separated usecases to filter (optional)")),
+			),
+		},
+		{
+			Handler: s.createTopic,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-create-topic",
+				mcp.WithDescription("Create a topic for a Kafka database cluster by its ID. Accepts name (required), partition_count, replication_factor, and config_json (TopicConfig as JSON, all optional)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to create")),
+				mcp.WithString("partition_count", mcp.Description("Number of partitions (optional, integer as string)")),
+				mcp.WithString("replication_factor", mcp.Description("Replication factor (optional, integer as string)")),
+				mcp.WithString("config_json", mcp.Description("TopicConfig as JSON (optional)")),
+			),
+		},
+		{
+			Handler: s.getTopic,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-topic",
+				mcp.WithDescription("Get a topic for a Kafka database cluster by its ID and topic name."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to get")),
+			),
+		},
+		{
+			Handler: s.deleteTopic,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-topic",
+				mcp.WithDescription("Delete a topic for a Kafka database cluster by its ID and topic name."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to delete")),
+			),
+		},
+		{
+			Handler: s.updateTopic,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-topic",
+				mcp.WithDescription("Update a topic for a Kafka database cluster by its ID and topic name. Accepts partition_count, replication_factor, and config_json (TopicConfig as JSON, all optional)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to update")),
+				mcp.WithString("partition_count", mcp.Description("Number of partitions (optional, integer as string)")),
+				mcp.WithString("replication_factor", mcp.Description("Replication factor (optional, integer as string)")),
+				mcp.WithString("config_json", mcp.Description("TopicConfig as JSON (optional)")),
+			),
+		},
+		{
+			Handler: s.getKafkaConfig,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-kafka-config",
+				mcp.WithDescription("Get the Kafka config for a cluster by its ID"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+			),
+		},
+		{
+			Handler: s.updateKafkaConfig,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-kafka-config",
+				mcp.WithDescription("Update the Kafka config for a cluster by its ID. Accepts a JSON string for the config."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the KafkaConfig to set")),
+			),
+		},
+	}
 }

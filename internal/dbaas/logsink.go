@@ -8,9 +8,20 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-func (s *ClusterTool) createLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type LogSinkTool struct {
+	client *godo.Client
+}
+
+func NewLogSinkTool(client *godo.Client) *LogSinkTool {
+	return &LogSinkTool{
+		client: client,
+	}
+}
+
+func (s *LogSinkTool) createLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -49,7 +60,7 @@ func (s *ClusterTool) createLogsink(ctx context.Context, req mcp.CallToolRequest
 	return mcp.NewToolResultText(string(jsonLogsink)), nil
 }
 
-func (s *ClusterTool) getLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *LogSinkTool) getLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -70,7 +81,7 @@ func (s *ClusterTool) getLogsink(ctx context.Context, req mcp.CallToolRequest) (
 	return mcp.NewToolResultText(string(jsonLogsink)), nil
 }
 
-func (s *ClusterTool) listLogsinks(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *LogSinkTool) listLogsinks(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -104,7 +115,7 @@ func (s *ClusterTool) listLogsinks(ctx context.Context, req mcp.CallToolRequest)
 	return mcp.NewToolResultText(string(jsonLogsinks)), nil
 }
 
-func (s *ClusterTool) updateLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *LogSinkTool) updateLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -131,7 +142,7 @@ func (s *ClusterTool) updateLogsink(ctx context.Context, req mcp.CallToolRequest
 	return mcp.NewToolResultText("Logsink updated successfully"), nil
 }
 
-func (s *ClusterTool) deleteLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (s *LogSinkTool) deleteLogsink(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["ID"].(string)
 	if !ok || id == "" {
@@ -146,4 +157,53 @@ func (s *ClusterTool) deleteLogsink(ctx context.Context, req mcp.CallToolRequest
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Logsink deleted successfully"), nil
+}
+
+func (s *LogSinkTool) Tools() []server.ServerTool {
+	return []server.ServerTool{
+		{
+			Handler: s.createLogsink,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-create-logsink",
+				mcp.WithDescription("Create a logsink for a database cluster by its ID. Accepts sink_name, sink_type, and config_json (DatabaseLogsinkConfig as JSON, all required)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("sink_name", mcp.Required(), mcp.Description("The logsink name to create")),
+				mcp.WithString("sink_type", mcp.Required(), mcp.Description("The logsink type (e.g., opensearch, datadog, logtail, papertrail)")),
+				mcp.WithString("config_json", mcp.Required(), mcp.Description("DatabaseLogsinkConfig as JSON (required)")),
+			),
+		},
+		{
+			Handler: s.getLogsink,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-logsink",
+				mcp.WithDescription("Get a logsink for a database cluster by its ID and logsink_id."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("logsink_id", mcp.Required(), mcp.Description("The logsink ID to get")),
+			),
+		},
+		{
+			Handler: s.listLogsinks,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-logsinks",
+				mcp.WithDescription("List logsinks for a database cluster by its ID. Supports pagination: page, per_page (optional, integer as string)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
+				mcp.WithString("per_page", mcp.Description("Number of results per page (optional, integer as string)")),
+			),
+		},
+		{
+			Handler: s.updateLogsink,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-logsink",
+				mcp.WithDescription("Update a logsink for a database cluster by its ID and logsink_id. Accepts config_json (DatabaseLogsinkConfig as JSON, required)."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("logsink_id", mcp.Required(), mcp.Description("The logsink ID to update")),
+				mcp.WithString("config_json", mcp.Required(), mcp.Description("DatabaseLogsinkConfig as JSON (required)")),
+			),
+		},
+		{
+			Handler: s.deleteLogsink,
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-logsink",
+				mcp.WithDescription("Delete a logsink for a database cluster by its ID and logsink_id."),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("logsink_id", mcp.Required(), mcp.Description("The logsink ID to delete")),
+			),
+		},
+	}
 }
