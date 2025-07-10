@@ -332,15 +332,15 @@ func (d *DoksTool) CreateDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 	args := req.GetArguments()
 
 	// Extract cluster ID
-	clusterID, ok := args["ClusterID"].(string)
+	clusterID, ok := args["cluster_id"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return nil, fmt.Errorf("cluster_id is required and must be a string")
 	}
 
 	// Extract cluster ID
-	createNPRequest, ok := args["CreateNodePoolRequest"].([]byte)
+	createNPRequest, ok := args["node_pool_create_request"].(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("CreateNodePoolRequest is required, and must be a json as []byte")
+		return nil, fmt.Errorf("node_pool_create_request is required, and must be a json as []byte")
 	}
 
 	jsonBytes, err := json.Marshal(createNPRequest)
@@ -771,10 +771,8 @@ func (d *DoksTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.CreateDOKSNodePool,
-			Tool: mcp.NewTool("digitalocean-doks-create-nodepool",
-				mcp.WithDescription("Create a new node pool in a DigitalOcean Kubernetes cluster"),
-				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
-				mcp.WithObject("NodePoolCreateRequest", mcp.Required(), mcp.AdditionalProperties(nodePoolCreateSchema), mcp.Description("The node pool create request object")),
+			Tool: mcp.NewToolWithRawSchema("digitalocean-doks-create-nodepool",
+				"Create a new node pool in a DigitalOcean Kubernetes cluster", nodePoolCreateSchema,
 			),
 		},
 		{

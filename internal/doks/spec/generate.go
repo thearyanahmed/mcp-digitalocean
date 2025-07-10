@@ -50,8 +50,27 @@ func main() {
 
 	fmt.Println("Schema successfully written to cluster-create-schema.json")
 
-	// Generate schema for KubernetesNodePoolCreateRequest
-	npCreateSchema, err := reflect.Reflect(&godo.KubernetesNodePoolCreateRequest{}).MarshalJSON()
+	// Generate wrapped auxiliary schema for KubernetesNodePoolCreateRequest
+	aux := struct {
+		ClusterID             string                               `json:"cluster_id"`
+		NodePoolCreateRequest godo.KubernetesNodePoolCreateRequest `json:"node_pool_create_request"`
+	}{
+		ClusterID: "",
+		NodePoolCreateRequest: godo.KubernetesNodePoolCreateRequest{
+			// Initialize with zero values
+			Name:      "",
+			Size:      "",
+			Count:     0,
+			Tags:      []string{},
+			Labels:    map[string]string{},
+			Taints:    []godo.Taint{},
+			AutoScale: false,
+			MinNodes:  0,
+			MaxNodes:  0,
+		},
+	}
+	reflector := &jsonschema.Reflector{}
+	npCreateSchema, err := reflector.Reflect(&aux).MarshalJSON()
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal node pool create schema: %w", err))
 	}

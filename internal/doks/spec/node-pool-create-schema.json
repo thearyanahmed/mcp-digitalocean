@@ -1,53 +1,81 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "size": {
-      "type": "string"
-    },
-    "count": {
-      "type": "integer"
-    },
-    "tags": {
-      "items": {
-        "type": "string"
+  "$defs": {
+    "KubernetesNodePoolCreateRequest": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "taints": {
+          "items": {
+            "$ref": "#/$defs/Taint"
+          },
+          "type": "array"
+        },
+        "auto_scale": {
+          "type": "boolean"
+        },
+        "min_nodes": {
+          "type": "integer"
+        },
+        "max_nodes": {
+          "type": "integer"
+        }
       },
-      "type": "array"
-    },
-    "labels": {
-      "additionalProperties": {
-        "type": "string"
-      },
+      "additionalProperties": false,
       "type": "object"
     },
-    "taints": {
-      "items": {
-        "properties": {
-          "Key": {
-            "type": "string"
-          },
-          "Value": {
-            "type": "string"
-          },
-          "Effect": {
-            "type": "string"
-          }
+    "Taint": {
+      "properties": {
+        "Key": {
+          "type": "string"
         },
-        "type": "object"
+        "Value": {
+          "type": "string"
+        },
+        "Effect": {
+          "type": "string"
+        }
       },
-      "type": "array"
-    },
-    "auto_scale": {
-      "type": "boolean"
-    },
-    "min_nodes": {
-      "type": "integer"
-    },
-    "max_nodes": {
-      "type": "integer"
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Key",
+        "Value",
+        "Effect"
+      ]
     }
   },
-  "type": "object"
+  "properties": {
+    "cluster_id": {
+      "type": "string"
+    },
+    "node_pool_create_request": {
+      "$ref": "#/$defs/KubernetesNodePoolCreateRequest"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "cluster_id",
+    "node_pool_create_request"
+  ]
 }
