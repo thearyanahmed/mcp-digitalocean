@@ -255,3 +255,56 @@ This directory contains tools and resources for managing DigitalOcean managed da
   - **Arguments:**
     - `ID` (required): The cluster ID (UUID)
     - `user`
+
+---
+
+## Example queries using DBaaS MCP Tools
+
+Below are some example natural language queries you might use, along with the corresponding tool and arguments. Each example shows how a user might phrase a request, and how it maps to the underlying tool and parameters.
+
+### Clusters
+
+| Example Query                                              | Tool                     | Arguments                                                                                       |
+|-----------------------------------------------------------|--------------------------|-------------------------------------------------------------------------------------------------|
+| Could you please list all dbaas clusters?                 | do-dbaas-cluster-list    | `{ "page": "1", "per_page": "10" }`                                                        |
+| Show me details for cluster `<cluster-uuid>`              | do-dbaas-cluster-get     | `{ "ID": "<cluster-uuid>" }`                                                                  |
+| Create a dbaas cluster called 'my-db' in nyc1             | do-dbaas-cluster-create  | `{ "name": "my-db", "engine": "mysql", "version": "8", "region": "nyc1", "size": "db-s-1vcpu-1gb", "num_nodes": 1 }` |
+| Delete the cluster `<cluster-uuid>`                       | do-dbaas-cluster-delete  | `{ "ID": "<cluster-uuid>" }`                                                                  |
+| Resize cluster `<cluster-uuid>` to 2 nodes                | do-dbaas-cluster-resize  | `{ "ID": "<cluster-uuid>", "num_nodes": 2 }`                                                |
+
+### Users
+
+| Example Query                                              | Tool                        | Arguments                                                      |
+|-----------------------------------------------------------|-----------------------------|----------------------------------------------------------------|
+| List all users for cluster `<cluster-uuid>`                | do-dbaas-cluster-list-users | `{ "ID": "<cluster-uuid>" }`                               |
+| Add a user named 'readonly' to cluster `<cluster-uuid>`    | do-dbaas-cluster-create-user| `{ "ID": "<cluster-uuid>", "name": "readonly" }`        |
+| Remove the user 'readonly' from cluster `<cluster-uuid>`   | do-dbaas-cluster-delete-user| `{ "ID": "<cluster-uuid>", "user": "readonly" }`        |
+| Update user 'readonly' with new settings                   | do-dbaas-cluster-update-user| `{ "ID": "<cluster-uuid>", "user": "readonly", "settings_json": "{...}" }` |
+
+### Firewalls
+
+| Example Query                                              | Tool                              | Arguments                                                      |
+|-----------------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
+| What are the firewall rules for cluster `<cluster-uuid>`?  | do-dbaas-cluster-get-firewall-rules| `{ "ID": "<cluster-uuid>" }`                               |
+| Update the firewall rules for cluster `<cluster-uuid>`     | do-dbaas-cluster-update-firewall-rules| `{ "ID": "<cluster-uuid>", "rules_json": "[ { ...rule... } ]" }` |
+
+### Configuration
+
+| Example Query                                              | Tool                                 | Arguments                                                      |
+|-----------------------------------------------------------|--------------------------------------|----------------------------------------------------------------|
+| Show me the MySQL config for cluster `<cluster-uuid>`      | do-dbaas-cluster-get-mysql-config    | `{ "ID": "<cluster-uuid>" }`                               |
+| Update the MongoDB config for cluster `<cluster-uuid>`     | do-dbaas-cluster-update-mongodb-config| `{ "ID": "<cluster-uuid>", "config_json": "{ ... }" }`  |
+| Get the Redis config for cluster `<cluster-uuid>`          | do-dbaas-cluster-get-redis-config    | `{ "ID": "<cluster-uuid>" }`                               |
+| Update the PostgreSQL config for cluster `<cluster-uuid>`  | do-dbaas-cluster-update-postgresql-config| `{ "ID": "<cluster-uuid>", "config_json": "{ ... }" }` |
+
+### Kafka Topics
+
+| Example Query                                              | Tool                              | Arguments                                                      |
+|-----------------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
+| List all topics in Kafka cluster `<cluster-uuid>`          | do-dbaas-cluster-list-topics       | `{ "ID": "<cluster-uuid>" }`                               |
+| Create a topic called 'my-topic' in Kafka cluster `<cluster-uuid>` | do-dbaas-cluster-create-topic | `{ "ID": "<cluster-uuid>", "name": "my-topic" }`        |
+| Delete the topic 'my-topic' from Kafka cluster `<cluster-uuid>` | do-dbaas-cluster-delete-topic | `{ "ID": "<cluster-uuid>", "name": "my-topic" }`        |
+
+---
+
+Feel free to use these queries as a starting point for interacting with the DBaaS MCP tools! 
