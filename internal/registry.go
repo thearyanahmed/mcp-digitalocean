@@ -89,20 +89,13 @@ func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 
 func registerDbaasTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(dbaas.NewClusterTool(c).Tools()...)
-	s.AddTools(dbaas.NewDBTool(c).Tools()...)
 	s.AddTools(dbaas.NewFirewallTool(c).Tools()...)
-	s.AddTools(dbaas.NewIndexTool(c).Tools()...)
 	s.AddTools(dbaas.NewKafkaTool(c).Tools()...)
-	s.AddTools(dbaas.NewLogSinkTool(c).Tools()...)
-	s.AddTools(dbaas.NewMetricCredentialTool(c).Tools()...)
-	s.AddTools(dbaas.NewMigrationTool(c).Tools()...)
 	s.AddTools(dbaas.NewMongoTool(c).Tools()...)
 	s.AddTools(dbaas.NewMysqlTool(c).Tools()...)
 	s.AddTools(dbaas.NewOpenSearchTool(c).Tools()...)
-	s.AddTools(dbaas.NewPoolTool(c).Tools()...)
 	s.AddTools(dbaas.NewPostgreSQLTool(c).Tools()...)
 	s.AddTools(dbaas.NewRedisTool(c).Tools()...)
-	s.AddTools(dbaas.NewReplicaTool(c).Tools()...)
 	s.AddTools(dbaas.NewUserTool(c).Tools()...)
 
 	return nil

@@ -101,14 +101,14 @@ func (s *MysqlTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getMySQLConfig,
-			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-mysql-config",
+			Tool: mcp.NewTool("do-dbaas-cluster-get-mysql-config",
 				mcp.WithDescription("Get the MySQL config for a cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateMySQLConfig,
-			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-mysql-config",
+			Tool: mcp.NewTool("do-dbaas-cluster-update-mysql-config",
 				mcp.WithDescription("Update the MySQL config for a cluster by its ID. Accepts a JSON string for the config."),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the MySQLConfig to set")),
@@ -116,14 +116,14 @@ func (s *MysqlTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.getSQLMode,
-			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-sql-mode",
+			Tool: mcp.NewTool("do-dbaas-cluster-get-sql-mode",
 				mcp.WithDescription("Get the SQL mode for a cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.setSQLMode,
-			Tool: mcp.NewTool("digitalocean-dbaas-cluster-set-sql-mode",
+			Tool: mcp.NewTool("do-dbaas-cluster-set-sql-mode",
 				mcp.WithDescription("Set the SQL mode for a cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("modes", mcp.Required(), mcp.Description("Comma-separated SQL modes to set")),

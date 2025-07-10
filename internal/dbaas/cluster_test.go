@@ -131,26 +131,6 @@ func TestClusterTool_resizeCluster(t *testing.T) {
 	assert.Contains(t, getText(res), "Cluster ID is required")
 }
 
-func TestClusterTool_migrateCluster(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("Migrate", mock.Anything, "abc", mock.AnythingOfType("*godo.DatabaseMigrateRequest")).Return(nil, nil)
-	client := &godo.Client{}
-	client.Databases = mockDB
-	ct := &ClusterTool{client: client}
-	args := map[string]interface{}{"ID": "abc", "region": "nyc3"}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err := ct.migrateCluster(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster migration initiated successfully")
-	mockDB.AssertExpectations(t)
-	// Error case: missing region
-	args = map[string]interface{}{"ID": "abc"}
-	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err = ct.migrateCluster(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Target region is required")
-}
-
 func TestClusterTool_getCA(t *testing.T) {
 	mockDB := &mocks.DatabasesService{}
 	ca := &godo.DatabaseCA{Certificate: []byte("cert-data")}
@@ -166,44 +146,6 @@ func TestClusterTool_getCA(t *testing.T) {
 	// Error case: missing ID
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = ct.getCA(context.Background(), reqMissing)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
-}
-
-func TestClusterTool_updateMaintenance(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("UpdateMaintenance", mock.Anything, "abc", mock.AnythingOfType("*godo.DatabaseUpdateMaintenanceRequest")).Return(nil, nil)
-	client := &godo.Client{}
-	client.Databases = mockDB
-	ct := &ClusterTool{client: client}
-	args := map[string]interface{}{"ID": "abc", "day": "monday"}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err := ct.updateMaintenance(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Maintenance window updated successfully")
-	mockDB.AssertExpectations(t)
-	// Error case: missing both day and hour
-	args = map[string]interface{}{"ID": "abc"}
-	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err = ct.updateMaintenance(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "At least one of 'day' or 'hour' must be provided")
-}
-
-func TestClusterTool_installUpdate(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("InstallUpdate", mock.Anything, "abc").Return(nil, nil)
-	client := &godo.Client{}
-	client.Databases = mockDB
-	ct := &ClusterTool{client: client}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"ID": "abc"}}}
-	res, err := ct.installUpdate(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Update installation triggered successfully")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
-	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
-	res, err = ct.installUpdate(context.Background(), reqMissing)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "Cluster ID is required")
 }
@@ -224,64 +166,6 @@ func TestClusterTool_listBackups(t *testing.T) {
 	res, err = ct.listBackups(context.Background(), reqMissing)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "Cluster ID is required")
-}
-
-func TestClusterTool_resetUserAuth(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("ResetUserAuth", mock.Anything, "abc", "user1", mock.AnythingOfType("*godo.DatabaseResetUserAuthRequest")).Return(&godo.DatabaseUser{Name: "user1"}, nil, nil)
-	client := &godo.Client{}
-	client.Databases = mockDB
-	ct := &ClusterTool{client: client}
-	args := map[string]interface{}{"ID": "abc", "user": "user1"}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err := ct.resetUserAuth(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "user1")
-	mockDB.AssertExpectations(t)
-	// Error case: missing user
-	args = map[string]interface{}{"ID": "abc"}
-	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err = ct.resetUserAuth(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "User name is required")
-}
-
-func TestClusterTool_getEvictionPolicy(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("GetEvictionPolicy", mock.Anything, "abc").Return("evict-all", nil, nil)
-	client := &godo.Client{}
-	client.Databases = mockDB
-	ct := &ClusterTool{client: client}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"ID": "abc"}}}
-	res, err := ct.getEvictionPolicy(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "evict-all")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
-	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
-	res, err = ct.getEvictionPolicy(context.Background(), reqMissing)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
-}
-
-func TestClusterTool_setEvictionPolicy(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("SetEvictionPolicy", mock.Anything, "abc", "evict-all").Return(nil, nil)
-	client := &godo.Client{}
-	client.Databases = mockDB
-	ct := &ClusterTool{client: client}
-	args := map[string]interface{}{"ID": "abc", "policy": "evict-all"}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err := ct.setEvictionPolicy(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Eviction policy set successfully")
-	mockDB.AssertExpectations(t)
-	// Error case: missing policy
-	args = map[string]interface{}{"ID": "abc"}
-	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-	res, err = ct.setEvictionPolicy(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Eviction policy is required")
 }
 
 func TestClusterTool_listOptions(t *testing.T) {
@@ -315,22 +199,4 @@ func TestClusterTool_upgradeMajorVersion(t *testing.T) {
 	res, err = ct.upgradeMajorVersion(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "Target version is required")
-}
-
-func TestClusterTool_listDatabaseEvents(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("ListDatabaseEvents", mock.Anything, "abc", mock.Anything).Return([]godo.DatabaseEvent{{ID: "event1"}}, nil, nil)
-	client := &godo.Client{}
-	client.Databases = mockDB
-	ct := &ClusterTool{client: client}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"ID": "abc"}}}
-	res, err := ct.listDatabaseEvents(context.Background(), req)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "event1")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
-	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
-	res, err = ct.listDatabaseEvents(context.Background(), reqMissing)
-	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
 }
