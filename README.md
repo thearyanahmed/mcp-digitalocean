@@ -76,6 +76,7 @@ See the following files for full documentation:
 - [Droplet Service README](./internal/droplet/README.md)
 - [Account Service README](./internal/account/README.md)
 - [Networking Service README](./internal/networking/README.md)
+- [DBaaS Service README](./internal/dbaas/README.md)
 
 ---
 
