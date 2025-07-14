@@ -28,3 +28,5 @@ scripts/npm/node_modules/
 
 # Build output
 scripts/npm/dist/
+
+docode/*

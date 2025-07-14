@@ -150,6 +150,8 @@ This directory contains tools and resources for managing DigitalOcean networking
   Create a new VPC.
   - `Name` (string, required): Name of the VPC
   - `Region` (string, required): Region slug (e.g., nyc3)
+  - `Subnet` (string, optional): Optional subnet CIDR block (e.g., 10.10.0.0/20)
+  - `Description` (string, optional): Optional description for the VPC
 
 - **`digitalocean-vpc-list-members`**
   List members of a VPC.
