@@ -73,6 +73,30 @@ This directory contains tools and resources for managing DigitalOcean networking
   - `ID` (string, required): ID of the firewall to remove droplets from
   - `DropletIDs` (array of numbers, required): Droplet IDs to remove from the firewall
 
+- **`digitalocean-firewall-add-rules`**
+  Add one or more rules to a firewall.
+  - `ID` (string, required): ID of the firewall to add rules to
+  - `InboundRules` (array of objects, optional): Inbound rules to add
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Sources` (array of strings, required): Source IP addresses or CIDR blocks
+  - `OutboundRules` (array of objects, optional): Outbound rules to add
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Destinations` (array of strings, required): Destination IP addresses or CIDR blocks
+
+- **`digitalocean-firewall-remove-rules`**
+  Remove one or more rules from a firewall.
+  - `ID` (string, required): ID of the firewall to remove rules from
+  - `InboundRules` (array of objects, optional): Inbound rules to remove
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Sources` (array of strings, required): Source IP addresses or CIDR blocks
+  - `OutboundRules` (array of objects, optional): Outbound rules to remove
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Destinations` (array of strings, required): Destination IP addresses or CIDR blocks
+
 ---
 
 ### Firewalls
@@ -335,6 +359,8 @@ The following tools are now available for direct querying and listing of all net
 - Delete the TXT record with ID 12345 from "example.com".
 - Create a new SSL certificate for "myapp.com".
 - Delete a firewall with ID "abcd-1234".
+- Add HTTP and HTTPS inbound rules to firewall "fw-123".
+- Remove SSH access rule from firewall "fw-456".
 - Reserve a new IPv4 in region "nyc3".
 - Assign reserved IP "198.51.100.5" to droplet 987654.
 - Create a new VPC named "private-net" in region "sfo2".
