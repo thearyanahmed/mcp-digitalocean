@@ -33,11 +33,10 @@ func (s *ClusterTool) listCluster(ctx context.Context, req mcp.CallToolRequest) 
 		}
 	}
 	perPage := 0
-	if ppStr, ok := args["per_page"].(string); ok && ppStr != "" {
-		if pp, err := strconv.Atoi(ppStr); err == nil {
-			perPage = pp
-		}
+	if pp, ok := args["per_page"].(int); ok {
+		perPage = pp
 	}
+
 	var opts *godo.ListOptions
 	if page > 0 || perPage > 0 {
 		opts = &godo.ListOptions{Page: page, PerPage: perPage}
@@ -189,11 +188,10 @@ func (s *ClusterTool) listBackups(ctx context.Context, req mcp.CallToolRequest) 
 		}
 	}
 	perPage := 0
-	if ppStr, ok := args["per_page"].(string); ok && ppStr != "" {
-		if pp, err := strconv.Atoi(ppStr); err == nil {
-			perPage = pp
-		}
+	if pp, ok := args["per_page"].(int); ok {
+		perPage = pp
 	}
+
 	var opts *godo.ListOptions
 	if page > 0 || perPage > 0 {
 		opts = &godo.ListOptions{Page: page, PerPage: perPage}
@@ -256,10 +254,8 @@ func (s *ClusterTool) startOnlineMigration(ctx context.Context, req mcp.CallTool
 		return mcp.NewToolResultError("Invalid source_json: " + err.Error()), nil
 	}
 	disableSSL := false
-	if dssl, ok := args["disable_ssl"].(string); ok && dssl != "" {
-		if b, err := strconv.ParseBool(dssl); err == nil {
-			disableSSL = b
-		}
+	if dssl, ok := args["disable_ssl"].(bool); ok {
+		disableSSL = dssl
 	}
 	var ignoreDBs []string
 	if ignoreStr, ok := args["ignore_dbs"].(string); ok && ignoreStr != "" {
@@ -325,29 +321,29 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 
 		{
 			Handler: s.listCluster,
-			Tool: mcp.NewTool("do-dbaas-cluster-list",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-list",
 				mcp.WithDescription("Get list of  Cluster"),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
-				mcp.WithString("per_page", mcp.Description("Number of results per page (optional, integer as string)")),
+				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional, integer)")),
 			),
 		},
 		{
 			Handler: s.getCluster,
-			Tool: mcp.NewTool("do-dbaas-cluster-get",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-get",
 				mcp.WithDescription("Get a cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to retrieve")),
 			),
 		},
 		{
 			Handler: s.getCA,
-			Tool: mcp.NewTool("do-dbaas-cluster-get-ca",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-get-ca",
 				mcp.WithDescription("Get the CA certificate for a cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to retrieve the CA for")),
 			),
 		},
 		{
 			Handler: s.createCluster,
-			Tool: mcp.NewTool("do-dbaas-cluster-create",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-create",
 				mcp.WithDescription("Create a new database cluster"),
 				mcp.WithString("name", mcp.Required(), mcp.Description("The name of the cluster")),
 				mcp.WithString("engine", mcp.Required(), mcp.Description("The engine slug (e.g., valkey, pg, mysql, etc.)")),
@@ -360,14 +356,14 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.deleteCluster,
-			Tool: mcp.NewTool("do-dbaas-cluster-delete",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-delete",
 				mcp.WithDescription("Delete a database cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to delete")),
 			),
 		},
 		{
 			Handler: s.resizeCluster,
-			Tool: mcp.NewTool("do-dbaas-cluster-resize",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-resize",
 				mcp.WithDescription("Resize a database cluster by its ID. At least one of size, num_nodes, or storage_size_mib must be provided."),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to resize")),
 				mcp.WithString("size", mcp.Description("The new size slug (e.g., db-s-2vcpu-4gb)")),
@@ -377,22 +373,22 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.listBackups,
-			Tool: mcp.NewTool("do-dbaas-cluster-list-backups",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-list-backups",
 				mcp.WithDescription("List backups for a database cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to list backups for")),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
-				mcp.WithString("per_page", mcp.Description("Number of results per page (optional, integer as string)")),
+				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional, integer)")),
 			),
 		},
 		{
 			Handler: s.listOptions,
-			Tool: mcp.NewTool("do-dbaas-cluster-list-options",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-list-options",
 				mcp.WithDescription("List available database options (engines, versions, sizes, regions, etc) for DigitalOcean managed databases."),
 			),
 		},
 		{
 			Handler: s.upgradeMajorVersion,
-			Tool: mcp.NewTool("do-dbaas-cluster-upgrade-major-version",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-upgrade-major-version",
 				mcp.WithDescription("Upgrade the major version of a database cluster by its ID. Requires the target version."),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("version", mcp.Required(), mcp.Description("The target major version to upgrade to (e.g., 15 for PostgreSQL)")),
@@ -400,17 +396,17 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.startOnlineMigration,
-			Tool: mcp.NewTool("do-dbaas-cluster-start-online-migration",
-				mcp.WithDescription("Start an online migration for a database cluster by its ID. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as string), and ignore_dbs (optional, comma-separated)."),
+			Tool: mcp.NewTool("digitalocean-dbaascluster-start-online-migration",
+				mcp.WithDescription("Start an online migration for a database cluster by its ID. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as boolean), and ignore_dbs (optional, comma-separated)."),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("source_json", mcp.Required(), mcp.Description("DatabaseOnlineMigrationConfig as JSON (required)")),
-				mcp.WithString("disable_ssl", mcp.Description("Disable SSL for migration (optional, bool as string)")),
+				mcp.WithBoolean("disable_ssl", mcp.Description("Disable SSL for migration (optional, bool as boolean)")),
 				mcp.WithString("ignore_dbs", mcp.Description("Comma-separated list of DBs to ignore (optional)")),
 			),
 		},
 		{
 			Handler: s.stopOnlineMigration,
-			Tool: mcp.NewTool("do-dbaas-cluster-stop-online-migration",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-stop-online-migration",
 				mcp.WithDescription("Stop an online migration for a database cluster by its ID and migration_id."),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("migration_id", mcp.Required(), mcp.Description("The migration ID to stop")),
@@ -418,7 +414,7 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.getOnlineMigrationStatus,
-			Tool: mcp.NewTool("do-dbaas-cluster-get-online-migration-status",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-get-online-migration-status",
 				mcp.WithDescription("Get the online migration status for a database cluster by its ID."),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 			),

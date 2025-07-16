@@ -58,11 +58,10 @@ func (s *UserTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp
 		}
 	}
 	perPage := 0
-	if ppStr, ok := args["per_page"].(string); ok && ppStr != "" {
-		if pp, err := strconv.Atoi(ppStr); err == nil {
-			perPage = pp
-		}
+	if pp, ok := args["per_page"].(int); ok {
+		perPage = pp
 	}
+
 	var opts *godo.ListOptions
 	if page > 0 || perPage > 0 {
 		opts = &godo.ListOptions{Page: page, PerPage: perPage}
@@ -170,7 +169,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getUser,
-			Tool: mcp.NewTool("do-dbaas-cluster-get-user",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-get-user",
 				mcp.WithDescription("Get a database user by cluster ID and user name"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
@@ -178,16 +177,16 @@ func (s *UserTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.listUsers,
-			Tool: mcp.NewTool("do-dbaas-cluster-list-users",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-list-users",
 				mcp.WithDescription("List database users for a cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional)")),
-				mcp.WithString("per_page", mcp.Description("Number of results per page (optional)")),
+				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional)")),
 			),
 		},
 		{
 			Handler: s.createUser,
-			Tool: mcp.NewTool("do-dbaas-cluster-create-user",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-create-user",
 				mcp.WithDescription("Create a database user for a cluster by its ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("The user name")),
@@ -197,7 +196,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.updateUser,
-			Tool: mcp.NewTool("do-dbaas-cluster-update-user",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-update-user",
 				mcp.WithDescription("Update a database user for a cluster by its ID and user name"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
@@ -206,7 +205,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.deleteUser,
-			Tool: mcp.NewTool("do-dbaas-cluster-delete-user",
+			Tool: mcp.NewTool("digitalocean-dbaascluster-delete-user",
 				mcp.WithDescription("Delete a database user by cluster ID and user name"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name to delete")),

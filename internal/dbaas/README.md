@@ -8,23 +8,23 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Cluster Tools
 
-- **`do-dbaas-cluster-list`**
+- **`digitalocean-dbaascluster-list`**
   - Get list of clusters.
   - **Arguments:**
     - `page` (optional, integer as string): Page number for pagination
-    - `per_page` (optional, integer as string): Number of results per page
+    - `per_page` (optional, integer): Number of results per page
 
-- **`do-dbaas-cluster-get`**
+- **`digitalocean-dbaascluster-get`**
   - Get a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The ID of the cluster to retrieve
 
-- **`do-dbaas-cluster-get-ca`**
+- **`digitalocean-dbaascluster-get-ca`**
   - Get the CA certificate for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The ID of the cluster to retrieve the CA for
 
-- **`do-dbaas-cluster-create`**
+- **`digitalocean-dbaascluster-create`**
   - Create a new database cluster.
   - **Arguments:**
     - `name` (required): The name of the cluster
@@ -35,12 +35,12 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `num_nodes` (required): The number of nodes
     - `tags` (optional): Comma-separated tags to apply to the cluster
 
-- **`do-dbaas-cluster-delete`**
+- **`digitalocean-dbaascluster-delete`**
   - Delete a database cluster by its ID.
   - **Arguments:**
     - `ID` (required): The ID of the cluster to delete
 
-- **`do-dbaas-cluster-resize`**
+- **`digitalocean-dbaascluster-resize`**
   - Resize a database cluster by its ID. At least one of size, num_nodes, or storage_size_mib must be provided.
   - **Arguments:**
     - `ID` (required): The ID of the cluster to resize
@@ -48,50 +48,50 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `num_nodes` (optional): The new number of nodes
     - `storage_size_mib` (optional): The new storage size in MiB
 
-- **`do-dbaas-cluster-list-backups`**
+- **`digitalocean-dbaascluster-list-backups`**
   - List backups for a database cluster by its ID.
   - **Arguments:**
     - `ID` (required): The ID of the cluster to list backups for
     - `page` (optional, integer as string): Page number for pagination
-    - `per_page` (optional, integer as string): Number of results per page
+    - `per_page` (optional, integer): Number of results per page
 
-- **`do-dbaas-cluster-list-options`**
+- **`digitalocean-dbaascluster-list-options`**
   - List available database options (engines, versions, sizes, regions, etc) for DigitalOcean managed databases.
   - **Arguments:** None
 
-- **`do-dbaas-cluster-upgrade-major-version`**
+- **`digitalocean-dbaascluster-upgrade-major-version`**
   - Upgrade the major version of a database cluster by its ID. Requires the target version.
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `version` (required): The target major version to upgrade to (e.g., 15 for PostgreSQL)
 
-- **`do-dbaas-cluster-start-online-migration`**
-  - Start an online migration for a database cluster by its ID. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as string), and ignore_dbs (optional, comma-separated).
+- **`digitalocean-dbaascluster-start-online-migration`**
+  - Start an online migration for a database cluster by its ID. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as boolean), and ignore_dbs (optional, comma-separated).
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `source_json` (required): DatabaseOnlineMigrationConfig as JSON
-    - `disable_ssl` (optional): Disable SSL for migration (bool as string)
+    - `disable_ssl` (optional): Disable SSL for migration (bool as boolean)
     - `ignore_dbs` (optional): Comma-separated list of DBs to ignore
 
-- **`do-dbaas-cluster-stop-online-migration`**
+- **`digitalocean-dbaascluster-stop-online-migration`**
   - Stop an online migration for a database cluster by its ID and migration_id.
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `migration_id` (required): The migration ID to stop
 
-- **`do-dbaas-cluster-get-online-migration-status`**
+- **`digitalocean-dbaascluster-get-online-migration-status`**
   - Get the online migration status for a database cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
 ### Firewall Tools
 
-- **`do-dbaas-cluster-get-firewall-rules`**
+- **`digitalocean-dbaascluster-get-firewall-rules`**
   - Get the firewall rules for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-update-firewall-rules`**
+- **`digitalocean-dbaascluster-update-firewall-rules`**
   - Update the firewall rules for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -99,18 +99,18 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Kafka Tools
 
-- **`do-dbaas-cluster-list-topics`**
+- **`digitalocean-dbaascluster-list-topics`**
   - List topics for a database cluster by its ID (Kafka clusters). Supports all ListOptions: page, per_page, with_projects, only_deployed, public_only, usecases (comma-separated).
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `page` (optional, integer as string): Page number for pagination
-    - `per_page` (optional, integer as string): Number of results per page
+    - `per_page` (optional, integer): Number of results per page
     - `with_projects` (optional, bool as string): Whether to include project_id fields
     - `only_deployed` (optional, bool as string): Only list deployed agents
     - `public_only` (optional, bool as string): Include only public models
     - `usecases` (optional): Comma-separated usecases to filter
 
-- **`do-dbaas-cluster-create-topic`**
+- **`digitalocean-dbaascluster-create-topic`**
   - Create a topic for a Kafka database cluster by its ID. Accepts name (required), partition_count, replication_factor, and config_json (TopicConfig as JSON, all optional).
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -119,19 +119,19 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `replication_factor` (optional, integer as string): Replication factor
     - `config_json` (optional): TopicConfig as JSON
 
-- **`do-dbaas-cluster-get-topic`**
+- **`digitalocean-dbaascluster-get-topic`**
   - Get a topic for a Kafka database cluster by its ID and topic name.
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `name` (required): The topic name to get
 
-- **`do-dbaas-cluster-delete-topic`**
+- **`digitalocean-dbaascluster-delete-topic`**
   - Delete a topic for a Kafka database cluster by its ID and topic name.
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `name` (required): The topic name to delete
 
-- **`do-dbaas-cluster-update-topic`**
+- **`digitalocean-dbaascluster-update-topic`**
   - Update a topic for a Kafka database cluster by its ID and topic name. Accepts partition_count, replication_factor, and config_json (TopicConfig as JSON, all optional).
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -140,12 +140,12 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `replication_factor` (optional, integer as string): Replication factor
     - `config_json` (optional): TopicConfig as JSON
 
-- **`do-dbaas-cluster-get-kafka-config`**
+- **`digitalocean-dbaascluster-get-kafka-config`**
   - Get the Kafka config for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-update-kafka-config`**
+- **`digitalocean-dbaascluster-update-kafka-config`**
   - Update the Kafka config for a cluster by its ID. Accepts a JSON string for the config.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -153,12 +153,12 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Mongo Tools
 
-- **`do-dbaas-cluster-get-mongodb-config`**
+- **`digitalocean-dbaascluster-get-mongodb-config`**
   - Get the MongoDB config for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-update-mongodb-config`**
+- **`digitalocean-dbaascluster-update-mongodb-config`**
   - Update the MongoDB config for a cluster by its ID. Accepts a JSON string for the config.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -166,23 +166,23 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### MySQL Tools
 
-- **`do-dbaas-cluster-get-mysql-config`**
+- **`digitalocean-dbaascluster-get-mysql-config`**
   - Get the MySQL config for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-update-mysql-config`**
+- **`digitalocean-dbaascluster-update-mysql-config`**
   - Update the MySQL config for a cluster by its ID. Accepts a JSON string for the config.
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `config_json` (required): JSON for the MySQLConfig to set
 
-- **`do-dbaas-cluster-get-sql-mode`**
+- **`digitalocean-dbaascluster-get-sql-mode`**
   - Get the SQL mode for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-set-sql-mode`**
+- **`digitalocean-dbaascluster-set-sql-mode`**
   - Set the SQL mode for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -190,12 +190,12 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Opensearch Tools
 
-- **`do-dbaas-cluster-get-opensearch-config`**
+- **`digitalocean-dbaascluster-get-opensearch-config`**
   - Get the Opensearch config for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-update-opensearch-config`**
+- **`digitalocean-dbaascluster-update-opensearch-config`**
   - Update the Opensearch config for a cluster by its ID. Accepts a JSON string for the config.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -203,12 +203,12 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Postgres Tools
 
-- **`do-dbaas-cluster-get-postgresql-config`**
+- **`digitalocean-dbaascluster-get-postgresql-config`**
   - Get the PostgreSQL config for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-update-postgresql-config`**
+- **`digitalocean-dbaascluster-update-postgresql-config`**
   - Update the PostgreSQL config for a cluster by its ID. Accepts a JSON string for the config.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -216,12 +216,12 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Redis Tools
 
-- **`do-dbaas-cluster-get-redis-config`**
+- **`digitalocean-dbaascluster-get-redis-config`**
   - Get the Redis config for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`do-dbaas-cluster-update-redis-config`**
+- **`digitalocean-dbaascluster-update-redis-config`**
   - Update the Redis config for a cluster by its ID. Accepts a JSON string for the config.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -229,20 +229,20 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### User Tools
 
-- **`do-dbaas-cluster-get-user`**
+- **`digitalocean-dbaascluster-get-user`**
   - Get a database user by cluster ID and user name.
   - **Arguments:**
     - `ID` (required): The cluster ID (UUID)
     - `user` (required): The user name
 
-- **`do-dbaas-cluster-list-users`**
+- **`digitalocean-dbaascluster-list-users`**
   - List database users for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster ID (UUID)
     - `page` (optional): Page number for pagination
     - `per_page` (optional): Number of results per page
 
-- **`do-dbaas-cluster-create-user`**
+- **`digitalocean-dbaascluster-create-user`**
   - Create a database user for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster ID (UUID)
@@ -250,7 +250,7 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `mysql_auth_plugin` (optional): MySQL auth plugin (e.g., mysql_native_password)
     - `settings_json` (optional): Raw JSON for DatabaseUserSettings
 
-- **`do-dbaas-cluster-update-user`**
+- **`digitalocean-dbaascluster-update-user`**
   - Update a database user for a cluster by its ID and user name.
   - **Arguments:**
     - `ID` (required): The cluster ID (UUID)
@@ -266,44 +266,44 @@ Below are some example natural language queries you might use, along with the co
 
 | Example Query                                              | Tool                     | Arguments                                                                                       |
 |-----------------------------------------------------------|--------------------------|-------------------------------------------------------------------------------------------------|
-| Could you please list all dbaas clusters?                 | do-dbaas-cluster-list    | `{ "page": "1", "per_page": "10" }`                                                        |
-| Show me details for cluster `<cluster-uuid>`              | do-dbaas-cluster-get     | `{ "ID": "<cluster-uuid>" }`                                                                  |
-| Create a dbaas cluster called 'my-db' in nyc1             | do-dbaas-cluster-create  | `{ "name": "my-db", "engine": "mysql", "version": "8", "region": "nyc1", "size": "db-s-1vcpu-1gb", "num_nodes": 1 }` |
-| Delete the cluster `<cluster-uuid>`                       | do-dbaas-cluster-delete  | `{ "ID": "<cluster-uuid>" }`                                                                  |
-| Resize cluster `<cluster-uuid>` to 2 nodes                | do-dbaas-cluster-resize  | `{ "ID": "<cluster-uuid>", "num_nodes": 2 }`                                                |
+| Could you please list all dbaas clusters?                 | digitalocean-dbaascluster-list    | `{ "page": "1", "per_page": 10 }`                                                        |
+| Show me details for cluster `<cluster-uuid>`              | digitalocean-dbaascluster-get     | `{ "ID": "<cluster-uuid>" }`                                                                  |
+| Create a dbaas cluster called 'my-db' in nyc1             | digitalocean-dbaascluster-create  | `{ "name": "my-db", "engine": "mysql", "version": "8", "region": "nyc1", "size": "db-s-1vcpu-1gb", "num_nodes": 1 }` |
+| Delete the cluster `<cluster-uuid>`                       | digitalocean-dbaascluster-delete  | `{ "ID": "<cluster-uuid>" }`                                                                  |
+| Resize cluster `<cluster-uuid>` to 2 nodes                | digitalocean-dbaascluster-resize  | `{ "ID": "<cluster-uuid>", "num_nodes": 2 }`                                                |
 
 ### Users
 
 | Example Query                                              | Tool                        | Arguments                                                      |
 |-----------------------------------------------------------|-----------------------------|----------------------------------------------------------------|
-| List all users for cluster `<cluster-uuid>`                | do-dbaas-cluster-list-users | `{ "ID": "<cluster-uuid>" }`                               |
-| Add a user named 'readonly' to cluster `<cluster-uuid>`    | do-dbaas-cluster-create-user| `{ "ID": "<cluster-uuid>", "name": "readonly" }`        |
-| Remove the user 'readonly' from cluster `<cluster-uuid>`   | do-dbaas-cluster-delete-user| `{ "ID": "<cluster-uuid>", "user": "readonly" }`        |
-| Update user 'readonly' with new settings                   | do-dbaas-cluster-update-user| `{ "ID": "<cluster-uuid>", "user": "readonly", "settings_json": "{...}" }` |
+| List all users for cluster `<cluster-uuid>`                | digitalocean-dbaascluster-list-users | `{ "ID": "<cluster-uuid>" }`                               |
+| Add a user named 'readonly' to cluster `<cluster-uuid>`    | digitalocean-dbaascluster-create-user| `{ "ID": "<cluster-uuid>", "name": "readonly" }`        |
+| Remove the user 'readonly' from cluster `<cluster-uuid>`   | digitalocean-dbaascluster-delete-user| `{ "ID": "<cluster-uuid>", "user": "readonly" }`        |
+| Update user 'readonly' with new settings                   | digitalocean-dbaascluster-update-user| `{ "ID": "<cluster-uuid>", "user": "readonly", "settings_json": "{...}" }` |
 
 ### Firewalls
 
 | Example Query                                              | Tool                              | Arguments                                                      |
 |-----------------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
-| What are the firewall rules for cluster `<cluster-uuid>`?  | do-dbaas-cluster-get-firewall-rules| `{ "ID": "<cluster-uuid>" }`                               |
-| Update the firewall rules for cluster `<cluster-uuid>`     | do-dbaas-cluster-update-firewall-rules| `{ "ID": "<cluster-uuid>", "rules_json": "[ { ...rule... } ]" }` |
+| What are the firewall rules for cluster `<cluster-uuid>`?  | digitalocean-dbaascluster-get-firewall-rules| `{ "ID": "<cluster-uuid>" }`                               |
+| Update the firewall rules for cluster `<cluster-uuid>`     | digitalocean-dbaascluster-update-firewall-rules| `{ "ID": "<cluster-uuid>", "rules_json": "[ { ...rule... } ]" }` |
 
 ### Configuration
 
 | Example Query                                              | Tool                                 | Arguments                                                      |
 |-----------------------------------------------------------|--------------------------------------|----------------------------------------------------------------|
-| Show me the MySQL config for cluster `<cluster-uuid>`      | do-dbaas-cluster-get-mysql-config    | `{ "ID": "<cluster-uuid>" }`                               |
-| Update the MongoDB config for cluster `<cluster-uuid>`     | do-dbaas-cluster-update-mongodb-config| `{ "ID": "<cluster-uuid>", "config_json": "{ ... }" }`  |
-| Get the Redis config for cluster `<cluster-uuid>`          | do-dbaas-cluster-get-redis-config    | `{ "ID": "<cluster-uuid>" }`                               |
-| Update the PostgreSQL config for cluster `<cluster-uuid>`  | do-dbaas-cluster-update-postgresql-config| `{ "ID": "<cluster-uuid>", "config_json": "{ ... }" }` |
+| Show me the MySQL config for cluster `<cluster-uuid>`      | digitalocean-dbaascluster-get-mysql-config    | `{ "ID": "<cluster-uuid>" }`                               |
+| Update the MongoDB config for cluster `<cluster-uuid>`     | digitalocean-dbaascluster-update-mongodb-config| `{ "ID": "<cluster-uuid>", "config_json": "{ ... }" }`  |
+| Get the Redis config for cluster `<cluster-uuid>`          | digitalocean-dbaascluster-get-redis-config    | `{ "ID": "<cluster-uuid>" }`                               |
+| Update the PostgreSQL config for cluster `<cluster-uuid>`  | digitalocean-dbaascluster-update-postgresql-config| `{ "ID": "<cluster-uuid>", "config_json": "{ ... }" }` |
 
 ### Kafka Topics
 
 | Example Query                                              | Tool                              | Arguments                                                      |
 |-----------------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
-| List all topics in Kafka cluster `<cluster-uuid>`          | do-dbaas-cluster-list-topics       | `{ "ID": "<cluster-uuid>" }`                               |
-| Create a topic called 'my-topic' in Kafka cluster `<cluster-uuid>` | do-dbaas-cluster-create-topic | `{ "ID": "<cluster-uuid>", "name": "my-topic" }`        |
-| Delete the topic 'my-topic' from Kafka cluster `<cluster-uuid>` | do-dbaas-cluster-delete-topic | `{ "ID": "<cluster-uuid>", "name": "my-topic" }`        |
+| List all topics in Kafka cluster `<cluster-uuid>`          | digitalocean-dbaascluster-list-topics       | `{ "ID": "<cluster-uuid>" }`                               |
+| Create a topic called 'my-topic' in Kafka cluster `<cluster-uuid>` | digitalocean-dbaascluster-create-topic | `{ "ID": "<cluster-uuid>", "name": "my-topic" }`        |
+| Delete the topic 'my-topic' from Kafka cluster `<cluster-uuid>` | digitalocean-dbaascluster-delete-topic | `{ "ID": "<cluster-uuid>", "name": "my-topic" }`        |
 
 ---
 

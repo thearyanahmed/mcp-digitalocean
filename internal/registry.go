@@ -24,7 +24,7 @@ var supportedServices = map[string]struct{}{
 	"droplets":   {},
 	"accounts":   {},
 	"spaces":     {},
-	"dbaas":      {},
+	"databases":  {},
 }
 
 // registerAppTools registers the app platform tools with the MCP server.
@@ -133,9 +133,9 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 			if err := registerSpacesTools(s, c); err != nil {
 				return fmt.Errorf("failed to register spaces tools: %w", err)
 			}
-		case "dbaas":
+		case "databases":
 			if err := registerDbaasTools(s, c); err != nil {
-				return fmt.Errorf("failed to register dbaas tools: %w", err)
+				return fmt.Errorf("failed to register databases tools: %w", err)
 			}
 		default:
 			return fmt.Errorf("unsupported service: %s, supported service are: %v", svc, setToString(supportedServices))

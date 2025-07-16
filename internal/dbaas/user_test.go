@@ -78,7 +78,7 @@ func TestUserTool_listUsers(t *testing.T) {
 		users := []godo.DatabaseUser{{Name: "u1"}, {Name: "u2"}}
 		opts := &godo.ListOptions{Page: 2, PerPage: 5}
 		mockSvc.On("ListUsers", ctx, "cid", opts).Return(users, nil, nil)
-		res, err := tool.listUsers(ctx, mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{"ID": "cid", "page": "2", "per_page": "5"}}})
+		res, err := tool.listUsers(ctx, mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{"ID": "cid", "page": "2", "per_page": 5}}})
 		assert.NoError(t, err)
 		assert.Contains(t, getTextContent(res), "u1")
 	})
