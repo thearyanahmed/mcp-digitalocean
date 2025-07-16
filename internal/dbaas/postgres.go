@@ -63,14 +63,14 @@ func (s *PostgreSQLTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getPostgreSQLConfig,
-			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-postgresql-config",
+			Tool: mcp.NewTool("digitalocean-databases-cluster-get-postgresql-config",
 				mcp.WithDescription("Get the PostgreSQL config for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updatePostgreSQLConfig,
-			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-postgresql-config",
+			Tool: mcp.NewTool("digitalocean-databases-cluster-update-postgresql-config",
 				mcp.WithDescription("Update the PostgreSQL config for a cluster by its id. Accepts a JSON string for the config."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the PostgreSQLConfig to set")),
