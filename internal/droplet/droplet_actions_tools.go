@@ -23,10 +23,204 @@ func NewDropletActionsTool(client *godo.Client) *DropletActionsTool {
 	}
 }
 
-// powerCycleDroplet power cycles a droplet
-func (d *DropletActionsTool) powerCycleDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+// rebootDroplet reboots a droplet
+func (da *DropletActionsTool) rebootDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
-	action, _, err := d.client.DropletActions.PowerCycle(ctx, int(dropletID))
+	action, _, err := da.client.DropletActions.Reboot(ctx, int(dropletID))
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonAction, err := json.MarshalIndent(action, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(jsonAction)), nil
+}
+
+// passwordResetDroplet resets the password for a droplet
+func (da *DropletActionsTool) passwordResetDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	dropletID := req.GetArguments()["ID"].(float64)
+	action, _, err := da.client.DropletActions.PasswordReset(ctx, int(dropletID))
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonAction, err := json.MarshalIndent(action, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(jsonAction)), nil
+}
+
+// RebuildByImageSlugDroplet rebuilds a droplet using an image slug
+func (da *DropletActionsTool) rebuildByImageSlugDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	dropletID := req.GetArguments()["ID"].(float64)
+	imageSlug := req.GetArguments()["ImageSlug"].(string)
+	action, _, err := da.client.DropletActions.RebuildByImageSlug(ctx, int(dropletID), imageSlug)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonAction, err := json.MarshalIndent(action, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(jsonAction)), nil
+}
+
+// powerCycleByTag power cycles droplets by tag
+func (da *DropletActionsTool) powerCycleByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.PowerCycleByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// powerOnByTag powers on droplets by tag
+func (da *DropletActionsTool) powerOnByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.PowerOnByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// powerOffByTag powers off droplets by tag
+func (da *DropletActionsTool) powerOffByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.PowerOffByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// shutdownByTag shuts down droplets by tag
+func (da *DropletActionsTool) shutdownByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.ShutdownByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// enableBackupsByTag enables backups on droplets by tag
+func (da *DropletActionsTool) enableBackupsByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.EnableBackupsByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// disableBackupsByTag disables backups on droplets by tag
+func (da *DropletActionsTool) disableBackupsByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.DisableBackupsByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// snapshotByTag takes a snapshot of droplets by tag
+func (da *DropletActionsTool) snapshotByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	name := req.GetArguments()["Name"].(string)
+	actions, _, err := da.client.DropletActions.SnapshotByTag(ctx, tag, name)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// enableIPv6ByTag enables IPv6 on droplets by tag
+func (da *DropletActionsTool) enableIPv6ByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.EnableIPv6ByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// enablePrivateNetworkingByTag enables private networking on droplets by tag
+func (da *DropletActionsTool) enablePrivateNetworkingByTag(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tag := req.GetArguments()["Tag"].(string)
+	actions, _, err := da.client.DropletActions.EnablePrivateNetworkingByTag(ctx, tag)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonActions, err := json.MarshalIndent(actions, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonActions)), nil
+}
+
+// powerCycleDroplet power cycles a droplet
+func (da *DropletActionsTool) powerCycleDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	dropletID := req.GetArguments()["ID"].(float64)
+	action, _, err := da.client.DropletActions.PowerCycle(ctx, int(dropletID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -40,9 +234,9 @@ func (d *DropletActionsTool) powerCycleDroplet(ctx context.Context, req mcp.Call
 }
 
 // powerOnDroplet powers on a droplet
-func (d *DropletActionsTool) powerOnDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) powerOnDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
-	action, _, err := d.client.DropletActions.PowerOn(ctx, int(dropletID))
+	action, _, err := da.client.DropletActions.PowerOn(ctx, int(dropletID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -56,9 +250,9 @@ func (d *DropletActionsTool) powerOnDroplet(ctx context.Context, req mcp.CallToo
 }
 
 // powerOffDroplet powers off a droplet
-func (d *DropletActionsTool) powerOffDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) powerOffDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
-	action, _, err := d.client.DropletActions.PowerOff(ctx, int(dropletID))
+	action, _, err := da.client.DropletActions.PowerOff(ctx, int(dropletID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -72,9 +266,9 @@ func (d *DropletActionsTool) powerOffDroplet(ctx context.Context, req mcp.CallTo
 }
 
 // shutdownDroplet shuts down a droplet
-func (d *DropletActionsTool) shutdownDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) shutdownDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
-	action, _, err := d.client.DropletActions.Shutdown(ctx, int(dropletID))
+	action, _, err := da.client.DropletActions.Shutdown(ctx, int(dropletID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -88,10 +282,10 @@ func (d *DropletActionsTool) shutdownDroplet(ctx context.Context, req mcp.CallTo
 }
 
 // restoreDroplet restores a droplet to a backup image
-func (d *DropletActionsTool) restoreDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) restoreDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
 	imageID := req.GetArguments()["ImageID"].(float64)
-	action, _, err := d.client.DropletActions.Restore(ctx, int(dropletID), int(imageID))
+	action, _, err := da.client.DropletActions.Restore(ctx, int(dropletID), int(imageID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -105,11 +299,11 @@ func (d *DropletActionsTool) restoreDroplet(ctx context.Context, req mcp.CallToo
 }
 
 // resizeDroplet resizes a droplet
-func (d *DropletActionsTool) resizeDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) resizeDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
 	size := req.GetArguments()["Size"].(string)
 	resizeDisk, _ := req.GetArguments()["ResizeDisk"].(bool) // Defaults to false
-	action, _, err := d.client.DropletActions.Resize(ctx, int(dropletID), size, resizeDisk)
+	action, _, err := da.client.DropletActions.Resize(ctx, int(dropletID), size, resizeDisk)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -123,10 +317,10 @@ func (d *DropletActionsTool) resizeDroplet(ctx context.Context, req mcp.CallTool
 }
 
 // rebuildDroplet rebuilds a droplet using a provided image
-func (d *DropletActionsTool) rebuildDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) rebuildDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
 	imageID := req.GetArguments()["ImageID"].(float64)
-	action, _, err := d.client.DropletActions.RebuildByImageID(ctx, int(dropletID), int(imageID))
+	action, _, err := da.client.DropletActions.RebuildByImageID(ctx, int(dropletID), int(imageID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -140,10 +334,10 @@ func (d *DropletActionsTool) rebuildDroplet(ctx context.Context, req mcp.CallToo
 }
 
 // renameDroplet renames a droplet
-func (d *DropletActionsTool) renameDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) renameDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
 	name := req.GetArguments()["Name"].(string)
-	action, _, err := d.client.DropletActions.Rename(ctx, int(dropletID), name)
+	action, _, err := da.client.DropletActions.Rename(ctx, int(dropletID), name)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -157,10 +351,10 @@ func (d *DropletActionsTool) renameDroplet(ctx context.Context, req mcp.CallTool
 }
 
 // changeKernel changes a droplet's kernel
-func (d *DropletActionsTool) changeKernel(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) changeKernel(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
 	kernelID := req.GetArguments()["KernelID"].(float64)
-	action, _, err := d.client.DropletActions.ChangeKernel(ctx, int(dropletID), int(kernelID))
+	action, _, err := da.client.DropletActions.ChangeKernel(ctx, int(dropletID), int(kernelID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -174,9 +368,9 @@ func (d *DropletActionsTool) changeKernel(ctx context.Context, req mcp.CallToolR
 }
 
 // enableIPv6 enables IPv6 on a droplet
-func (d *DropletActionsTool) enableIPv6(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) enableIPv6(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
-	action, _, err := d.client.DropletActions.EnableIPv6(ctx, int(dropletID))
+	action, _, err := da.client.DropletActions.EnableIPv6(ctx, int(dropletID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -190,9 +384,9 @@ func (d *DropletActionsTool) enableIPv6(ctx context.Context, req mcp.CallToolReq
 }
 
 // enableBackups enables backups on a droplet
-func (d *DropletActionsTool) enableBackups(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) enableBackups(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
-	action, _, err := d.client.DropletActions.EnableBackups(ctx, int(dropletID))
+	action, _, err := da.client.DropletActions.EnableBackups(ctx, int(dropletID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -206,9 +400,9 @@ func (d *DropletActionsTool) enableBackups(ctx context.Context, req mcp.CallTool
 }
 
 // disableBackups disables backups on a droplet
-func (d *DropletActionsTool) disableBackups(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) disableBackups(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
-	action, _, err := d.client.DropletActions.DisableBackups(ctx, int(dropletID))
+	action, _, err := da.client.DropletActions.DisableBackups(ctx, int(dropletID))
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -222,10 +416,10 @@ func (d *DropletActionsTool) disableBackups(ctx context.Context, req mcp.CallToo
 }
 
 // snapshotDroplet creates a snapshot of a droplet
-func (d *DropletActionsTool) snapshotDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (da *DropletActionsTool) snapshotDroplet(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID := req.GetArguments()["ID"].(float64)
 	name := req.GetArguments()["Name"].(string)
-	action, _, err := d.client.DropletActions.Snapshot(ctx, int(dropletID), name)
+	action, _, err := da.client.DropletActions.Snapshot(ctx, int(dropletID), name)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -239,38 +433,124 @@ func (d *DropletActionsTool) snapshotDroplet(ctx context.Context, req mcp.CallTo
 }
 
 // Tools returns a list of tool functions
-func (d *DropletActionsTool) Tools() []server.ServerTool {
+func (da *DropletActionsTool) Tools() []server.ServerTool {
 	tools := []server.ServerTool{
 		{
-			Handler: d.powerCycleDroplet,
+			Handler: da.rebootDroplet,
+			Tool: mcp.NewTool("digitalocean-droplet-action-reboot",
+				mcp.WithDescription("Reboot a droplet"),
+				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to reboot")),
+			),
+		},
+		{
+			Handler: da.passwordResetDroplet,
+			Tool: mcp.NewTool("digitalocean-droplet-action-password-reset",
+				mcp.WithDescription("Reset password for a droplet"),
+				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
+			),
+		},
+		{
+			Handler: da.rebuildByImageSlugDroplet,
+			Tool: mcp.NewTool("digitalocean-droplet-action-rebuild-by-slug",
+				mcp.WithDescription("Rebuild a droplet using an image slug"),
+				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to rebuild")),
+				mcp.WithString("ImageSlug", mcp.Required(), mcp.Description("Slug of the image to rebuild from")),
+			),
+		},
+		{
+			Handler: da.powerCycleByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-power-cycle-by-tag",
+				mcp.WithDescription("Power cycle droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets to power cycle")),
+			),
+		},
+		{
+			Handler: da.powerOnByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-power-on-by-tag",
+				mcp.WithDescription("Power on droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets to power on")),
+			),
+		},
+		{
+			Handler: da.powerOffByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-power-off-by-tag",
+				mcp.WithDescription("Power off droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets to power off")),
+			),
+		},
+		{
+			Handler: da.shutdownByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-shutdown-by-tag",
+				mcp.WithDescription("Shutdown droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets to shutdown")),
+			),
+		},
+		{
+			Handler: da.enableBackupsByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-enable-backups-by-tag",
+				mcp.WithDescription("Enable backups on droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets")),
+			),
+		},
+		{
+			Handler: da.disableBackupsByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-disable-backups-by-tag",
+				mcp.WithDescription("Disable backups on droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets")),
+			),
+		},
+		{
+			Handler: da.snapshotByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-snapshot-by-tag",
+				mcp.WithDescription("Take a snapshot of droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets")),
+				mcp.WithString("Name", mcp.Required(), mcp.Description("Name for the snapshot")),
+			),
+		},
+		{
+			Handler: da.enableIPv6ByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-enable-ipv6-by-tag",
+				mcp.WithDescription("Enable IPv6 on droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets")),
+			),
+		},
+		{
+			Handler: da.enablePrivateNetworkingByTag,
+			Tool: mcp.NewTool("digitalocean-droplet-action-enable-private-net-by-tag",
+				mcp.WithDescription("Enable private networking on droplets by tag"),
+				mcp.WithString("Tag", mcp.Required(), mcp.Description("Tag of the droplets")),
+			),
+		},
+		{
+			Handler: da.powerCycleDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-power-cycle",
 				mcp.WithDescription("Power cycle a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to power cycle")),
 			),
 		},
 		{
-			Handler: d.powerOnDroplet,
+			Handler: da.powerOnDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-power-on",
 				mcp.WithDescription("Power on a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to power on")),
 			),
 		},
 		{
-			Handler: d.powerOffDroplet,
+			Handler: da.powerOffDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-power-off",
 				mcp.WithDescription("Power off a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to power off")),
 			),
 		},
 		{
-			Handler: d.shutdownDroplet,
+			Handler: da.shutdownDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-shutdown",
 				mcp.WithDescription("Shutdown a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to shutdown")),
 			),
 		},
 		{
-			Handler: d.restoreDroplet,
+			Handler: da.restoreDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-restore",
 				mcp.WithDescription("Restore a droplet from a backup/snapshot"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to restore")),
@@ -278,7 +558,7 @@ func (d *DropletActionsTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.resizeDroplet,
+			Handler: da.resizeDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-resize",
 				mcp.WithDescription("Resize a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to resize")),
@@ -287,7 +567,7 @@ func (d *DropletActionsTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.rebuildDroplet,
+			Handler: da.rebuildDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-rebuild",
 				mcp.WithDescription("Rebuild a droplet from an image"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to rebuild")),
@@ -295,7 +575,7 @@ func (d *DropletActionsTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.renameDroplet,
+			Handler: da.renameDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-rename",
 				mcp.WithDescription("Rename a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to rename")),
@@ -303,7 +583,7 @@ func (d *DropletActionsTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.changeKernel,
+			Handler: da.changeKernel,
 			Tool: mcp.NewTool("digitalocean-droplet-action-change-kernel",
 				mcp.WithDescription("Change a droplet's kernel"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
@@ -311,28 +591,28 @@ func (d *DropletActionsTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.enableIPv6,
+			Handler: da.enableIPv6,
 			Tool: mcp.NewTool("digitalocean-droplet-action-enable-ipv6",
 				mcp.WithDescription("Enable IPv6 on a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
 			),
 		},
 		{
-			Handler: d.enableBackups,
+			Handler: da.enableBackups,
 			Tool: mcp.NewTool("digitalocean-droplet-action-enable-backups",
 				mcp.WithDescription("Enable backups on a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
 			),
 		},
 		{
-			Handler: d.disableBackups,
+			Handler: da.disableBackups,
 			Tool: mcp.NewTool("digitalocean-droplet-action-disable-backups",
 				mcp.WithDescription("Disable backups on a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
 			),
 		},
 		{
-			Handler: d.snapshotDroplet,
+			Handler: da.snapshotDroplet,
 			Tool: mcp.NewTool("digitalocean-droplet-action-snapshot",
 				mcp.WithDescription("Take a snapshot of a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),

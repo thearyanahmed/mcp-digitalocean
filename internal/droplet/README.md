@@ -28,91 +28,116 @@ This directory contains tools for managing DigitalOcean Droplets, Images, and Si
   **Arguments:**  
   - `ID` (number, required): Droplet ID
 
+---
+
+### Droplet Actions Tools
+
 - **digitalocean-droplet-action-get**  
   Get information about a specific action performed on a Droplet.  
   **Arguments:**  
   - `DropletID` (number, required): Droplet ID  
   - `ActionID` (number, required): Action ID
 
-- **digitalocean-droplet-power-cycle**  
-- **digitalocean-droplet-power-on**  
-- **digitalocean-droplet-power-off**  
-- **digitalocean-droplet-shutdown**  
-- **digitalocean-droplet-reboot**  
-  Power and state management for a Droplet.  
+- **digitalocean-droplet-action-reboot**  
+  Reboot a Droplet.  
   **Arguments:**  
   - `ID` (number, required): Droplet ID
 
-- **digitalocean-droplet-restore**  
-  Restore a Droplet from a backup/snapshot.  
-  - `ID` (number, required): Droplet ID  
-  - `ImageID` (number, required): Backup/snapshot image ID
-
-- **digitalocean-droplet-resize**  
-  Resize a Droplet.  
-  - `ID` (number, required): Droplet ID  
-  - `Size` (string, required): New size slug  
-  - `ResizeDisk` (boolean, optional, default: false): Whether to resize the disk
-
-- **digitalocean-droplet-rebuild**  
-  Rebuild a Droplet from an image.  
-  - `ID` (number, required): Droplet ID  
-  - `ImageID` (number, required): Image ID
-
-- **digitalocean-droplet-rebuild-by-slug**  
-  Rebuild a Droplet using an image slug.  
-  - `ID` (number, required): Droplet ID  
-  - `ImageSlug` (string, required): Image slug
-
-- **digitalocean-droplet-snapshot**  
-  Take a snapshot of a Droplet.  
-  - `ID` (number, required): Droplet ID  
-  - `Name` (string, required): Name for the snapshot
-
-- **digitalocean-droplet-enable-ipv6**  
-- **digitalocean-droplet-enable-private-net**  
-- **digitalocean-droplet-enable-backups**  
-- **digitalocean-droplet-disable-backups**  
-  Enable/disable features on a Droplet.  
+- **digitalocean-droplet-action-password-reset**  
+  Reset password for a Droplet.  
+  **Arguments:**  
   - `ID` (number, required): Droplet ID
 
-- **digitalocean-droplet-get-neighbors**  
-  Get neighbors of a Droplet.  
-  - `ID` (number, required): Droplet ID
-
-- **digitalocean-droplet-get-kernels**  
-  Get available kernels for a Droplet.  
-  - `ID` (number, required): Droplet ID
-
-- **digitalocean-droplet-change-kernel**  
-  Change a Droplet's kernel.  
-  - `ID` (number, required): Droplet ID  
-  - `KernelID` (number, required): Kernel ID
-
-- **digitalocean-droplet-rename**  
+- **digitalocean-droplet-action-rename**  
   Rename a Droplet.  
+  **Arguments:**  
   - `ID` (number, required): Droplet ID  
   - `Name` (string, required): New name
 
-- **digitalocean-droplet-password-reset**  
-  Reset password for a Droplet.  
+- **digitalocean-droplet-action-change-kernel**  
+  Change a Droplet's kernel.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID  
+  - `KernelID` (number, required): Kernel ID
+
+- **digitalocean-droplet-action-enable-ipv6**  
+- **digitalocean-droplet-action-enable-private-net**  
+- **digitalocean-droplet-action-enable-backups**  
+- **digitalocean-droplet-action-disable-backups**  
+  Enable/disable features on a Droplet.  
+  **Arguments:**  
   - `ID` (number, required): Droplet ID
 
 #### Tag-based Bulk Actions
 
-- **digitalocean-droplet-power-cycle-by-tag**  
-- **digitalocean-droplet-power-on-by-tag**  
-- **digitalocean-droplet-power-off-by-tag**  
-- **digitalocean-droplet-shutdown-by-tag**  
-- **digitalocean-droplet-enable-backups-by-tag**  
-- **digitalocean-droplet-disable-backups-by-tag**  
-- **digitalocean-droplet-snapshot-by-tag**  
-- **digitalocean-droplet-enable-ipv6-by-tag**  
-- **digitalocean-droplet-enable-private-net-by-tag**  
+- **digitalocean-droplet-action-power-cycle-by-tag**  
+- **digitalocean-droplet-action-power-on-by-tag**  
+- **digitalocean-droplet-action-power-off-by-tag**  
+- **digitalocean-droplet-action-shutdown-by-tag**  
+- **digitalocean-droplet-action-enable-backups-by-tag**  
+- **digitalocean-droplet-action-disable-backups-by-tag**  
+- **digitalocean-droplet-action-snapshot-by-tag**  
+- **digitalocean-droplet-action-enable-ipv6-by-tag**  
+- **digitalocean-droplet-action-enable-private-net-by-tag**  
   All require:  
   - `Tag` (string, required): Tag of the droplets  
   Some require:  
   - `Name` (string, required): Name for the snapshot (for snapshot-by-tag)
+
+---
+
+### Additional Droplet Actions Tools
+
+- **digitalocean-droplet-action-rebuild-by-slug**  
+  Rebuild a droplet using an image slug.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID  
+  - `ImageSlug` (string, required): Slug of the image to rebuild from
+
+- **digitalocean-droplet-action-power-cycle**  
+  Power cycle a droplet.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID
+
+- **digitalocean-droplet-action-power-on**  
+  Power on a droplet.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID
+
+- **digitalocean-droplet-action-power-off**  
+  Power off a droplet.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID
+
+- **digitalocean-droplet-action-shutdown**  
+  Shutdown a droplet.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID
+
+- **digitalocean-droplet-action-restore**  
+  Restore a droplet from a backup/snapshot.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID  
+  - `ImageID` (number, required): ID of the backup/snapshot image
+
+- **digitalocean-droplet-action-resize**  
+  Resize a droplet.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID  
+  - `Size` (string, required): Slug of the new size (e.g., s-1vcpu-1gb)  
+  - `ResizeDisk` (boolean, optional, default: false): Whether to resize the disk
+
+- **digitalocean-droplet-action-rebuild**  
+  Rebuild a droplet from an image.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID  
+  - `ImageID` (number, required): ID of the image to rebuild from
+
+- **digitalocean-droplet-action-snapshot**  
+  Take a snapshot of a droplet.  
+  **Arguments:**  
+  - `ID` (number, required): Droplet ID  
+  - `Name` (string, required): Name for the snapshot
 
 ---
 
@@ -164,18 +189,32 @@ This directory contains tools for managing DigitalOcean Droplets, Images, and Si
     - `DropletID`: `12345`  
     - `ActionID`: `67890`
 
-- **List all distribution images:**  
-  Tool: `digitalocean-image-list`  
-  Arguments: `{}`
-
-- **Get image by ID:**  
-  Tool: `digitalocean-image-get`  
+- **Reboot a Droplet:**  
+  Tool: `digitalocean-droplet-action-reboot`  
   Arguments:  
-    - `ID`: `7890`
+    - `ID`: `12345`
 
-- **List all Droplet sizes:**  
-  Tool: `digitalocean-size-list`  
-  Arguments: `{}`
+- **Reset password for a Droplet:**  
+  Tool: `digitalocean-droplet-action-password-reset`  
+  Arguments:  
+    - `ID`: `12345`
+
+- **Rename a Droplet:**  
+  Tool: `digitalocean-droplet-action-rename`  
+  Arguments:  
+    - `ID`: `12345`  
+    - `Name`: `"new-name"`
+
+- **Change a Droplet's kernel:**  
+  Tool: `digitalocean-droplet-action-change-kernel`  
+  Arguments:  
+    - `ID`: `12345`  
+    - `KernelID`: `67890`
+
+- **Perform bulk actions by tag:**  
+  Tool: `digitalocean-droplet-action-power-cycle-by-tag`  
+  Arguments:  
+    - `Tag`: `"web"`
 
 ---
 
