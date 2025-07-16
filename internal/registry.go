@@ -47,7 +47,6 @@ func registerCommonTools(s *server.MCPServer, c *godo.Client) error {
 // registerDropletTools registers the droplet tools with the MCP server.
 func registerDropletTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(droplet.NewDropletTool(c).Tools()...)
-	s.AddTools(droplet.NewDropletActionsTool(c).Tools()...)
 	s.AddTools(droplet.NewImagesTool(c).Tools()...)
 	s.AddTools(droplet.NewSizesTool(c).Tools()...)
 	return nil
