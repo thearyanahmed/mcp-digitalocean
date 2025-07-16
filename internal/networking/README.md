@@ -62,12 +62,17 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### Certificates
 
-- **`digitalocean-certificate-create`**
-  Create a new certificate.
+- **`digitalocean-custom-certificate-create`**
+  Create a new custom certificate.
   - `Name` (string, required): Name of the certificate
-  - `PrivateKey` (string, required): Private key
+  - `PrivateKey` (string, required): Private key for the certificate
   - `LeafCertificate` (string, required): Leaf certificate
   - `CertificateChain` (string, required): Certificate chain
+
+- **`digitalocean-lets-encrypt-certificate-create`**
+  Create a new Let's Encrypt certificate.
+  - `Name` (string, required): Name of the certificate
+  - `DnsNames` (array of strings, required): DNS names of the certificate, including wildcard domains
 
 - **`digitalocean-certificate-delete`**
   Delete a certificate.
@@ -304,7 +309,9 @@ This directory contains tools and resources for managing DigitalOcean networking
 - Create a new domain "example.com" pointing to IP "203.0.113.10".
 - Add an A record to "example.com" for "www" pointing to "203.0.113.20".
 - Delete the TXT record with ID 12345 from "example.com".
-- Create a new SSL certificate for "myapp.com".
+- Create a new custom SSL certificate for "myapp.com".
+- Create a new Let's Encrypt certificate for "example.com" and "www.example.com".
+- Create a wildcard Let's Encrypt certificate for "*.example.com" and "example.com".
 - Delete a firewall with ID "abcd-1234".
 - Add HTTP and HTTPS inbound rules to firewall "fw-123".
 - Remove SSH access rule from firewall "fw-456".
