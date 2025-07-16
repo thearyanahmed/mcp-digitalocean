@@ -169,7 +169,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getUser,
-			Tool: mcp.NewTool("digitalocean-dbaascluster-get-user",
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-user",
 				mcp.WithDescription("Get a database user by cluster id and user name"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
@@ -177,7 +177,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.listUsers,
-			Tool: mcp.NewTool("digitalocean-dbaascluster-list-users",
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-list-users",
 				mcp.WithDescription("List database users for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional)")),
@@ -186,7 +186,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.createUser,
-			Tool: mcp.NewTool("digitalocean-dbaascluster-create-user",
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-create-user",
 				mcp.WithDescription("Create a database user for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("The user name")),
@@ -196,7 +196,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.updateUser,
-			Tool: mcp.NewTool("digitalocean-dbaascluster-update-user",
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-user",
 				mcp.WithDescription("Update a database user for a cluster by its id and user name"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
@@ -205,7 +205,7 @@ func (s *UserTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.deleteUser,
-			Tool: mcp.NewTool("digitalocean-dbaascluster-delete-user",
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-delete-user",
 				mcp.WithDescription("Delete a database user by cluster id and user name"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name to delete")),

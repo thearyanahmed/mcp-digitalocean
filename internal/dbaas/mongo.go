@@ -63,14 +63,14 @@ func (s *MongoTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getMongoDBConfig,
-			Tool: mcp.NewTool("digitalocean-dbaascluster-get-mongodb-config",
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-get-mongodb-config",
 				mcp.WithDescription("Get the MongoDB config for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateMongoDBConfig,
-			Tool: mcp.NewTool("digitalocean-dbaascluster-update-mongodb-config",
+			Tool: mcp.NewTool("digitalocean-dbaas-cluster-update-mongodb-config",
 				mcp.WithDescription("Update the MongoDB config for a cluster by its id. Accepts a JSON string for the config."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the MongoDBConfig to set")),
