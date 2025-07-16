@@ -22,8 +22,8 @@ func NewCertificateTool(client *godo.Client) *CertificateTool {
 	}
 }
 
-// createCertificate creates a new certificate
-func (c *CertificateTool) createCertificate(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+// createCustomCertificate creates a new certificate
+func (c *CertificateTool) createCustomCertificate(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	name := req.GetArguments()["Name"].(string)
 	privateKey := req.GetArguments()["PrivateKey"].(string)
 	leafCertificate := req.GetArguments()["LeafCertificate"].(string)
@@ -35,6 +35,34 @@ func (c *CertificateTool) createCertificate(ctx context.Context, req mcp.CallToo
 		LeafCertificate:  leafCertificate,
 		CertificateChain: certificateChain,
 		Type:             "custom",
+	}
+
+	certificate, _, err := c.client.Certificates.Create(ctx, certRequest)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonCert, err := json.MarshalIndent(certificate, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(jsonCert)), nil
+}
+
+// createLetsEncryptCertificate creates a new LetsEncrypt certificate
+func (c *CertificateTool) createLetsEncryptCertificate(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	name := req.GetArguments()["Name"].(string)
+	dnsNames := req.GetArguments()["DnsNames"].([]any)
+	dnsNamesStr := make([]string, len(dnsNames))
+	for i, dnsName := range dnsNames {
+		dnsNamesStr[i] = dnsName.(string)
+	}
+
+	certRequest := &godo.CertificateRequest{
+		Name:     name,
+		DNSNames: dnsNamesStr,
+		Type:     "lets_encrypt",
 	}
 
 	certificate, _, err := c.client.Certificates.Create(ctx, certRequest)
@@ -121,13 +149,24 @@ func (c *CertificateTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: c.createCertificate,
-			Tool: mcp.NewTool("digitalocean-certificate-create",
-				mcp.WithDescription("Create a new certificate"),
+			Handler: c.createCustomCertificate,
+			Tool: mcp.NewTool("digitalocean-custom-certificate-create",
+				mcp.WithDescription("Create a new custom certificate"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the certificate")),
 				mcp.WithString("PrivateKey", mcp.Required(), mcp.Description("Private key for the certificate")),
 				mcp.WithString("LeafCertificate", mcp.Required(), mcp.Description("Leaf certificate")),
 				mcp.WithString("CertificateChain", mcp.Required(), mcp.Description("Certificate chain")),
+			),
+		},
+		{
+			Handler: c.createLetsEncryptCertificate,
+			Tool: mcp.NewTool("digitalocean-lets-encrypt-certificate-create",
+				mcp.WithDescription("Create a new let's encrypt certificate"),
+				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the certificate")),
+				mcp.WithArray("DnsNames", mcp.Required(), mcp.Description("DNS names of the certificate"), mcp.Items(map[string]any{
+					"type":        "string",
+					"description": "DNS name for the certificate, including wildcard domains",
+				})),
 			),
 		},
 		{

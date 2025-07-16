@@ -196,8 +196,8 @@ func TestFirewallTool_createFirewall(t *testing.T) {
 				"OutboundProtocol":    "udp",
 				"OutboundPortRange":   "53",
 				"OutboundDestination": "8.8.8.8/32",
-				"DropletIDs":          []float64{123, 456},
-				"Tags":                []string{"web", "prod"},
+				"DropletIDs":          []any{float64(123), float64(456)},
+				"Tags":                []any{"web", "prod"},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -234,8 +234,8 @@ func TestFirewallTool_createFirewall(t *testing.T) {
 				"OutboundProtocol":    "tcp",
 				"OutboundPortRange":   "443",
 				"OutboundDestination": "0.0.0.0/0",
-				"DropletIDs":          []float64{},
-				"Tags":                []string{},
+				"DropletIDs":          []any{},
+				"Tags":                []any{},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -304,7 +304,7 @@ func TestFirewallTool_addTags(t *testing.T) {
 			name: "Successful add tags",
 			args: map[string]any{
 				"ID":   "fw-123",
-				"Tags": []string{"web", "prod"},
+				"Tags": []any{"web", "prod"},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -318,7 +318,7 @@ func TestFirewallTool_addTags(t *testing.T) {
 			name: "API error",
 			args: map[string]any{
 				"ID":   "fw-456",
-				"Tags": []string{"fail"},
+				"Tags": []any{"fail"},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -367,7 +367,7 @@ func TestFirewallTool_removeTags(t *testing.T) {
 			name: "Successful remove tags",
 			args: map[string]any{
 				"ID":   "fw-123",
-				"Tags": []string{"web", "prod"},
+				"Tags": []any{"web", "prod"},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -381,7 +381,7 @@ func TestFirewallTool_removeTags(t *testing.T) {
 			name: "API error",
 			args: map[string]any{
 				"ID":   "fw-456",
-				"Tags": []string{"fail"},
+				"Tags": []any{"fail"},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -430,7 +430,7 @@ func TestFirewallTool_addDroplets(t *testing.T) {
 			name: "Successful add droplets",
 			args: map[string]any{
 				"ID":         "fw-123",
-				"DropletIDs": []float64{101, 202},
+				"DropletIDs": []any{float64(101), float64(202)},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -444,7 +444,7 @@ func TestFirewallTool_addDroplets(t *testing.T) {
 			name: "API error",
 			args: map[string]any{
 				"ID":         "fw-456",
-				"DropletIDs": []float64{303},
+				"DropletIDs": []any{float64(303)},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -493,7 +493,7 @@ func TestFirewallTool_removeDroplets(t *testing.T) {
 			name: "Successful remove droplets",
 			args: map[string]any{
 				"ID":         "fw-123",
-				"DropletIDs": []float64{101, 202},
+				"DropletIDs": []any{float64(101), float64(202)},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -507,7 +507,7 @@ func TestFirewallTool_removeDroplets(t *testing.T) {
 			name: "API error",
 			args: map[string]any{
 				"ID":         "fw-456",
-				"DropletIDs": []float64{303},
+				"DropletIDs": []any{float64(303)},
 			},
 			mockSetup: func(m *MockFirewallsService) {
 				m.EXPECT().
@@ -528,6 +528,231 @@ func TestFirewallTool_removeDroplets(t *testing.T) {
 			tool := setupFirewallToolWithMock(mockFirewalls)
 			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
 			resp, err := tool.removeDroplets(context.Background(), req)
+			if tc.expectError {
+				require.NotNil(t, resp)
+				require.True(t, resp.IsError)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.False(t, resp.IsError)
+			require.Contains(t, resp.Content[0].(mcp.TextContent).Text, tc.expectText)
+		})
+	}
+}
+
+func TestFirewallTool_addRules(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	tests := []struct {
+		name        string
+		args        map[string]any
+		mockSetup   func(*MockFirewallsService)
+		expectError bool
+		expectText  string
+	}{
+		{
+			name: "Successful add inbound and outbound rules",
+			args: map[string]any{
+				"ID": "fw-123",
+				"InboundRules": []any{
+					map[string]any{
+						"Protocol":  "tcp",
+						"PortRange": "80",
+						"Sources":   []any{"0.0.0.0/0", "10.0.0.0/8"},
+					},
+					map[string]any{
+						"Protocol":  "tcp",
+						"PortRange": "443",
+						"Sources":   []any{"0.0.0.0/0"},
+					},
+				},
+				"OutboundRules": []any{
+					map[string]any{
+						"Protocol":     "udp",
+						"PortRange":    "53",
+						"Destinations": []any{"8.8.8.8/32", "1.1.1.1/32"},
+					},
+				},
+			},
+			mockSetup: func(m *MockFirewallsService) {
+				m.EXPECT().
+					AddRules(gomock.Any(), "fw-123", gomock.Any()).
+					Return(&godo.Response{}, nil).
+					Times(1)
+			},
+			expectText: "Rule(s) added to firewall successfully",
+		},
+		{
+			name: "Successful add inbound rules only",
+			args: map[string]any{
+				"ID": "fw-456",
+				"InboundRules": []any{
+					map[string]any{
+						"Protocol":  "tcp",
+						"PortRange": "22",
+						"Sources":   []any{"192.168.1.0/24"},
+					},
+				},
+			},
+			mockSetup: func(m *MockFirewallsService) {
+				m.EXPECT().
+					AddRules(gomock.Any(), "fw-456", gomock.Any()).
+					Return(&godo.Response{}, nil).
+					Times(1)
+			},
+			expectText: "Rule(s) added to firewall successfully",
+		},
+		{
+			name: "No rules provided",
+			args: map[string]any{
+				"ID": "fw-789",
+			},
+			mockSetup:   nil,
+			expectError: true,
+		},
+		{
+			name: "API error",
+			args: map[string]any{
+				"ID": "fw-error",
+				"InboundRules": []any{
+					map[string]any{
+						"Protocol":  "tcp",
+						"PortRange": "80",
+						"Sources":   []any{"0.0.0.0/0"},
+					},
+				},
+			},
+			mockSetup: func(m *MockFirewallsService) {
+				m.EXPECT().
+					AddRules(gomock.Any(), "fw-error", gomock.Any()).
+					Return(nil, errors.New("api error")).
+					Times(1)
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockFirewalls := NewMockFirewallsService(ctrl)
+			if tc.mockSetup != nil {
+				tc.mockSetup(mockFirewalls)
+			}
+			tool := setupFirewallToolWithMock(mockFirewalls)
+			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
+			resp, err := tool.addRules(context.Background(), req)
+			if tc.expectError {
+				require.NotNil(t, resp)
+				require.True(t, resp.IsError)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.False(t, resp.IsError)
+			require.Contains(t, resp.Content[0].(mcp.TextContent).Text, tc.expectText)
+		})
+	}
+}
+
+func TestFirewallTool_removeRules(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	tests := []struct {
+		name        string
+		args        map[string]any
+		mockSetup   func(*MockFirewallsService)
+		expectError bool
+		expectText  string
+	}{
+		{
+			name: "Successful remove inbound and outbound rules",
+			args: map[string]any{
+				"ID": "fw-123",
+				"InboundRules": []any{
+					map[string]any{
+						"Protocol":  "tcp",
+						"PortRange": "80",
+						"Sources":   []any{"0.0.0.0/0"},
+					},
+				},
+				"OutboundRules": []any{
+					map[string]any{
+						"Protocol":     "udp",
+						"PortRange":    "53",
+						"Destinations": []any{"8.8.8.8/32"},
+					},
+				},
+			},
+			mockSetup: func(m *MockFirewallsService) {
+				m.EXPECT().
+					RemoveRules(gomock.Any(), "fw-123", gomock.Any()).
+					Return(&godo.Response{}, nil).
+					Times(1)
+			},
+			expectText: "Rule(s) removed from firewall successfully",
+		},
+		{
+			name: "Successful remove outbound rules only",
+			args: map[string]any{
+				"ID": "fw-456",
+				"OutboundRules": []any{
+					map[string]any{
+						"Protocol":     "tcp",
+						"PortRange":    "443",
+						"Destinations": []any{"192.168.1.0/24", "10.0.0.0/8"},
+					},
+				},
+			},
+			mockSetup: func(m *MockFirewallsService) {
+				m.EXPECT().
+					RemoveRules(gomock.Any(), "fw-456", gomock.Any()).
+					Return(&godo.Response{}, nil).
+					Times(1)
+			},
+			expectText: "Rule(s) removed from firewall successfully",
+		},
+		{
+			name: "No rules provided",
+			args: map[string]any{
+				"ID": "fw-789",
+			},
+			mockSetup:   nil,
+			expectError: true,
+		},
+		{
+			name: "API error",
+			args: map[string]any{
+				"ID": "fw-error",
+				"InboundRules": []any{
+					map[string]any{
+						"Protocol":  "tcp",
+						"PortRange": "22",
+						"Sources":   []any{"192.168.1.0/24"},
+					},
+				},
+			},
+			mockSetup: func(m *MockFirewallsService) {
+				m.EXPECT().
+					RemoveRules(gomock.Any(), "fw-error", gomock.Any()).
+					Return(nil, errors.New("api error")).
+					Times(1)
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockFirewalls := NewMockFirewallsService(ctrl)
+			if tc.mockSetup != nil {
+				tc.mockSetup(mockFirewalls)
+			}
+			tool := setupFirewallToolWithMock(mockFirewalls)
+			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
+			resp, err := tool.removeRules(context.Background(), req)
 			if tc.expectError {
 				require.NotNil(t, resp)
 				require.True(t, resp.IsError)
