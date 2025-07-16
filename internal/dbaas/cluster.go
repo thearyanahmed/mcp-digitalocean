@@ -54,9 +54,9 @@ func (s *ClusterTool) listCluster(ctx context.Context, req mcp.CallToolRequest) 
 }
 
 func (s *ClusterTool) getCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	id, ok := req.GetArguments()["ID"].(string)
+	id, ok := req.GetArguments()["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	cluster, _, err := s.client.Databases.Get(ctx, id)
 	if err != nil {
@@ -111,9 +111,9 @@ func (s *ClusterTool) createCluster(ctx context.Context, req mcp.CallToolRequest
 }
 
 func (s *ClusterTool) deleteCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	id, ok := req.GetArguments()["ID"].(string)
+	id, ok := req.GetArguments()["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	_, err := s.client.Databases.Delete(ctx, id)
 	if err != nil {
@@ -124,9 +124,9 @@ func (s *ClusterTool) deleteCluster(ctx context.Context, req mcp.CallToolRequest
 
 func (s *ClusterTool) resizeCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 
 	size, _ := args["size"].(string)
@@ -158,9 +158,9 @@ func (s *ClusterTool) resizeCluster(ctx context.Context, req mcp.CallToolRequest
 }
 
 func (s *ClusterTool) getCA(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	id, ok := req.GetArguments()["ID"].(string)
+	id, ok := req.GetArguments()["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	ca, _, err := s.client.Databases.GetCA(ctx, id)
 	if err != nil {
@@ -175,9 +175,9 @@ func (s *ClusterTool) getCA(ctx context.Context, req mcp.CallToolRequest) (*mcp.
 
 func (s *ClusterTool) listBackups(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 
 	// Optional pagination
@@ -222,9 +222,9 @@ func (s *ClusterTool) listOptions(ctx context.Context, req mcp.CallToolRequest) 
 
 func (s *ClusterTool) upgradeMajorVersion(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	version, ok := args["version"].(string)
 	if !ok || version == "" {
@@ -240,9 +240,9 @@ func (s *ClusterTool) upgradeMajorVersion(ctx context.Context, req mcp.CallToolR
 
 func (s *ClusterTool) startOnlineMigration(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	sourceStr, ok := args["source_json"].(string)
 	if !ok || sourceStr == "" {
@@ -284,9 +284,9 @@ func (s *ClusterTool) startOnlineMigration(ctx context.Context, req mcp.CallTool
 
 func (s *ClusterTool) stopOnlineMigration(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	migrationID, ok := args["migration_id"].(string)
 	if !ok || migrationID == "" {
@@ -301,9 +301,9 @@ func (s *ClusterTool) stopOnlineMigration(ctx context.Context, req mcp.CallToolR
 
 func (s *ClusterTool) getOnlineMigrationStatus(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	status, _, err := s.client.Databases.GetOnlineMigrationStatus(ctx, id)
 	if err != nil {
@@ -330,15 +330,15 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		{
 			Handler: s.getCluster,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-get",
-				mcp.WithDescription("Get a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to retrieve")),
+				mcp.WithDescription("Get a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to retrieve")),
 			),
 		},
 		{
 			Handler: s.getCA,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-get-ca",
-				mcp.WithDescription("Get the CA certificate for a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to retrieve the CA for")),
+				mcp.WithDescription("Get the CA certificate for a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to retrieve the CA for")),
 			),
 		},
 		{
@@ -357,15 +357,15 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		{
 			Handler: s.deleteCluster,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-delete",
-				mcp.WithDescription("Delete a database cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to delete")),
+				mcp.WithDescription("Delete a database cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to delete")),
 			),
 		},
 		{
 			Handler: s.resizeCluster,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-resize",
-				mcp.WithDescription("Resize a database cluster by its ID. At least one of size, num_nodes, or storage_size_mib must be provided."),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to resize")),
+				mcp.WithDescription("Resize a database cluster by its id. At least one of size, num_nodes, or storage_size_mib must be provided."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to resize")),
 				mcp.WithString("size", mcp.Description("The new size slug (e.g., db-s-2vcpu-4gb)")),
 				mcp.WithNumber("num_nodes", mcp.Description("The new number of nodes")),
 				mcp.WithNumber("storage_size_mib", mcp.Description("The new storage size in MiB")),
@@ -374,8 +374,8 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		{
 			Handler: s.listBackups,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-list-backups",
-				mcp.WithDescription("List backups for a database cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The ID of the cluster to list backups for")),
+				mcp.WithDescription("List backups for a database cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to list backups for")),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
 				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional, integer)")),
 			),
@@ -389,16 +389,16 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		{
 			Handler: s.upgradeMajorVersion,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-upgrade-major-version",
-				mcp.WithDescription("Upgrade the major version of a database cluster by its ID. Requires the target version."),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Upgrade the major version of a database cluster by its id. Requires the target version."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("version", mcp.Required(), mcp.Description("The target major version to upgrade to (e.g., 15 for PostgreSQL)")),
 			),
 		},
 		{
 			Handler: s.startOnlineMigration,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-start-online-migration",
-				mcp.WithDescription("Start an online migration for a database cluster by its ID. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as boolean), and ignore_dbs (optional, comma-separated)."),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Start an online migration for a database cluster by its id. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as boolean), and ignore_dbs (optional, comma-separated)."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("source_json", mcp.Required(), mcp.Description("DatabaseOnlineMigrationConfig as JSON (required)")),
 				mcp.WithBoolean("disable_ssl", mcp.Description("Disable SSL for migration (optional, bool as boolean)")),
 				mcp.WithString("ignore_dbs", mcp.Description("Comma-separated list of DBs to ignore (optional)")),
@@ -407,16 +407,16 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		{
 			Handler: s.stopOnlineMigration,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-stop-online-migration",
-				mcp.WithDescription("Stop an online migration for a database cluster by its ID and migration_id."),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("migration_id", mcp.Required(), mcp.Description("The migration ID to stop")),
+				mcp.WithDescription("Stop an online migration for a database cluster by its id and migration_id."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithString("migration_id", mcp.Required(), mcp.Description("The migration id to stop")),
 			),
 		},
 		{
 			Handler: s.getOnlineMigrationStatus,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-get-online-migration-status",
-				mcp.WithDescription("Get the online migration status for a database cluster by its ID."),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Get the online migration status for a database cluster by its id."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 	}

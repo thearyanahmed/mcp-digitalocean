@@ -22,9 +22,9 @@ func NewRedisTool(client *godo.Client) *RedisTool {
 
 func (s *RedisTool) getRedisConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	cfg, _, err := s.client.Databases.GetRedisConfig(ctx, id)
 	if err != nil {
@@ -39,9 +39,9 @@ func (s *RedisTool) getRedisConfig(ctx context.Context, req mcp.CallToolRequest)
 
 func (s *RedisTool) updateRedisConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	configStr, ok := args["config_json"].(string)
 	if !ok || configStr == "" {
@@ -64,15 +64,15 @@ func (s *RedisTool) Tools() []server.ServerTool {
 		{
 			Handler: s.getRedisConfig,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-get-redis-config",
-				mcp.WithDescription("Get the Redis config for a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Get the Redis config for a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateRedisConfig,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-update-redis-config",
-				mcp.WithDescription("Update the Redis config for a cluster by its ID. Accepts a JSON string for the config."),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Update the Redis config for a cluster by its id. Accepts a JSON string for the config."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the RedisConfig to set")),
 			),
 		},

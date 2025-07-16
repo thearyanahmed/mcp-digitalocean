@@ -22,9 +22,9 @@ func NewFirewallTool(client *godo.Client) *FirewallTool {
 
 func (s *FirewallTool) getFirewallRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	rules, _, err := s.client.Databases.GetFirewallRules(ctx, id)
 	if err != nil {
@@ -39,9 +39,9 @@ func (s *FirewallTool) getFirewallRules(ctx context.Context, req mcp.CallToolReq
 
 func (s *FirewallTool) updateFirewallRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	rulesStr, ok := args["rules_json"].(string)
 	if !ok || rulesStr == "" {
@@ -64,15 +64,15 @@ func (s *FirewallTool) Tools() []server.ServerTool {
 		{
 			Handler: s.getFirewallRules,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-get-firewall-rules",
-				mcp.WithDescription("Get the firewall rules for a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Get the firewall rules for a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateFirewallRules,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-update-firewall-rules",
-				mcp.WithDescription("Update the firewall rules for a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Update the firewall rules for a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("rules_json", mcp.Required(), mcp.Description("JSON array of firewall rules to set")),
 			),
 		},

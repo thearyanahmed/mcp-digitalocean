@@ -22,9 +22,9 @@ func NewMongoTool(client *godo.Client) *MongoTool {
 
 func (s *MongoTool) getMongoDBConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	cfg, _, err := s.client.Databases.GetMongoDBConfig(ctx, id)
 	if err != nil {
@@ -39,9 +39,9 @@ func (s *MongoTool) getMongoDBConfig(ctx context.Context, req mcp.CallToolReques
 
 func (s *MongoTool) updateMongoDBConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	configStr, ok := args["config_json"].(string)
 	if !ok || configStr == "" {
@@ -64,15 +64,15 @@ func (s *MongoTool) Tools() []server.ServerTool {
 		{
 			Handler: s.getMongoDBConfig,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-get-mongodb-config",
-				mcp.WithDescription("Get the MongoDB config for a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Get the MongoDB config for a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateMongoDBConfig,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-update-mongodb-config",
-				mcp.WithDescription("Update the MongoDB config for a cluster by its ID. Accepts a JSON string for the config."),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Update the MongoDB config for a cluster by its id. Accepts a JSON string for the config."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the MongoDBConfig to set")),
 			),
 		},

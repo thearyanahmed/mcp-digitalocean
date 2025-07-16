@@ -87,7 +87,7 @@ func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 	return nil
 }
 
-func registerDbaasTools(s *server.MCPServer, c *godo.Client) error {
+func registerDatabasesTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(dbaas.NewClusterTool(c).Tools()...)
 	s.AddTools(dbaas.NewFirewallTool(c).Tools()...)
 	s.AddTools(dbaas.NewKafkaTool(c).Tools()...)
@@ -134,7 +134,7 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 				return fmt.Errorf("failed to register spaces tools: %w", err)
 			}
 		case "databases":
-			if err := registerDbaasTools(s, c); err != nil {
+			if err := registerDatabasesTools(s, c); err != nil {
 				return fmt.Errorf("failed to register databases tools: %w", err)
 			}
 		default:

@@ -23,9 +23,9 @@ func NewUserTool(client *godo.Client) *UserTool {
 
 func (s *UserTool) getUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	user, ok := args["user"].(string)
 	if !ok || user == "" {
@@ -45,9 +45,9 @@ func (s *UserTool) getUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.C
 
 func (s *UserTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 
 	// Optional pagination
@@ -80,9 +80,9 @@ func (s *UserTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp
 
 func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	name, ok := args["name"].(string)
 	if !ok || name == "" {
@@ -117,9 +117,9 @@ func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 
 func (s *UserTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	user, ok := args["user"].(string)
 	if !ok || user == "" {
@@ -150,9 +150,9 @@ func (s *UserTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 
 func (s *UserTool) deleteUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["ID"].(string)
+	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster ID is required"), nil
+		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 	user, ok := args["user"].(string)
 	if !ok || user == "" {
@@ -170,16 +170,16 @@ func (s *UserTool) Tools() []server.ServerTool {
 		{
 			Handler: s.getUser,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-get-user",
-				mcp.WithDescription("Get a database user by cluster ID and user name"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithDescription("Get a database user by cluster id and user name"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
 			),
 		},
 		{
 			Handler: s.listUsers,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-list-users",
-				mcp.WithDescription("List database users for a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithDescription("List database users for a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional)")),
 				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional)")),
 			),
@@ -187,8 +187,8 @@ func (s *UserTool) Tools() []server.ServerTool {
 		{
 			Handler: s.createUser,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-create-user",
-				mcp.WithDescription("Create a database user for a cluster by its ID"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithDescription("Create a database user for a cluster by its id"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("The user name")),
 				mcp.WithString("mysql_auth_plugin", mcp.Description("MySQL auth plugin (optional, e.g., mysql_native_password)")),
 				mcp.WithString("settings_json", mcp.Description("Raw JSON for DatabaseUserSettings (optional)")),
@@ -197,8 +197,8 @@ func (s *UserTool) Tools() []server.ServerTool {
 		{
 			Handler: s.updateUser,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-update-user",
-				mcp.WithDescription("Update a database user for a cluster by its ID and user name"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster ID (UUID)")),
+				mcp.WithDescription("Update a database user for a cluster by its id and user name"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
 				mcp.WithString("settings_json", mcp.Description("Raw JSON for DatabaseUserSettings (optional)")),
 			),
@@ -206,8 +206,8 @@ func (s *UserTool) Tools() []server.ServerTool {
 		{
 			Handler: s.deleteUser,
 			Tool: mcp.NewTool("digitalocean-dbaascluster-delete-user",
-				mcp.WithDescription("Delete a database user by cluster ID and user name"),
-				mcp.WithString("ID", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Delete a database user by cluster id and user name"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name to delete")),
 			),
 		}}
