@@ -275,11 +275,11 @@ func (c *UptimeCheckAlertTool) Tools() []server.ServerTool {
 				mcp.WithString("CheckID", mcp.Required(), mcp.Description("A unique identifier for a check")),
 				mcp.WithString("AlertID", mcp.Required(), mcp.Description("A unique identifier for a check alert")),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the UptimeCheck Alert")),
-				mcp.WithString("Type", mcp.Required(), mcp.Description("latency, down, down_global or ssl_expiry. type of the UptimeCheck Alert")),
+				mcp.WithString("Type", mcp.Required(), mcp.Description("Type of the UptimeCheck Alert. value: latency, down, down_global or ssl_expiry")),
 				mcp.WithNumber("Threshold", mcp.Description("The threshold at which the alert will enter a trigger state. The specific threshold is dependent on the alert type")),
-				mcp.WithString("Comparison", mcp.Description("The comparison operator used against the alert's threshold. values : greater_than or less_than")),
+				mcp.WithString("Comparison", mcp.Description("The comparison operator used against the alert's threshold. value : greater_than or less_than")),
 				mcp.WithString("Period", mcp.Required(), mcp.WithStringEnumItems([]string{"2m", "3m", "5m", "10m", "15m", "30m", "1h"}), mcp.Description("Period of time the threshold must be exceeded to trigger the alert")),
-				mcp.WithArray("Emails", mcp.Required(), mcp.Description("email addresses to notify"), mcp.Items(map[string]any{
+				mcp.WithArray("Emails", mcp.Required(), mcp.Description("Email addresses to notify"), mcp.Items(map[string]any{
 					"type":        "string",
 					"description": "email address to notify",
 				})),
