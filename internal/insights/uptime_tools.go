@@ -7,7 +7,6 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"log"
 )
 
 // UptimeTool provides UptimeCheck and Alert management tools
@@ -108,14 +107,13 @@ func (c *UptimeTool) createUptimeCheck(ctx context.Context, req mcp.CallToolRequ
 		Regions: regions,
 		Enabled: enabled,
 	}
-	log.Println(createRequest)
+
 	uptimeCheck, _, err := c.client.UptimeChecks.Create(ctx, createRequest)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 
 	jsonUptimeCheck, err := json.MarshalIndent(uptimeCheck, "", "  ")
-	log.Println(jsonUptimeCheck)
 
 	if err != nil {
 		return nil, fmt.Errorf("marshal error: %w", err)
@@ -190,7 +188,7 @@ func (c *UptimeTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.getUptimeCheckState,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-getstate",
+			Tool: mcp.NewTool("digitalocean-uptimecheck-get-state",
 				mcp.WithDescription("Get UptimeCheck information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the UptimeCheck")),
 			),
@@ -212,7 +210,6 @@ func (c *UptimeTool) Tools() []server.ServerTool {
 				mcp.WithString("Target", mcp.Required(), mcp.Description("endpoint to check for the UptimeCheck")),
 				mcp.WithArray("Regions", mcp.Description("Regions where you'd like to perform these checks. values : \"us_east\", \"us_west\", \"eu_west\", \"se_asia\""),
 					mcp.WithStringEnumItems([]string{"us_east", "us_west", "eu_west", "se_asia"})),
-				mcp.WithString("Target", mcp.Required(), mcp.Description("endpoint to check for the UptimeCheck")),
 				mcp.WithBoolean("Enabled", mcp.Required(), mcp.Description("A boolean value indicating whether the check is enabled/disabled.")),
 			),
 		},

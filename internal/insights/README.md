@@ -109,7 +109,7 @@ Pagination and filtering are supported where applicable.
     - Arguments: `{ "ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 - List uptimechecks (page 2, 50 per page):
-    - Tool: `digitalocean-uptimechecks-list`
+    - Tool: `digitalocean-uptimecheck-list`
     - Arguments: `{ "Page": 2, "PerPage": 50 }`
 
 - Create a new uptime check:
