@@ -67,6 +67,7 @@ The MCP DigitalOcean Integration supports a variety of services, allowing users 
 | **Networking** | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.            |
 | **Insights**   | Monitors your endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring.          |
 
+
 ---
 ## Service Documentation
 
