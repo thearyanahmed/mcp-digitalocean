@@ -80,7 +80,7 @@ func TestOneClickTool_listOneClickApps(t *testing.T) {
 		{
 			name: "Successful list with kubernetes type",
 			args: map[string]interface{}{
-				"type": "kubernetes",
+				"Type": "kubernetes",
 			},
 			mockSetup: func(m *MockOneClickService) {
 				m.EXPECT().
@@ -103,7 +103,7 @@ func TestOneClickTool_listOneClickApps(t *testing.T) {
 		{
 			name: "Empty type parameter uses default",
 			args: map[string]interface{}{
-				"type": "",
+				"Type": "",
 			},
 			mockSetup: func(m *MockOneClickService) {
 				m.EXPECT().
