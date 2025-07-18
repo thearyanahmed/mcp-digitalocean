@@ -1,9 +1,6 @@
 all: lint build test
 build-dist: build-bin dist
 
-build:
-	go build ./...
-
 MAIN := ./cmd/mcp-digitalocean/main.go
 COMMIT := $(shell git rev-parse --short HEAD)
 VERSION := $(shell git describe --tags --always --dirty)
