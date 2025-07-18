@@ -25,7 +25,7 @@ func (o *OneClickTool) listOneClickApps(ctx context.Context, req mcp.CallToolReq
 
 	// Type parameter is optional, defaults to "droplet"
 	oneClickType := "droplet"
-	if typeArg, ok := args["type"]; ok {
+	if typeArg, ok := args["Type"]; ok {
 		if typeStr, ok := typeArg.(string); ok && typeStr != "" {
 			oneClickType = typeStr
 		}
@@ -113,7 +113,7 @@ func (o *OneClickTool) Tools() []server.ServerTool {
 			Handler: o.listOneClickApps,
 			Tool: mcp.NewTool("digitalocean-1-click-list",
 				mcp.WithDescription("List available 1-click applications from the DigitalOcean marketplace"),
-				mcp.WithString("type", mcp.Description("Type of 1-click apps to list (e.g., 'droplet', 'kubernetes'). Defaults to 'droplet'")),
+				mcp.WithString("Type", mcp.Description("Type of 1-click apps to list (e.g., 'droplet', 'kubernetes'). Defaults to 'droplet'")),
 			),
 		},
 		{
