@@ -70,6 +70,16 @@ func (v *VPCTool) createVPC(ctx context.Context, req mcp.CallToolRequest) (*mcp.
 		RegionSlug: region,
 	}
 
+	// Add optional subnet parameter
+	if subnet, ok := req.GetArguments()["Subnet"].(string); ok && subnet != "" {
+		createRequest.IPRange = subnet
+	}
+
+	// Add optional description parameter
+	if description, ok := req.GetArguments()["Description"].(string); ok && description != "" {
+		createRequest.Description = description
+	}
+
 	vpc, _, err := v.client.VPCs.Create(ctx, createRequest)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
@@ -136,6 +146,8 @@ func (v *VPCTool) Tools() []server.ServerTool {
 				mcp.WithDescription("Create a new VPC"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the VPC")),
 				mcp.WithString("Region", mcp.Required(), mcp.Description("Region slug (e.g., nyc3)")),
+				mcp.WithString("Subnet", mcp.Description("Optional subnet CIDR block (e.g., 10.10.0.0/20)")),
+				mcp.WithString("Description", mcp.Description("Optional description for the VPC")),
 			),
 		},
 		{

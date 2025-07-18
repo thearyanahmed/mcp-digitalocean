@@ -38,40 +38,54 @@ This directory contains tools and resources for managing DigitalOcean networking
   - `Name` (string, required): Record name
   - `Data` (string, required): Record data
 
+- **`digitalocean-domain-get`**  
+  Get domain information by name.  
+  - `Name` (string, required): Name of the domain
+
+- **`digitalocean-domain-list`**  
+  List domains with pagination.  
+  - `Page` (number, default: 1): Page number  
+  - `PerPage` (number, default: 20): Items per page
+
+- **`digitalocean-domain-record-get`**  
+  Get a domain record by domain name and record ID.  
+  - `Domain` (string, required): Domain name  
+  - `RecordID` (number, required): ID of the domain record
+
+- **`digitalocean-domain-record-list`**  
+  List domain records for a domain with pagination.  
+  - `Domain` (string, required): Domain name  
+  - `Page` (number, default: 1): Page number  
+  - `PerPage` (number, default: 20): Items per page
+
 ---
 
 ### Certificates
 
-- **`digitalocean-certificate-create`**
-  Create a new certificate.
+- **`digitalocean-custom-certificate-create`**
+  Create a new custom certificate.
   - `Name` (string, required): Name of the certificate
-  - `PrivateKey` (string, required): Private key
+  - `PrivateKey` (string, required): Private key for the certificate
   - `LeafCertificate` (string, required): Leaf certificate
   - `CertificateChain` (string, required): Certificate chain
+
+- **`digitalocean-lets-encrypt-certificate-create`**
+  Create a new Let's Encrypt certificate.
+  - `Name` (string, required): Name of the certificate
+  - `DnsNames` (array of strings, required): DNS names of the certificate, including wildcard domains
 
 - **`digitalocean-certificate-delete`**
   Delete a certificate.
   - `ID` (string, required): ID of the certificate to delete
 
-- **`digitalocean-firewall-add-tags`**
-  Add one or more tags to a firewall.
-  - `ID` (string, required): ID of the firewall to update tags
-  - `Tags` (array of strings, required): Tags to apply the firewall to
+- **`digitalocean-certificate-get`**  
+  Get certificate information by ID.  
+  - `ID` (string, required): ID of the certificate
 
-- **`digitalocean-firewall-remove-tags`**
-  Remove one or more tags from a firewall.
-  - `ID` (string, required): ID of the firewall to update tags
-  - `Tags` (array of strings, required): Tags to remove from the firewall
-
-- **`digitalocean-firewall-add-droplets`**
-  Add one or more droplets to a firewall.
-  - `ID` (string, required): ID of the firewall to apply to droplets
-  - `DropletIDs` (array of numbers, required): Droplet IDs to apply the firewall to
-
-- **`digitalocean-firewall-remove-droplets`**
-  Remove one or more droplets from a firewall.
-  - `ID` (string, required): ID of the firewall to remove droplets from
-  - `DropletIDs` (array of numbers, required): Droplet IDs to remove from the firewall
+- **`digitalocean-certificate-list`**  
+  List certificates with pagination.  
+  - `Page` (number, default: 1): Page number  
+  - `PerPage` (number, default: 20): Items per page
 
 ---
 
@@ -93,17 +107,61 @@ This directory contains tools and resources for managing DigitalOcean networking
   Delete a firewall.
   - `ID` (string, required): ID of the firewall to delete
 
+- **`digitalocean-firewall-add-tags`**
+  Add one or more tags to a firewall.
+  - `ID` (string, required): ID of the firewall to update tags
+  - `Tags` (array of strings, required): Tags to apply the firewall to
+
+- **`digitalocean-firewall-remove-tags`**
+  Remove one or more tags from a firewall.
+  - `ID` (string, required): ID of the firewall to update tags
+  - `Tags` (array of strings, required): Tags to remove from the firewall
+
+- **`digitalocean-firewall-add-droplets`**
+  Add one or more droplets to a firewall.
+  - `ID` (string, required): ID of the firewall to apply to droplets
+  - `DropletIDs` (array of numbers, required): Droplet IDs to apply the firewall to
+
+- **`digitalocean-firewall-remove-droplets`**
+  Remove one or more droplets from a firewall.
+  - `ID` (string, required): ID of the firewall to remove droplets from
+  - `DropletIDs` (array of numbers, required): Droplet IDs to remove from the firewall
+
+- **`digitalocean-firewall-add-rules`**
+  Add one or more rules to a firewall.
+  - `ID` (string, required): ID of the firewall to add rules to
+  - `InboundRules` (array of objects, optional): Inbound rules to add
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Sources` (array of strings, required): Source IP addresses or CIDR blocks
+  - `OutboundRules` (array of objects, optional): Outbound rules to add
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Destinations` (array of strings, required): Destination IP addresses or CIDR blocks
+
+- **`digitalocean-firewall-remove-rules`**
+  Remove one or more rules from a firewall.
+  - `ID` (string, required): ID of the firewall to remove rules from
+  - `InboundRules` (array of objects, optional): Inbound rules to remove
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Sources` (array of strings, required): Source IP addresses or CIDR blocks
+  - `OutboundRules` (array of objects, optional): Outbound rules to remove
+    - `Protocol` (string, required): Protocol (tcp, udp, icmp)
+    - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
+    - `Destinations` (array of strings, required): Destination IP addresses or CIDR blocks
+
+- **`digitalocean-firewall-get`**  
+  Get firewall information by ID.  
+  - `ID` (string, required): ID of the firewall
+
+- **`digitalocean-firewall-list`**  
+  List firewalls with pagination.  
+  - `Page` (number, default: 1): Page number  
+  - `PerPage` (number, default: 20): Items per page
+
 ---
 
-- **`digitalocean-reserved-ipv4-list`**
-  List reserved IPv4 addresses with pagination.
-  - `Page` (number, optional, default: 1): Page number
-  - `PerPage` (number, optional, default: 20): Items per page
-
-- **`digitalocean-reserved-ipv6-list`**
-  List reserved IPv6 addresses with pagination.
-  - `Page` (number, optional, default: 1): Page number
-  - `PerPage` (number, optional, default: 20): Items per page
 
 ### Reserved IPs
 
@@ -128,6 +186,34 @@ This directory contains tools and resources for managing DigitalOcean networking
   - `IP` (string, required): The reserved IP to unassign
   - `Type` (string, required): Type of IP (`ipv4` or `ipv6`)
 
+- **`digitalocean-reserved-ipv4-list`**
+  List reserved IPv4 addresses with pagination.
+  - `Page` (number, optional, default: 1): Page number
+  - `PerPage` (number, optional, default: 20): Items per page
+
+- **`digitalocean-reserved-ipv6-list`**
+  List reserved IPv6 addresses with pagination.
+  - `Page` (number, optional, default: 1): Page number
+  - `PerPage` (number, optional, default: 20): Items per page
+
+- **`digitalocean-reserved-ipv4-list`**  
+  List reserved IPv4 addresses with pagination.  
+  - `Page` (number, optional, default: 1): Page number  
+  - `PerPage` (number, optional, default: 20): Items per page
+
+- **`digitalocean-reserved-ipv6-list`**  
+  List reserved IPv6 addresses with pagination.  
+  - `Page` (number, optional, default: 1): Page number  
+  - `PerPage` (number, optional, default: 20): Items per page
+
+- **`digitalocean-reserved-ipv4-get`**  
+  Get reserved IPv4 information by IP.  
+  - `IP` (string, required): The reserved IPv4 address
+
+- **`digitalocean-reserved-ipv6-get`**  
+  Get reserved IPv6 information by IP.  
+  - `IP` (string, required): The reserved IPv6 address
+  
 ---
 
 ### VPC Peering
@@ -142,6 +228,15 @@ This directory contains tools and resources for managing DigitalOcean networking
   Delete a VPC Peering connection.
   - `ID` (string, required): ID of the VPC Peering connection to delete
 
+- **`digitalocean-vpc-peering-get`**  
+  Get VPC Peering information by ID.  
+  - `ID` (string, required): ID of the VPC Peering connection
+
+- **`digitalocean-vpc-peering-list`**  
+  List VPC Peering connections with pagination.  
+  - `Page` (number, default: 1): Page number  
+  - `PerPage` (number, default: 20): Items per page
+
 ---
 
 ### VPCs
@@ -150,6 +245,8 @@ This directory contains tools and resources for managing DigitalOcean networking
   Create a new VPC.
   - `Name` (string, required): Name of the VPC
   - `Region` (string, required): Region slug (e.g., nyc3)
+  - `Subnet` (string, optional): Optional subnet CIDR block (e.g., 10.10.0.0/20)
+  - `Description` (string, optional): Optional description for the VPC
 
 - **`digitalocean-vpc-list-members`**
   List members of a VPC.
@@ -159,30 +256,16 @@ This directory contains tools and resources for managing DigitalOcean networking
   Delete a VPC.
   - `ID` (string, required): ID of the VPC to delete
 
----
+- **`digitalocean-vpc-get`**  
+  Get VPC information by ID.  
+  - `ID` (string, required): ID of the VPC
 
-### CDN
-
-- **`digitalocean-cdn-create`**
-  Create a new CDN.
-  - `Origin` (string, required): Origin URL for the CDN
-  - `TTL` (number, required): Time-to-live for the CDN cache
-  - `CustomDomain` (string, optional): Custom domain for the CDN
-
-- **`digitalocean-cdn-delete`**
-  Delete a CDN.
-  - `ID` (string, required): ID of the CDN to delete
-
-- **`digitalocean-cdn-flush-cache`**
-  Flush the cache of a CDN.
-  - `ID` (string, required): ID of the CDN
-  - `Files` (array of strings, required): File names to flush from the cache
+- **`digitalocean-vpc-list`**  
+  List VPCs with pagination.  
+  - `Page` (number, default: 1): Page number  
+  - `PerPage` (number, default: 20): Items per page
 
 ---
-
-- **`vpc_peering://{id}`**
-  Returns information about a specific VPC Peering connection.
-
 
 ### Partner Attachments
 
@@ -210,111 +293,6 @@ This directory contains tools and resources for managing DigitalOcean networking
   - `Name` (string, required): New name
   - `VPCIDs` (array of strings, required): VPC IDs to associate
 
----
-
-## Additional Tool-Based Handlers
-
-The following tools are now available for direct querying and listing of all networking resources:
-
-### Domains
-
-- **`digitalocean-domain-get`**  
-  Get domain information by name.  
-  - `Name` (string, required): Name of the domain
-
-- **`digitalocean-domain-list`**  
-  List domains with pagination.  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
-- **`digitalocean-domain-record-get`**  
-  Get a domain record by domain name and record ID.  
-  - `Domain` (string, required): Domain name  
-  - `RecordID` (number, required): ID of the domain record
-
-- **`digitalocean-domain-record-list`**  
-  List domain records for a domain with pagination.  
-  - `Domain` (string, required): Domain name  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
-### Certificates
-
-- **`digitalocean-certificate-get`**  
-  Get certificate information by ID.  
-  - `ID` (string, required): ID of the certificate
-
-- **`digitalocean-certificate-list`**  
-  List certificates with pagination.  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
-### Firewalls
-
-- **`digitalocean-firewall-get`**  
-  Get firewall information by ID.  
-  - `ID` (string, required): ID of the firewall
-
-- **`digitalocean-firewall-list`**  
-  List firewalls with pagination.  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
-### Reserved IPs
-
-- **`digitalocean-reserved-ipv4-list`**  
-  List reserved IPv4 addresses with pagination.  
-  - `Page` (number, optional, default: 1): Page number  
-  - `PerPage` (number, optional, default: 20): Items per page
-
-- **`digitalocean-reserved-ipv6-list`**  
-  List reserved IPv6 addresses with pagination.  
-  - `Page` (number, optional, default: 1): Page number  
-  - `PerPage` (number, optional, default: 20): Items per page
-
-- **`digitalocean-reserved-ipv4-get`**  
-  Get reserved IPv4 information by IP.  
-  - `IP` (string, required): The reserved IPv4 address
-
-- **`digitalocean-reserved-ipv6-get`**  
-  Get reserved IPv6 information by IP.  
-  - `IP` (string, required): The reserved IPv6 address
-
-### VPCs
-
-- **`digitalocean-vpc-get`**  
-  Get VPC information by ID.  
-  - `ID` (string, required): ID of the VPC
-
-- **`digitalocean-vpc-list`**  
-  List VPCs with pagination.  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
-### VPC Peering
-
-- **`digitalocean-vpc-peering-get`**  
-  Get VPC Peering information by ID.  
-  - `ID` (string, required): ID of the VPC Peering connection
-
-- **`digitalocean-vpc-peering-list`**  
-  List VPC Peering connections with pagination.  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
-### CDN
-
-- **`digitalocean-cdn-get`**  
-  Get CDN information by ID.  
-  - `ID` (string, required): ID of the CDN
-
-- **`digitalocean-cdn-list`**  
-  List CDNs with pagination.  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
-### Partner Attachments
-
 - **`digitalocean-partner-attachment-get`**  
   Get partner attachment information by ID.  
   - `ID` (string, required): ID of the partner attachment
@@ -331,8 +309,12 @@ The following tools are now available for direct querying and listing of all net
 - Create a new domain "example.com" pointing to IP "203.0.113.10".
 - Add an A record to "example.com" for "www" pointing to "203.0.113.20".
 - Delete the TXT record with ID 12345 from "example.com".
-- Create a new SSL certificate for "myapp.com".
+- Create a new custom SSL certificate for "myapp.com".
+- Create a new Let's Encrypt certificate for "example.com" and "www.example.com".
+- Create a wildcard Let's Encrypt certificate for "*.example.com" and "example.com".
 - Delete a firewall with ID "abcd-1234".
+- Add HTTP and HTTPS inbound rules to firewall "fw-123".
+- Remove SSH access rule from firewall "fw-456".
 - Reserve a new IPv4 in region "nyc3".
 - Assign reserved IP "198.51.100.5" to droplet 987654.
 - Create a new VPC named "private-net" in region "sfo2".

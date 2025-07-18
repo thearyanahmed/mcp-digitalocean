@@ -5,16 +5,16 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/digitalocean/godo"
+	"github.com/mark3labs/mcp-go/server"
 	"mcp-digitalocean/internal/account"
 	"mcp-digitalocean/internal/apps"
 	"mcp-digitalocean/internal/common"
 	"mcp-digitalocean/internal/droplet"
 	"mcp-digitalocean/internal/marketplace"
+	"mcp-digitalocean/internal/insights"
 	"mcp-digitalocean/internal/networking"
 	"mcp-digitalocean/internal/spaces"
-
-	"github.com/digitalocean/godo"
-	"github.com/mark3labs/mcp-go/server"
 )
 
 // supportedServices is a set of services that we support in this MCP server.
@@ -24,7 +24,8 @@ var supportedServices = map[string]struct{}{
 	"droplets":    {},
 	"accounts":    {},
 	"spaces":      {},
-	"marketplace": {},
+  "marketplace": {},
+	"insights":    {},
 }
 
 // registerAppTools registers the app platform tools with the MCP server.
@@ -49,6 +50,7 @@ func registerCommonTools(s *server.MCPServer, c *godo.Client) error {
 // registerDropletTools registers the droplet tools with the MCP server.
 func registerDropletTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(droplet.NewDropletTool(c).Tools()...)
+	s.AddTools(droplet.NewDropletActionsTool(c).Tools()...)
 	s.AddTools(droplet.NewImagesTool(c).Tools()...)
 	s.AddTools(droplet.NewSizesTool(c).Tools()...)
 	return nil
@@ -56,7 +58,6 @@ func registerDropletTools(s *server.MCPServer, c *godo.Client) error {
 
 // registerNetworkingTools registers the networking tools with the MCP server.
 func registerNetworkingTools(s *server.MCPServer, c *godo.Client) error {
-	s.AddTools(networking.NewCDNTool(c).Tools()...)
 	s.AddTools(networking.NewCertificateTool(c).Tools()...)
 	s.AddTools(networking.NewDomainsTool(c).Tools()...)
 	s.AddTools(networking.NewFirewallTool(c).Tools()...)
@@ -83,6 +84,7 @@ func registerAccountTools(s *server.MCPServer, c *godo.Client) error {
 func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 	// Register the tools for spaces keys
 	s.AddTools(spaces.NewSpacesKeysTool(c).Tools()...)
+	s.AddTools(spaces.NewCDNTool(c).Tools()...)
 
 	return nil
 }
@@ -90,6 +92,15 @@ func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 // registerMarketplaceTools registers the marketplace tools with the MCP server.
 func registerMarketplaceTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(marketplace.NewOneClickTool(c).Tools()...)
+  
+  return nil
+}
+
+// registerInsightsTools registers the account tools with the MCP server.
+func registerInsightsTools(s *server.MCPServer, c *godo.Client) error {
+	s.AddTools(insights.NewUptimeTool(c).Tools()...)
+	s.AddTools(insights.NewUptimeCheckAlertTool(c).Tools()...)
+  
 	return nil
 }
 
@@ -128,6 +139,10 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 		case "marketplace":
 			if err := registerMarketplaceTools(s, c); err != nil {
 				return fmt.Errorf("failed to register marketplace tools: %w", err)
+      }
+		case "insights":
+			if err := registerInsightsTools(s, c); err != nil {
+				return fmt.Errorf("failed to register insights tools: %w", err)
 			}
 		default:
 			return fmt.Errorf("unsupported service: %s, supported service are: %v", svc, setToString(supportedServices))

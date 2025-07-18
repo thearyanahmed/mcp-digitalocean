@@ -172,6 +172,227 @@ func TestCertificateTool_listCertificates(t *testing.T) {
 	}
 }
 
+func TestCertificateTool_createLetsEncryptCertificate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	testCert := &godo.Certificate{
+		ID:       "cert-123",
+		Name:     "my-lets-encrypt-cert",
+		DNSNames: []string{"example.com", "www.example.com"},
+		Type:     "lets_encrypt",
+	}
+
+	tests := []struct {
+		name        string
+		args        map[string]any
+		mockSetup   func(*MockCertificatesService)
+		expectError bool
+	}{
+		{
+			name: "Successful creation",
+			args: map[string]any{
+				"Name":     "my-lets-encrypt-cert",
+				"DnsNames": []any{"example.com", "www.example.com"},
+			},
+			mockSetup: func(m *MockCertificatesService) {
+				expectedReq := &godo.CertificateRequest{
+					Name:     "my-lets-encrypt-cert",
+					DNSNames: []string{"example.com", "www.example.com"},
+					Type:     "lets_encrypt",
+				}
+				m.EXPECT().
+					Create(gomock.Any(), expectedReq).
+					Return(testCert, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "Single DNS name",
+			args: map[string]any{
+				"Name":     "single-domain-cert",
+				"DnsNames": []any{"example.com"},
+			},
+			mockSetup: func(m *MockCertificatesService) {
+				expectedReq := &godo.CertificateRequest{
+					Name:     "single-domain-cert",
+					DNSNames: []string{"example.com"},
+					Type:     "lets_encrypt",
+				}
+				m.EXPECT().
+					Create(gomock.Any(), expectedReq).
+					Return(testCert, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "Wildcard domain",
+			args: map[string]any{
+				"Name":     "wildcard-cert",
+				"DnsNames": []any{"*.example.com", "example.com"},
+			},
+			mockSetup: func(m *MockCertificatesService) {
+				expectedReq := &godo.CertificateRequest{
+					Name:     "wildcard-cert",
+					DNSNames: []string{"*.example.com", "example.com"},
+					Type:     "lets_encrypt",
+				}
+				m.EXPECT().
+					Create(gomock.Any(), expectedReq).
+					Return(testCert, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "API error",
+			args: map[string]any{
+				"Name":     "failing-cert",
+				"DnsNames": []any{"fail.example.com"},
+			},
+			mockSetup: func(m *MockCertificatesService) {
+				m.EXPECT().
+					Create(gomock.Any(), gomock.Any()).
+					Return(nil, nil, errors.New("api error")).
+					Times(1)
+			},
+			expectError: true,
+		},
+		{
+			name: "Empty DNS names",
+			args: map[string]any{
+				"Name":     "empty-dns-cert",
+				"DnsNames": []any{},
+			},
+			mockSetup: func(m *MockCertificatesService) {
+				expectedReq := &godo.CertificateRequest{
+					Name:     "empty-dns-cert",
+					DNSNames: []string{},
+					Type:     "lets_encrypt",
+				}
+				m.EXPECT().
+					Create(gomock.Any(), expectedReq).
+					Return(testCert, nil, nil).
+					Times(1)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockCert := NewMockCertificatesService(ctrl)
+			if tc.mockSetup != nil {
+				tc.mockSetup(mockCert)
+			}
+			tool := setupCertificateToolWithMock(mockCert)
+			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
+			resp, err := tool.createLetsEncryptCertificate(context.Background(), req)
+
+			if tc.expectError {
+				require.NotNil(t, resp)
+				require.True(t, resp.IsError)
+				return
+			}
+
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.False(t, resp.IsError)
+			require.NotEmpty(t, resp.Content)
+
+			var outCert godo.Certificate
+			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outCert))
+			require.Equal(t, testCert.ID, outCert.ID)
+			require.Equal(t, testCert.Name, outCert.Name)
+			require.Equal(t, testCert.Type, outCert.Type)
+		})
+	}
+}
+
+func TestCertificateTool_createCustomCertificate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	testCert := &godo.Certificate{
+		ID:   "cert-456",
+		Name: "my-custom-cert",
+		Type: "custom",
+	}
+
+	tests := []struct {
+		name        string
+		args        map[string]any
+		mockSetup   func(*MockCertificatesService)
+		expectError bool
+	}{
+		{
+			name: "Successful creation",
+			args: map[string]any{
+				"Name":             "my-custom-cert",
+				"PrivateKey":       "-----BEGIN PRIVATE KEY-----\nMIIEvQ...\n-----END PRIVATE KEY-----",
+				"LeafCertificate":  "-----BEGIN CERTIFICATE-----\nMIIFX...\n-----END CERTIFICATE-----",
+				"CertificateChain": "-----BEGIN CERTIFICATE-----\nMIIFY...\n-----END CERTIFICATE-----",
+			},
+			mockSetup: func(m *MockCertificatesService) {
+				expectedReq := &godo.CertificateRequest{
+					Name:             "my-custom-cert",
+					PrivateKey:       "-----BEGIN PRIVATE KEY-----\nMIIEvQ...\n-----END PRIVATE KEY-----",
+					LeafCertificate:  "-----BEGIN CERTIFICATE-----\nMIIFX...\n-----END CERTIFICATE-----",
+					CertificateChain: "-----BEGIN CERTIFICATE-----\nMIIFY...\n-----END CERTIFICATE-----",
+					Type:             "custom",
+				}
+				m.EXPECT().
+					Create(gomock.Any(), expectedReq).
+					Return(testCert, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "API error",
+			args: map[string]any{
+				"Name":             "failing-custom-cert",
+				"PrivateKey":       "invalid-key",
+				"LeafCertificate":  "invalid-cert",
+				"CertificateChain": "invalid-chain",
+			},
+			mockSetup: func(m *MockCertificatesService) {
+				m.EXPECT().
+					Create(gomock.Any(), gomock.Any()).
+					Return(nil, nil, errors.New("invalid certificate")).
+					Times(1)
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockCert := NewMockCertificatesService(ctrl)
+			if tc.mockSetup != nil {
+				tc.mockSetup(mockCert)
+			}
+			tool := setupCertificateToolWithMock(mockCert)
+			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
+			resp, err := tool.createCustomCertificate(context.Background(), req)
+
+			if tc.expectError {
+				require.NotNil(t, resp)
+				require.True(t, resp.IsError)
+				return
+			}
+
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.False(t, resp.IsError)
+			require.NotEmpty(t, resp.Content)
+
+			var outCert godo.Certificate
+			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outCert))
+			require.Equal(t, testCert.ID, outCert.ID)
+			require.Equal(t, testCert.Name, outCert.Name)
+			require.Equal(t, testCert.Type, outCert.Type)
+		})
+	}
+}
+
 func TestCertificateTool_deleteCertificate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
