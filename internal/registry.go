@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"log/slog"
-	"mcp-digitalocean/internal/doks"
 	"strings"
 
 	"github.com/digitalocean/godo"
@@ -12,14 +11,12 @@ import (
 	"mcp-digitalocean/internal/account"
 	"mcp-digitalocean/internal/apps"
 	"mcp-digitalocean/internal/common"
+	"mcp-digitalocean/internal/doks"
 	"mcp-digitalocean/internal/droplet"
 	"mcp-digitalocean/internal/insights"
 	"mcp-digitalocean/internal/marketplace"
 	"mcp-digitalocean/internal/networking"
 	"mcp-digitalocean/internal/spaces"
-
-	"github.com/digitalocean/godo"
-	"github.com/mark3labs/mcp-go/server"
 )
 
 // supportedServices is a set of services that we support in this MCP server.

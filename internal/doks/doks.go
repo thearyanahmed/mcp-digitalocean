@@ -74,13 +74,13 @@ func (d *DoksTool) listDOKSClusters(ctx context.Context, req mcp.CallToolRequest
 		PerPage: perPage,
 	})
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 
 	// Marshal the response
 	clustersJSON, err := json.MarshalIndent(clusters, "", "  ")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("marshal error: %w", err)
 	}
 
 	return mcp.NewToolResultText(string(clustersJSON)), nil
@@ -711,8 +711,8 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			Handler: d.listDOKSClusters,
 			Tool: mcp.NewTool("digitalocean-doks-list-clusters",
 				mcp.WithDescription("List all DigitalOcean Kubernetes clusters"),
-				mcp.WithNumber("Page", mcp.Description("Page number of the results to fetch")),
-				mcp.WithNumber("PerPage", mcp.Description("Number of items returned per page")),
+				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number of the results to fetch")),
+				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Number of items returned per page")),
 			),
 		},
 		{
