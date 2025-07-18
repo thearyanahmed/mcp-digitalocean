@@ -10,6 +10,11 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+const (
+	defaultAlertsPageSize = 20
+	defaultAlertsPage     = 1
+)
+
 // UptimeCheckAlertTool provides UptimeCheck and Alert management tools
 type UptimeCheckAlertTool struct {
 	client *godo.Client
@@ -26,12 +31,12 @@ func NewUptimeCheckAlertTool(client *godo.Client) *UptimeCheckAlertTool {
 func (c *UptimeCheckAlertTool) getUptimeCheckAlert(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	checkId, ok := req.GetArguments()["CheckID"].(string)
 	if !ok || checkId == "" {
-		return mcp.NewToolResultError("UptimeCheck ID is required"), nil
+		return mcp.NewToolResultError("Uptime CheckID is required"), nil
 	}
 
 	alertId, ok := req.GetArguments()["AlertID"].(string)
 	if !ok || alertId == "" {
-		return mcp.NewToolResultError("UptimeCheck Alert ID is required"), nil
+		return mcp.NewToolResultError("UptimeCheck AlertID is required"), nil
 	}
 
 	uptimeCheckAlert, _, err := c.client.UptimeChecks.GetAlert(ctx, checkId, alertId)
@@ -51,11 +56,11 @@ func (c *UptimeCheckAlertTool) getUptimeCheckAlert(ctx context.Context, req mcp.
 func (c *UptimeCheckAlertTool) listUptimeCheckAlerts(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	id, ok := req.GetArguments()["CheckID"].(string)
 	if !ok || id == "" {
-		return mcp.NewToolResultError("UptimeCheck ID is required"), nil
+		return mcp.NewToolResultError("Uptime CheckID is required"), nil
 	}
 
-	page := 1
-	perPage := 20
+	page := defaultAlertsPage
+	perPage := defaultAlertsPageSize
 	if v, ok := req.GetArguments()["Page"].(float64); ok && int(v) > 0 {
 		page = int(v)
 	}
@@ -78,7 +83,7 @@ func (c *UptimeCheckAlertTool) listUptimeCheckAlerts(ctx context.Context, req mc
 func (c *UptimeCheckAlertTool) createUptimeCheckAlert(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	checkID, ok := req.GetArguments()["CheckID"].(string)
 	if !ok || checkID == "" {
-		return mcp.NewToolResultError("UptimeCheck ID is required"), nil
+		return mcp.NewToolResultError("Uptime CheckID is required"), nil
 	}
 	name := req.GetArguments()["Name"].(string)
 	alertType := req.GetArguments()["Type"].(string)
@@ -138,12 +143,12 @@ func (c *UptimeCheckAlertTool) createUptimeCheckAlert(ctx context.Context, req m
 func (c *UptimeCheckAlertTool) updateUptimeCheckAlert(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	checkID, ok := req.GetArguments()["CheckID"].(string)
 	if !ok || checkID == "" {
-		return mcp.NewToolResultError("UptimeCheck ID is required"), nil
+		return mcp.NewToolResultError("Uptime CheckID is required"), nil
 	}
 
 	alertId, ok := req.GetArguments()["AlertID"].(string)
 	if !ok || alertId == "" {
-		return mcp.NewToolResultError("UptimeCheck Alert ID is required"), nil
+		return mcp.NewToolResultError("UptimeCheck AlertID is required"), nil
 	}
 
 	name := req.GetArguments()["Name"].(string)
@@ -205,11 +210,11 @@ func (c *UptimeCheckAlertTool) deleteUptimeCheckAlert(ctx context.Context, req m
 	uptimeCheckID, ok := req.GetArguments()["CheckID"].(string)
 
 	if !ok || uptimeCheckID == "" {
-		return mcp.NewToolResultError("UptimeCheck ID is required"), nil
+		return mcp.NewToolResultError("Uptime CheckID is required"), nil
 	}
 	alertId, ok := req.GetArguments()["AlertID"].(string)
 	if !ok || alertId == "" {
-		return mcp.NewToolResultError("UptimeCheck Alert ID is required"), nil
+		return mcp.NewToolResultError("UptimeCheck AlertID is required"), nil
 	}
 
 	_, err := c.client.UptimeChecks.DeleteAlert(ctx, uptimeCheckID, alertId)
@@ -236,8 +241,8 @@ func (c *UptimeCheckAlertTool) Tools() []server.ServerTool {
 			Tool: mcp.NewTool("digitalocean-uptimecheck-alert-list",
 				mcp.WithDescription("List UptimeChecks Alerts with pagination"),
 				mcp.WithString("CheckID", mcp.Required(), mcp.Description("A unique identifier for a check")),
-				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
-				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
+				mcp.WithNumber("Page", mcp.DefaultNumber(defaultAlertsPage), mcp.Description("Page number")),
+				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultAlertsPageSize), mcp.Description("Items per page")),
 			),
 		},
 		{

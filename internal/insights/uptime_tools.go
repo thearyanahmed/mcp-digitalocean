@@ -9,6 +9,11 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+const (
+	defaultChecksPageSize = 20
+	defaultChecksPage     = 1
+)
+
 // UptimeTool provides UptimeCheck and Alert management tools
 type UptimeTool struct {
 	client *godo.Client
@@ -63,8 +68,8 @@ func (c *UptimeTool) getUptimeCheckState(ctx context.Context, req mcp.CallToolRe
 
 // listUptimeChecks lists UptimeChecks with pagination support
 func (c *UptimeTool) listUptimeChecks(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	page := 1
-	perPage := 20
+	page := defaultChecksPage
+	perPage := defaultChecksPageSize
 	if v, ok := req.GetArguments()["Page"].(float64); ok && int(v) > 0 {
 		page = int(v)
 	}
@@ -167,8 +172,11 @@ func (c *UptimeTool) updateUptimeCheck(ctx context.Context, req mcp.CallToolRequ
 
 // deleteUptimeCheck deletes a UptimeCheck
 func (c *UptimeTool) deleteUptimeCheck(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	uptimeCheckID := req.GetArguments()["ID"].(string)
-	_, err := c.client.UptimeChecks.Delete(ctx, uptimeCheckID)
+	id, ok := req.GetArguments()["ID"].(string)
+	if !ok || id == "" {
+		return mcp.NewToolResultError("UptimeCheck ID is required"), nil
+	}
+	_, err := c.client.UptimeChecks.Delete(ctx, id)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -197,8 +205,8 @@ func (c *UptimeTool) Tools() []server.ServerTool {
 			Handler: c.listUptimeChecks,
 			Tool: mcp.NewTool("digitalocean-uptimecheck-list",
 				mcp.WithDescription("List UptimeChecks with pagination"),
-				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
-				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
+				mcp.WithNumber("Page", mcp.DefaultNumber(defaultChecksPage), mcp.Description("Page number")),
+				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultChecksPageSize), mcp.Description("Items per page")),
 			),
 		},
 		{
