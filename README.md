@@ -64,8 +64,9 @@ The MCP DigitalOcean Integration supports a variety of services, allowing users 
 | **Apps**       | Manage DigitalOcean App Platform applications, including deployments and configurations.                            |
 | **Droplets**   | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                          |
 | **Account**    | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                          |
-| **Networking** | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.            |
-| **Insights**   | Monitors your endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring.          |
+| **Networking** | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.    |
+| **Insights**   | Monitors your endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring.             |
+| **Spaces**     | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage.                                |
 
 
 ---
@@ -79,6 +80,7 @@ See the following files for full documentation:
 - [Account Service README](./internal/account/README.md)
 - [Networking Service README](./internal/networking/README.md)
 - [Insights Service README](./internal/insights/README.md)
+- [Spaces Service README](./internal/spaces/README.md)
 
 ---
 
