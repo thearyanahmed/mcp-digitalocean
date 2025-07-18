@@ -13,7 +13,7 @@ This directory contains tools for managing DigitalOcean Marketplace services via
   **Arguments:**  
   - `type` (string, optional, default: "droplet"): Type of 1-click apps to list (e.g., "droplet", "kubernetes")
 
-- **digitalocean-1-click-install-kubernetes**  
+- **digitalocean-1-click-kuberenetes-app-install**  
   Install 1-click applications on a Kubernetes cluster.  
   **Arguments:**  
   - `cluster_uuid` (string, required): UUID of the Kubernetes cluster to install apps on  
@@ -33,13 +33,13 @@ This directory contains tools for managing DigitalOcean Marketplace services via
   - `type`: `"kubernetes"`
 
 - **Install single app on Kubernetes cluster:**  
-  Tool: `digitalocean-1-click-install-kubernetes`  
+  Tool: `digitalocean-1-click-kuberenetes-app-install`  
   Arguments:  
   - `cluster_uuid`: `"k8s-1234567890abcdef"`  
   - `app_slugs`: `["wordpress"]`
 
 - **Install multiple apps on Kubernetes cluster:**  
-  Tool: `digitalocean-1-click-install-kubernetes`  
+  Tool: `digitalocean-1-click-kuberenetes-app-install`  
   Arguments:  
   - `cluster_uuid`: `"k8s-1234567890abcdef"`  
   - `app_slugs`: `["wordpress", "mysql", "redis"]`
@@ -63,7 +63,7 @@ This directory contains tools for managing DigitalOcean Marketplace services via
 - **Install apps on Kubernetes cluster:**
 
   ```json
-  {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"digitalocean-1-click-install-kubernetes","arguments":{"cluster_uuid":"k8s-1234567890abcdef","app_slugs":["wordpress","nginx"]}}}
+  {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"digitalocean-1-click-kuberenetes-app-install","arguments":{"cluster_uuid":"k8s-1234567890abcdef","app_slugs":["wordpress","nginx"]}}}
   ```
 
 ---

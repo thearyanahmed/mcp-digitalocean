@@ -34,7 +34,7 @@ func TestOneClickTool_Tools(t *testing.T) {
 	}
 
 	assert.Contains(t, toolNames, "digitalocean-1-click-list")
-	assert.Contains(t, toolNames, "digitalocean-1-click-install-kubernetes")
+	assert.Contains(t, toolNames, "digitalocean-1-click-kuberenetes-app-install")
 }
 
 func setupOneClickToolWithMock(mockOneClick *MockOneClickService) *OneClickTool {

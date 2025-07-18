@@ -118,7 +118,7 @@ func (o *OneClickTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: o.installKubernetesApps,
-			Tool: mcp.NewTool("digitalocean-1-click-install-kubernetes",
+			Tool: mcp.NewTool("digitalocean-1-click-kuberenetes-app-install",
 				mcp.WithDescription("Install 1-click applications on a Kubernetes cluster"),
 				mcp.WithString("cluster_uuid", mcp.Required(), mcp.Description("UUID of the Kubernetes cluster to install apps on")),
 				mcp.WithArray("app_slugs", mcp.Required(), mcp.Description("Array of app slugs to install")),
