@@ -159,8 +159,8 @@ func TestOneClickTool_installKubernetesApps(t *testing.T) {
 		{
 			name: "Successful install",
 			args: map[string]interface{}{
-				"cluster_uuid": "k8s-1234567890abcdef",
-				"app_slugs":    []interface{}{"wordpress", "mysql"},
+				"ClusterUUID": "k8s-1234567890abcdef",
+				"AppSlugs":    []interface{}{"wordpress", "mysql"},
 			},
 			mockSetup: func(m *MockOneClickService) {
 				expectedRequest := &godo.InstallKubernetesAppsRequest{
@@ -174,78 +174,78 @@ func TestOneClickTool_installKubernetesApps(t *testing.T) {
 			},
 		},
 		{
-			name: "Missing cluster_uuid",
+			name: "Missing ClusterUUID",
 			args: map[string]interface{}{
-				"app_slugs": []interface{}{"wordpress"},
+				"AppSlugs": []interface{}{"wordpress"},
 			},
 			mockSetup:   func(m *MockOneClickService) {},
 			expectError: true,
-			errorMsg:    "cluster_uuid parameter is required",
+			errorMsg:    "ClusterUUID parameter is required",
 		},
 		{
-			name: "Missing app_slugs",
+			name: "Missing AppSlugs",
 			args: map[string]interface{}{
-				"cluster_uuid": "k8s-1234567890abcdef",
+				"ClusterUUID": "k8s-1234567890abcdef",
 			},
 			mockSetup:   func(m *MockOneClickService) {},
 			expectError: true,
-			errorMsg:    "app_slugs parameter is required",
+			errorMsg:    "AppSlugs parameter is required",
 		},
 		{
-			name: "Empty cluster_uuid",
+			name: "Empty ClusterUUID",
 			args: map[string]interface{}{
-				"cluster_uuid": "",
-				"app_slugs":    []interface{}{"wordpress"},
+				"ClusterUUID": "",
+				"AppSlugs":    []interface{}{"wordpress"},
 			},
 			mockSetup:   func(m *MockOneClickService) {},
 			expectError: true,
-			errorMsg:    "cluster_uuid cannot be empty",
+			errorMsg:    "ClusterUUID cannot be empty",
 		},
 		{
-			name: "Empty app_slugs",
+			name: "Empty AppSlugs",
 			args: map[string]interface{}{
-				"cluster_uuid": "k8s-1234567890abcdef",
-				"app_slugs":    []interface{}{},
+				"ClusterUUID": "k8s-1234567890abcdef",
+				"AppSlugs":    []interface{}{},
 			},
 			mockSetup:   func(m *MockOneClickService) {},
 			expectError: true,
-			errorMsg:    "app_slugs cannot be empty",
+			errorMsg:    "AppSlugs cannot be empty",
 		},
 		{
-			name: "Invalid cluster_uuid type",
+			name: "Invalid ClusterUUID type",
 			args: map[string]interface{}{
-				"cluster_uuid": 123,
-				"app_slugs":    []interface{}{"wordpress"},
+				"ClusterUUID": 123,
+				"AppSlugs":    []interface{}{"wordpress"},
 			},
 			mockSetup:   func(m *MockOneClickService) {},
 			expectError: true,
-			errorMsg:    "cluster_uuid must be a string",
+			errorMsg:    "ClusterUUID must be a string",
 		},
 		{
-			name: "Invalid app_slugs type",
+			name: "Invalid AppSlugs type",
 			args: map[string]interface{}{
-				"cluster_uuid": "k8s-1234567890abcdef",
-				"app_slugs":    "wordpress",
+				"ClusterUUID": "k8s-1234567890abcdef",
+				"AppSlugs":    "wordpress",
 			},
 			mockSetup:   func(m *MockOneClickService) {},
 			expectError: true,
-			errorMsg:    "app_slugs must be an array",
+			errorMsg:    "AppSlugs must be an array",
 		},
 		{
-			name: "Invalid app_slug type in array",
+			name: "Invalid app slug type in array",
 			args: map[string]interface{}{
-				"cluster_uuid": "k8s-1234567890abcdef",
-				"app_slugs":    []interface{}{"wordpress", 123},
+				"ClusterUUID": "k8s-1234567890abcdef",
+				"AppSlugs":    []interface{}{"wordpress", 123},
 			},
 			mockSetup:   func(m *MockOneClickService) {},
 			expectError: true,
-			errorMsg:    "all app_slugs must be strings",
+			errorMsg:    "all AppSlugs must be strings",
 		},
 		{
 			name: "API error",
 			args: map[string]interface{}{
-				"cluster_uuid": "k8s-1234567890abcdef",
-				"app_slugs":    []interface{}{"wordpress"},
+				"ClusterUUID": "k8s-1234567890abcdef",
+				"AppSlugs":    []interface{}{"wordpress"},
 			},
 			mockSetup: func(m *MockOneClickService) {
 				m.EXPECT().

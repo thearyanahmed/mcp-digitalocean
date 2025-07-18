@@ -51,42 +51,42 @@ func (o *OneClickTool) installKubernetesApps(ctx context.Context, req mcp.CallTo
 	args := req.GetArguments()
 
 	// Get cluster UUID
-	clusterUUIDArg, ok := args["cluster_uuid"]
+	clusterUUIDArg, ok := args["ClusterUUID"]
 	if !ok {
-		return mcp.NewToolResultError("cluster_uuid parameter is required"), nil
+		return mcp.NewToolResultError("ClusterUUID parameter is required"), nil
 	}
 
 	clusterUUID, ok := clusterUUIDArg.(string)
 	if !ok {
-		return mcp.NewToolResultError("cluster_uuid must be a string"), nil
+		return mcp.NewToolResultError("ClusterUUID must be a string"), nil
 	}
 
 	if clusterUUID == "" {
-		return mcp.NewToolResultError("cluster_uuid cannot be empty"), nil
+		return mcp.NewToolResultError("ClusterUUID cannot be empty"), nil
 	}
 
 	// Get app slugs
-	slugsArg, ok := args["app_slugs"]
+	slugsArg, ok := args["AppSlugs"]
 	if !ok {
-		return mcp.NewToolResultError("app_slugs parameter is required"), nil
+		return mcp.NewToolResultError("AppSlugs parameter is required"), nil
 	}
 
 	slugsInterface, ok := slugsArg.([]interface{})
 	if !ok {
-		return mcp.NewToolResultError("app_slugs must be an array"), nil
+		return mcp.NewToolResultError("AppSlugs must be an array"), nil
 	}
 
 	slugs := make([]string, len(slugsInterface))
 	for i, slug := range slugsInterface {
 		slugStr, ok := slug.(string)
 		if !ok {
-			return mcp.NewToolResultError("all app_slugs must be strings"), nil
+			return mcp.NewToolResultError("all AppSlugs must be strings"), nil
 		}
 		slugs[i] = slugStr
 	}
 
 	if len(slugs) == 0 {
-		return mcp.NewToolResultError("app_slugs cannot be empty"), nil
+		return mcp.NewToolResultError("AppSlugs cannot be empty"), nil
 	}
 
 	installRequest := &godo.InstallKubernetesAppsRequest{
@@ -120,8 +120,8 @@ func (o *OneClickTool) Tools() []server.ServerTool {
 			Handler: o.installKubernetesApps,
 			Tool: mcp.NewTool("digitalocean-1-click-kubernetes-app-install",
 				mcp.WithDescription("Install 1-click applications on a Kubernetes cluster"),
-				mcp.WithString("cluster_uuid", mcp.Required(), mcp.Description("UUID of the Kubernetes cluster to install apps on")),
-				mcp.WithArray("app_slugs", mcp.Required(), mcp.Description("Array of app slugs to install")),
+				mcp.WithString("ClusterUUID", mcp.Required(), mcp.Description("UUID of the Kubernetes cluster to install apps on")),
+				mcp.WithArray("AppSlugs", mcp.Required(), mcp.Description("Array of app slugs to install")),
 			),
 		},
 	}
