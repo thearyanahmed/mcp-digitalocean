@@ -26,6 +26,8 @@ jobs:
         with:
           name: bin
           path: bin/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build dist
         run: make build-dist
