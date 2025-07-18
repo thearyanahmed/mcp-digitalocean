@@ -193,16 +193,14 @@ func TestCDNTool_createCDN(t *testing.T) {
 		{
 			name: "Successful create",
 			args: map[string]any{
-				"Origin":       "origin.example.com",
-				"TTL":          float64(3600),
-				"CustomDomain": "cdn.example.com",
+				"Origin": "origin.example.com",
+				"TTL":    float64(3600),
 			},
 			mockSetup: func(m *MockCDNService) {
 				m.EXPECT().
 					Create(gomock.Any(), &godo.CDNCreateRequest{
-						Origin:       "origin.example.com",
-						TTL:          3600,
-						CustomDomain: "cdn.example.com",
+						Origin: "origin.example.com",
+						TTL:    3600,
 					}).
 					Return(testCDN, nil, nil).
 					Times(1)
@@ -211,16 +209,14 @@ func TestCDNTool_createCDN(t *testing.T) {
 		{
 			name: "API error",
 			args: map[string]any{
-				"Origin":       "fail.example.com",
-				"TTL":          float64(1800),
-				"CustomDomain": "",
+				"Origin": "fail.example.com",
+				"TTL":    float64(1800),
 			},
 			mockSetup: func(m *MockCDNService) {
 				m.EXPECT().
 					Create(gomock.Any(), &godo.CDNCreateRequest{
-						Origin:       "fail.example.com",
-						TTL:          1800,
-						CustomDomain: "",
+						Origin: "fail.example.com",
+						TTL:    1800,
 					}).
 					Return(nil, nil, errors.New("api error")).
 					Times(1)
