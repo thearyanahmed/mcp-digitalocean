@@ -9,6 +9,7 @@ import (
 	"mcp-digitalocean/internal/apps"
 	"mcp-digitalocean/internal/common"
 	"mcp-digitalocean/internal/droplet"
+	"mcp-digitalocean/internal/marketplace"
 	"mcp-digitalocean/internal/networking"
 	"mcp-digitalocean/internal/spaces"
 
@@ -18,11 +19,12 @@ import (
 
 // supportedServices is a set of services that we support in this MCP server.
 var supportedServices = map[string]struct{}{
-	"apps":       {},
-	"networking": {},
-	"droplets":   {},
-	"accounts":   {},
-	"spaces":     {},
+	"apps":        {},
+	"networking":  {},
+	"droplets":    {},
+	"accounts":    {},
+	"spaces":      {},
+	"marketplace": {},
 }
 
 // registerAppTools registers the app platform tools with the MCP server.
@@ -85,6 +87,12 @@ func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 	return nil
 }
 
+// registerMarketplaceTools registers the marketplace tools with the MCP server.
+func registerMarketplaceTools(s *server.MCPServer, c *godo.Client) error {
+	s.AddTools(marketplace.NewOneClickTool(c).Tools()...)
+	return nil
+}
+
 // Register registers the set of tools for the specified services with the MCP server.
 // We either register a subset of tools of the services are specified, or we register all tools if no services are specified.
 func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, servicesToActivate ...string) error {
@@ -116,6 +124,10 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 		case "spaces":
 			if err := registerSpacesTools(s, c); err != nil {
 				return fmt.Errorf("failed to register spaces tools: %w", err)
+			}
+		case "marketplace":
+			if err := registerMarketplaceTools(s, c); err != nil {
+				return fmt.Errorf("failed to register marketplace tools: %w", err)
 			}
 		default:
 			return fmt.Errorf("unsupported service: %s, supported service are: %v", svc, setToString(supportedServices))
