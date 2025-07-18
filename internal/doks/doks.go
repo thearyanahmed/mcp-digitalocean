@@ -26,8 +26,8 @@ func NewDoksTool(client *godo.Client) *DoksTool {
 	return &DoksTool{client: client}
 }
 
-// GetDoksCluster gets a DOKS cluster
-func (d *DoksTool) GetDoksCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+// getDoksCluster gets a DOKS cluster
+func (d *DoksTool) getDoksCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -52,7 +52,7 @@ func (d *DoksTool) GetDoksCluster(ctx context.Context, req mcp.CallToolRequest) 
 }
 
 // ListDOKSClusters lists DOKS clusters
-func (d *DoksTool) ListDOKSClusters(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) listDOKSClusters(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get list options from the request
 	args := req.GetArguments()
 
@@ -87,7 +87,7 @@ func (d *DoksTool) ListDOKSClusters(ctx context.Context, req mcp.CallToolRequest
 }
 
 // CreateDOKSCluster creates a new Kubernetes cluster
-func (d *DoksTool) CreateDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) createDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(req.GetArguments())
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal arguments: %w", err)
@@ -118,7 +118,7 @@ func (d *DoksTool) CreateDOKSCluster(ctx context.Context, req mcp.CallToolReques
 }
 
 // UpdateDOKSCluster updates a Kubernetes cluster
-func (d *DoksTool) UpdateDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) updateDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -196,7 +196,7 @@ func (d *DoksTool) UpdateDOKSCluster(ctx context.Context, req mcp.CallToolReques
 }
 
 // DeleteDOKSCluster deletes a Kubernetes cluster
-func (d *DoksTool) DeleteDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) deleteDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -215,7 +215,7 @@ func (d *DoksTool) DeleteDOKSCluster(ctx context.Context, req mcp.CallToolReques
 }
 
 // UpgradeDOKSCluster upgrades a Kubernetes cluster
-func (d *DoksTool) UpgradeDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) upgradeDOKSCluster(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -242,7 +242,7 @@ func (d *DoksTool) UpgradeDOKSCluster(ctx context.Context, req mcp.CallToolReque
 }
 
 // GetDOKSClusterUpgrades gets the available upgrades for a cluster
-func (d *DoksTool) GetDOKSClusterUpgrades(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) getDOKSClusterUpgrades(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -267,7 +267,7 @@ func (d *DoksTool) GetDOKSClusterUpgrades(ctx context.Context, req mcp.CallToolR
 }
 
 // GetDOKSClusterKubeConfig gets the kubeconfig for a cluster
-func (d *DoksTool) GetDOKSClusterKubeConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) getDOKSClusterKubeConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -286,7 +286,7 @@ func (d *DoksTool) GetDOKSClusterKubeConfig(ctx context.Context, req mcp.CallToo
 }
 
 // GetDOKSClusterCredentials gets the credentials for a cluster
-func (d *DoksTool) GetDOKSClusterCredentials(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) getDOKSClusterCredentials(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -328,7 +328,7 @@ func (d *DoksTool) GetDOKSClusterCredentials(ctx context.Context, req mcp.CallTo
 }
 
 // CreateDOKSNodePool creates a new node pool for a cluster
-func (d *DoksTool) CreateDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) createDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -369,7 +369,7 @@ func (d *DoksTool) CreateDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 }
 
 // GetDOKSNodePool gets a node pool for a cluster
-func (d *DoksTool) GetDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) getDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -400,7 +400,7 @@ func (d *DoksTool) GetDOKSNodePool(ctx context.Context, req mcp.CallToolRequest)
 }
 
 // ListDOKSNodePools lists node pools for a cluster
-func (d *DoksTool) ListDOKSNodePools(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) listDOKSNodePools(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -425,7 +425,7 @@ func (d *DoksTool) ListDOKSNodePools(ctx context.Context, req mcp.CallToolReques
 }
 
 // UpdateDOKSNodePool updates a node pool for a cluster
-func (d *DoksTool) UpdateDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) updateDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -541,7 +541,7 @@ func (d *DoksTool) UpdateDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 }
 
 // DeleteDOKSNodePool deletes a node pool for a cluster
-func (d *DoksTool) DeleteDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) deleteDOKSNodePool(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -566,7 +566,7 @@ func (d *DoksTool) DeleteDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 }
 
 // DeleteDOKSNode deletes a node from a node pool
-func (d *DoksTool) DeleteDOKSNode(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) deleteDOKSNode(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -612,7 +612,7 @@ func (d *DoksTool) DeleteDOKSNode(ctx context.Context, req mcp.CallToolRequest) 
 }
 
 // RecycleDOKSNodes recycles nodes in a node pool
-func (d *DoksTool) RecycleDOKSNodes(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (d *DoksTool) recycleDOKSNodes(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
 	// Extract cluster ID
@@ -701,14 +701,14 @@ func (d *DoksTool) Tools() []server.ServerTool {
 
 	return []server.ServerTool{
 		{
-			Handler: d.GetDoksCluster,
+			Handler: d.getDoksCluster,
 			Tool: mcp.NewTool("digitalocean-doks-get-cluster",
 				mcp.WithDescription("Get a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
 			),
 		},
 		{
-			Handler: d.ListDOKSClusters,
+			Handler: d.listDOKSClusters,
 			Tool: mcp.NewTool("digitalocean-doks-list-clusters",
 				mcp.WithDescription("List all DigitalOcean Kubernetes clusters"),
 				mcp.WithNumber("Page", mcp.Description("Page number of the results to fetch")),
@@ -716,13 +716,13 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.CreateDOKSCluster,
+			Handler: d.createDOKSCluster,
 			Tool: mcp.NewToolWithRawSchema("digitalocean-doks-create-cluster",
 				"Create a new DigitalOcean Kubernetes cluster", clusterCreateSchema,
 			),
 		},
 		{
-			Handler: d.UpdateDOKSCluster,
+			Handler: d.updateDOKSCluster,
 			Tool: mcp.NewTool("digitalocean-doks-update-cluster",
 				mcp.WithDescription("Update a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
@@ -734,14 +734,14 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.DeleteDOKSCluster,
+			Handler: d.deleteDOKSCluster,
 			Tool: mcp.NewTool("digitalocean-doks-delete-cluster",
 				mcp.WithDescription("Delete a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
 			),
 		},
 		{
-			Handler: d.UpgradeDOKSCluster,
+			Handler: d.upgradeDOKSCluster,
 			Tool: mcp.NewTool("digitalocean-doks-upgrade-cluster",
 				mcp.WithDescription("Upgrade a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
@@ -749,34 +749,34 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.GetDOKSClusterUpgrades,
+			Handler: d.getDOKSClusterUpgrades,
 			Tool: mcp.NewTool("digitalocean-doks-get-cluster-upgrades",
 				mcp.WithDescription("Get available upgrades for a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
 			),
 		},
 		{
-			Handler: d.GetDOKSClusterKubeConfig,
+			Handler: d.getDOKSClusterKubeConfig,
 			Tool: mcp.NewTool("digitalocean-doks-get-kubeconfig",
 				mcp.WithDescription("Get kubeconfig for a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
 			),
 		},
 		{
-			Handler: d.GetDOKSClusterCredentials,
+			Handler: d.getDOKSClusterCredentials,
 			Tool: mcp.NewTool("digitalocean-doks-get-credentials",
 				mcp.WithDescription("Get credentials for a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
 			),
 		},
 		{
-			Handler: d.CreateDOKSNodePool,
+			Handler: d.createDOKSNodePool,
 			Tool: mcp.NewToolWithRawSchema("digitalocean-doks-create-nodepool",
 				"Create a new node pool in a DigitalOcean Kubernetes cluster", nodePoolCreateSchema,
 			),
 		},
 		{
-			Handler: d.GetDOKSNodePool,
+			Handler: d.getDOKSNodePool,
 			Tool: mcp.NewTool("digitalocean-doks-get-nodepool",
 				mcp.WithDescription("Get a node pool in a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
@@ -784,14 +784,14 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.ListDOKSNodePools,
+			Handler: d.listDOKSNodePools,
 			Tool: mcp.NewTool("digitalocean-doks-list-nodepools",
 				mcp.WithDescription("List all node pools in a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
 			),
 		},
 		{
-			Handler: d.UpdateDOKSNodePool,
+			Handler: d.updateDOKSNodePool,
 			Tool: mcp.NewTool("digitalocean-doks-update-nodepool",
 				mcp.WithDescription("Update a node pool in a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
@@ -807,7 +807,7 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.DeleteDOKSNodePool,
+			Handler: d.deleteDOKSNodePool,
 			Tool: mcp.NewTool("digitalocean-doks-delete-nodepool",
 				mcp.WithDescription("Delete a node pool in a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
@@ -815,7 +815,7 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.DeleteDOKSNode,
+			Handler: d.deleteDOKSNode,
 			Tool: mcp.NewTool("digitalocean-doks-delete-node",
 				mcp.WithDescription("Delete a node from a node pool in a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
@@ -826,7 +826,7 @@ func (d *DoksTool) Tools() []server.ServerTool {
 			),
 		},
 		{
-			Handler: d.RecycleDOKSNodes,
+			Handler: d.recycleDOKSNodes,
 			Tool: mcp.NewTool("digitalocean-doks-recycle-nodes",
 				mcp.WithDescription("Recycle specific nodes in a node pool in a DigitalOcean Kubernetes cluster"),
 				mcp.WithString("ClusterID", mcp.Required(), mcp.Description("The ID of the Kubernetes cluster")),
