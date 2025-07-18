@@ -1,10 +1,15 @@
 package marketplace
 
 import (
+	"context"
+	"errors"
 	"testing"
 
 	"github.com/digitalocean/godo"
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestNewOneClickTool(t *testing.T) {
@@ -28,6 +33,251 @@ func TestOneClickTool_Tools(t *testing.T) {
 		toolNames[i] = tool.Tool.Name
 	}
 
-	assert.Contains(t, toolNames, "digitalocean-oneclick-list")
-	assert.Contains(t, toolNames, "digitalocean-oneclick-install-kubernetes")
+	assert.Contains(t, toolNames, "digitalocean-1-click-list")
+	assert.Contains(t, toolNames, "digitalocean-1-click-install-kubernetes")
+}
+
+func setupOneClickToolWithMock(mockOneClick *MockOneClickService) *OneClickTool {
+	client := &godo.Client{}
+	client.OneClick = mockOneClick
+	return NewOneClickTool(client)
+}
+
+func TestOneClickTool_listOneClickApps(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockOneClick := NewMockOneClickService(ctrl)
+	tool := setupOneClickToolWithMock(mockOneClick)
+
+	testApps := []*godo.OneClick{
+		{
+			Slug: "wordpress",
+			Type: "droplet",
+		},
+		{
+			Slug: "mysql",
+			Type: "droplet",
+		},
+	}
+
+	tests := []struct {
+		name        string
+		args        map[string]interface{}
+		mockSetup   func(*MockOneClickService)
+		expectError bool
+	}{
+		{
+			name: "Successful list with default type",
+			args: map[string]interface{}{},
+			mockSetup: func(m *MockOneClickService) {
+				m.EXPECT().
+					List(gomock.Any(), "droplet").
+					Return(testApps, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "Successful list with kubernetes type",
+			args: map[string]interface{}{
+				"type": "kubernetes",
+			},
+			mockSetup: func(m *MockOneClickService) {
+				m.EXPECT().
+					List(gomock.Any(), "kubernetes").
+					Return(testApps, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "API error",
+			args: map[string]interface{}{},
+			mockSetup: func(m *MockOneClickService) {
+				m.EXPECT().
+					List(gomock.Any(), "droplet").
+					Return(nil, nil, errors.New("api error")).
+					Times(1)
+			},
+			expectError: true,
+		},
+		{
+			name: "Empty type parameter uses default",
+			args: map[string]interface{}{
+				"type": "",
+			},
+			mockSetup: func(m *MockOneClickService) {
+				m.EXPECT().
+					List(gomock.Any(), "droplet").
+					Return(testApps, nil, nil).
+					Times(1)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockSetup(mockOneClick)
+
+			req := mcp.CallToolRequest{
+				Params: mcp.CallToolParams{
+					Arguments: tt.args,
+				},
+			}
+
+			result, err := tool.listOneClickApps(context.Background(), req)
+			require.NoError(t, err)
+
+			if tt.expectError {
+				assert.True(t, result.IsError)
+				assert.Contains(t, result.Content[0].(mcp.TextContent).Text, "Failed to list 1-click apps")
+			} else {
+				assert.False(t, result.IsError)
+				assert.NotEmpty(t, result.Content[0].(mcp.TextContent).Text)
+			}
+		})
+	}
+}
+
+func TestOneClickTool_installKubernetesApps(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockOneClick := NewMockOneClickService(ctrl)
+	tool := setupOneClickToolWithMock(mockOneClick)
+
+	testResponse := &godo.InstallKubernetesAppsResponse{
+		Message: "Apps installed successfully",
+	}
+
+	tests := []struct {
+		name        string
+		args        map[string]interface{}
+		mockSetup   func(*MockOneClickService)
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name: "Successful install",
+			args: map[string]interface{}{
+				"cluster_uuid": "k8s-1234567890abcdef",
+				"app_slugs":    []interface{}{"wordpress", "mysql"},
+			},
+			mockSetup: func(m *MockOneClickService) {
+				expectedRequest := &godo.InstallKubernetesAppsRequest{
+					Slugs:       []string{"wordpress", "mysql"},
+					ClusterUUID: "k8s-1234567890abcdef",
+				}
+				m.EXPECT().
+					InstallKubernetes(gomock.Any(), expectedRequest).
+					Return(testResponse, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "Missing cluster_uuid",
+			args: map[string]interface{}{
+				"app_slugs": []interface{}{"wordpress"},
+			},
+			mockSetup:   func(m *MockOneClickService) {},
+			expectError: true,
+			errorMsg:    "cluster_uuid parameter is required",
+		},
+		{
+			name: "Missing app_slugs",
+			args: map[string]interface{}{
+				"cluster_uuid": "k8s-1234567890abcdef",
+			},
+			mockSetup:   func(m *MockOneClickService) {},
+			expectError: true,
+			errorMsg:    "app_slugs parameter is required",
+		},
+		{
+			name: "Empty cluster_uuid",
+			args: map[string]interface{}{
+				"cluster_uuid": "",
+				"app_slugs":    []interface{}{"wordpress"},
+			},
+			mockSetup:   func(m *MockOneClickService) {},
+			expectError: true,
+			errorMsg:    "cluster_uuid cannot be empty",
+		},
+		{
+			name: "Empty app_slugs",
+			args: map[string]interface{}{
+				"cluster_uuid": "k8s-1234567890abcdef",
+				"app_slugs":    []interface{}{},
+			},
+			mockSetup:   func(m *MockOneClickService) {},
+			expectError: true,
+			errorMsg:    "app_slugs cannot be empty",
+		},
+		{
+			name: "Invalid cluster_uuid type",
+			args: map[string]interface{}{
+				"cluster_uuid": 123,
+				"app_slugs":    []interface{}{"wordpress"},
+			},
+			mockSetup:   func(m *MockOneClickService) {},
+			expectError: true,
+			errorMsg:    "cluster_uuid must be a string",
+		},
+		{
+			name: "Invalid app_slugs type",
+			args: map[string]interface{}{
+				"cluster_uuid": "k8s-1234567890abcdef",
+				"app_slugs":    "wordpress",
+			},
+			mockSetup:   func(m *MockOneClickService) {},
+			expectError: true,
+			errorMsg:    "app_slugs must be an array",
+		},
+		{
+			name: "Invalid app_slug type in array",
+			args: map[string]interface{}{
+				"cluster_uuid": "k8s-1234567890abcdef",
+				"app_slugs":    []interface{}{"wordpress", 123},
+			},
+			mockSetup:   func(m *MockOneClickService) {},
+			expectError: true,
+			errorMsg:    "all app_slugs must be strings",
+		},
+		{
+			name: "API error",
+			args: map[string]interface{}{
+				"cluster_uuid": "k8s-1234567890abcdef",
+				"app_slugs":    []interface{}{"wordpress"},
+			},
+			mockSetup: func(m *MockOneClickService) {
+				m.EXPECT().
+					InstallKubernetes(gomock.Any(), gomock.Any()).
+					Return(nil, nil, errors.New("api error")).
+					Times(1)
+			},
+			expectError: true,
+			errorMsg:    "Failed to install Kubernetes apps",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockSetup(mockOneClick)
+
+			req := mcp.CallToolRequest{
+				Params: mcp.CallToolParams{
+					Arguments: tt.args,
+				},
+			}
+
+			result, err := tool.installKubernetesApps(context.Background(), req)
+			require.NoError(t, err)
+
+			if tt.expectError {
+				assert.True(t, result.IsError)
+				assert.Contains(t, result.Content[0].(mcp.TextContent).Text, tt.errorMsg)
+			} else {
+				assert.False(t, result.IsError)
+				assert.NotEmpty(t, result.Content[0].(mcp.TextContent).Text)
+			}
+		})
+	}
 }

@@ -111,14 +111,14 @@ func (o *OneClickTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: o.listOneClickApps,
-			Tool: mcp.NewTool("digitalocean-oneclick-list",
+			Tool: mcp.NewTool("digitalocean-1-click-list",
 				mcp.WithDescription("List available 1-click applications from the DigitalOcean marketplace"),
 				mcp.WithString("type", mcp.Description("Type of 1-click apps to list (e.g., 'droplet', 'kubernetes'). Defaults to 'droplet'")),
 			),
 		},
 		{
 			Handler: o.installKubernetesApps,
-			Tool: mcp.NewTool("digitalocean-oneclick-install-kubernetes",
+			Tool: mcp.NewTool("digitalocean-1-click-install-kubernetes",
 				mcp.WithDescription("Install 1-click applications on a Kubernetes cluster"),
 				mcp.WithString("cluster_uuid", mcp.Required(), mcp.Description("UUID of the Kubernetes cluster to install apps on")),
 				mcp.WithArray("app_slugs", mcp.Required(), mcp.Description("Array of app slugs to install")),
