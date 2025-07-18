@@ -1,4 +1,4 @@
-all: lint build test
+all: lint test build-dist
 build-dist: build-bin dist
 
 MAIN := ./cmd/mcp-digitalocean/main.go
