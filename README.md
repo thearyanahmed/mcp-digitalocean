@@ -1,6 +1,6 @@
 # MCP DigitalOcean Integration
 
-MCP DigitalOcean Integration is an open-source project that provides a comprehensive interface for managing DigitalOcean resources and performing actions using the [DigitalOcean API](https://docs.digitalocean.com/reference/api/). Built on top of the [godo](https://github.com/digitalocean/godo) library and the [MCP framework](https://github.com/mark3labs/mcp-go), this project exposes a wide range of tools and resources to simplify cloud infrastructure management.
+MCP DigitalOcean Integration is an open-source project that provides a comprehensive interface for managing DigitalOcean resources and performing actions using the [DigitalOcean API](https://docs.digitalocean.com/reference/api/). Built on top of the [godo](https://github.com/digitalocean/godo) library and the [MCP framework](https://github.com/mark3labs/mcp-go), this project exposes a wide range of tools to simplify cloud infrastructure management.
 
 > DISCLAIMER: “Use of MCP technology to interact with your DigitalOcean account [can come with risks](https://www.wiz.io/blog/mcp-security-research-briefing)”
 
@@ -11,13 +11,13 @@ Prerequisites:
 - Node.js (v18 or later)
 - NPM (v8 or later)
 
-### Local Installation
+#### Local Installation
 
 ```bash
 npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
 ```
 
-### Using Cursor IDE
+#### Using Cursor IDE
 
 ```json
 {
@@ -33,7 +33,7 @@ npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
 }
 ```
 
-### Using VSCode
+#### Using VSCode
 ```json
 {
     "mcp": {
@@ -55,9 +55,9 @@ npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
 }
 ```
 
-### Supported Services
+## Supported Services
 
-The MCP DigitalOcean Integration supports a variety of services, allowing users to manage their DigitalOcean infrastructure effectively. The following services are currently supported:
+The MCP DigitalOcean Integration supports the following services, allowing users to manage their DigitalOcean infrastructure effectively
 
 | **Service**    | **Description**                                                                                                     |
 |----------------|---------------------------------------------------------------------------------------------------------------------|
@@ -70,17 +70,17 @@ The MCP DigitalOcean Integration supports a variety of services, allowing users 
 
 
 ---
-## Service Documentation
+### Service Documentation
 
 Each service provides a detailed README describing all available tools, resources, arguments, and example queries.
 See the following files for full documentation:
 
-- [Apps Service README](./internal/apps/README.md)
-- [Droplet Service README](./internal/droplet/README.md)
-- [Account Service README](./internal/account/README.md)
-- [Networking Service README](./internal/networking/README.md)
-- [Insights Service README](./internal/insights/README.md)
-- [Spaces Service README](./internal/spaces/README.md)
+- [Apps Service](./internal/apps/README.md)
+- [Droplet Service](./internal/droplet/README.md)
+- [Account Service](./internal/account/README.md)
+- [Networking Service](./internal/networking/README.md)
+- [Insights Service](./internal/insights/README.md)
+- [Spaces Service](./internal/spaces/README.md)
 
 ---
 
