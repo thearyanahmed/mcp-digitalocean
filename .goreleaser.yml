@@ -5,6 +5,7 @@ version: 2
 env:
   - CGO_ENABLED=0
 dist: ./bin
+archives: []
 builds:
   - id: "mcp-digitalocean"
     main: "./cmd/mcp-digitalocean/"
