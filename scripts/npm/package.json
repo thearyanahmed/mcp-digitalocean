@@ -25,11 +25,11 @@
     "node": ">=18.0.0"
   },
   "mcp-server-binaries": {
-    "mcp-digitalocean-darwin-arm64": "./dist/mcp-digitalocean-darwin-amd64",
+    "mcp-digitalocean-darwin-arm64": "./dist/mcp-digitalocean-darwin-arm64",
     "mcp-digitalocean-darwin-amd64": "./dist/mcp-digitalocean-darwin-amd64",
-    "mcp-digitalocean-linux-arm64": "./dist/mcp-digitalocean-linux-amd64",
+    "mcp-digitalocean-linux-arm64": "./dist/mcp-digitalocean-linux-arm64",
     "mcp-digitalocean-linux-amd64": "./dist/mcp-digitalocean-linux-amd64",
-    "mcp-digitalocean-win32-arm64": "./dist/mcp-digitalocean-win32-amd64",
+    "mcp-digitalocean-win32-arm64": "./dist/mcp-digitalocean-win32-arm64",
     "mcp-digitalocean-win32-amd64": "./dist/mcp-digitalocean-win32-amd64"
   },
   "os": [

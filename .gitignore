@@ -30,3 +30,4 @@ scripts/npm/node_modules/
 scripts/npm/dist/
 
 docode/*
+dist/
