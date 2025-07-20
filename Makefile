@@ -1,19 +1,17 @@
-all: lint build test
+all: lint test build-dist
 build-dist: build-bin dist
 
-build:
-	go build ./...
-
 build-bin:
-	GOOS=darwin GOARCH=arm64 go build -o bin/mcp-digitalocean-darwin-arm64 ./cmd/mcp-digitalocean/main.go
-	GOOS=darwin GOARCH=amd64 go build -o bin/mcp-digitalocean-darwin-amd64 ./cmd/mcp-digitalocean/main.go
-	GOOS=linux GOARCH=arm64 go build -o bin/mcp-digitalocean-linux-arm64 ./cmd/mcp-digitalocean/main.go
-	GOOS=linux GOARCH=amd64 go build -o bin/mcp-digitalocean-linux-amd64 ./cmd/mcp-digitalocean/main.go
-	GOOS=windows GOARCH=amd64 go build -o bin/mcp-digitalocean-windows-amd64.exe ./cmd/mcp-digitalocean/main.go
-	GOOS=windows GOARCH=arm64 go build -o bin/mcp-digitalocean-windows-arm64.exe ./cmd/mcp-digitalocean/main.go
+	@if ! command -v goreleaser >/dev/null 2>&1; then \
+		echo "goreleaser not found, installing..."; \
+		go install github.com/goreleaser/goreleaser@latest; \
+	fi
+	goreleaser build --auto-snapshot --clean
 
+.PHONY: dist
 dist:
-	cp ./bin/* ./scripts/npm/dist/
+	mkdir -p ./scripts/npm/dist
+	cp ./dist/*/mcp-digitalocean* ./scripts/npm/dist/
 	cp ./internal/apps/spec/*.json ./scripts/npm/dist/
 	npm install --prefix ./scripts/npm/
 
