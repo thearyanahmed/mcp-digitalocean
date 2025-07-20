@@ -32,8 +32,5 @@ jobs:
       - name: Check Code Formatting
         run: make format-check
 
-      - name: Build
-        run: make build-bin
-
       - name: Test
         run: make test
