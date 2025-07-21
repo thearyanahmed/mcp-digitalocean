@@ -96,30 +96,27 @@ func (s *FirewallTool) Tools() []server.ServerTool {
 				mcp.WithDescription("Update firewall rules for a cluster using a structured list of rules."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithArray("rules",
-					mcp.Required(),
-					mcp.Description("List of firewall rules to set"),
-					mcp.Items(
-						mcp.WithObject("firewall_rule",
-							mcp.Properties(map[string]any{
-								"uuid": map[string]any{
-									"type":        "string",
-									"description": "Rule UUID (optional when creating new rules)",
-								},
-								"cluster_uuid": map[string]any{
-									"type":        "string",
-									"description": "UUID of the cluster the rule belongs to",
-								},
-								"type": map[string]any{
-									"type":        "string",
-									"description": "Type of the rule (e.g., ip_addr, droplet, tag, app)",
-								},
-								"value": map[string]any{
-									"type":        "string",
-									"description": "Value for the rule (e.g., IP address or tag name)",
-								},
-							}),
-						),
-					),
+					mcp.Items(map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"uuid": map[string]any{
+								"type":        "string",
+								"description": "Rule UUID (optional when creating new rules)",
+							},
+							"cluster_uuid": map[string]any{
+								"type":        "string",
+								"description": "UUID of the cluster the rule belongs to",
+							},
+							"type": map[string]any{
+								"type":        "string",
+								"description": "Type of the rule (e.g., ip_addr, droplet, tag, app)",
+							},
+							"value": map[string]any{
+								"type":        "string",
+								"description": "Value for the rule (e.g., IP address or tag name)",
+							},
+						},
+					}),
 				),
 			),
 		},
