@@ -96,6 +96,47 @@ Pagination and filtering are supported where applicable.
                 - `Channel` (string, required): The Slack channel to post the alert.
                 - `URL` (string, required): The Slack webhook URL for posting alerts.
 
+### Alert Policy
+
+- **digitalocean-alert-policy-get**
+    - Get Alert Policy information by UUID.
+    - Arguments:
+        - `UUID` (string, required): UUID of the Alert Policy to retrieve.
+
+- **digitalocean-alert-policy-list**
+    - List all Alert Policies in your account with pagination.
+    - Arguments:
+        - `Page` (number, default: 1): Page number for pagination.
+        - `PerPage` (number, default: 20): Number of items per page.
+
+- **digitalocean-alert-policy-create**
+    - Create a new Alert Policy.
+    - Arguments:
+        - `Type` (string, required): Type of the Alert Policy (e.g., 'v1/insights/droplet/cpu').
+        - `Description` (string, required): Human-readable description of the alert policy.
+        - `Compare` (string, required): Comparison operator ('GreaterThan' or 'LessThan').
+        - `Value` (number, required): Threshold value for the alert.
+        - `Window` (string, required): Time window for the alert ('5m', '10m', '30m', '1h').
+        - `Entities` (array of strings): List of resource IDs to monitor.
+        - `Tags` (array of strings): List of tags to monitor.
+        - `Alerts` (object): Notification settings containing:
+            - `Email` (array of strings): List of email addresses.
+            - `Slack` (array of objects): List of Slack configurations with:
+                - `Channel` (string): Slack channel.
+                - `URL` (string): Slack webhook URL.
+        - `Enabled` (boolean): Whether the alert policy is enabled.
+
+- **digitalocean-alert-policy-update**
+    - Update an existing Alert Policy.
+    - Arguments:
+        - Same as create, plus:
+        - `UUID` (string, required): UUID of the Alert Policy to update.
+
+- **digitalocean-alert-policy-delete**
+    - Delete an Alert Policy permanently.
+    - Arguments:
+        - `UUID` (string, required): UUID of the Alert Policy to delete.
+
 ---
 
 ## Example Usage
@@ -152,6 +193,69 @@ Pagination and filtering are supported where applicable.
 - List uptimechecks alerts (page 2, 50 per page):
     - Tool: `digitalocean-uptimechecks-alert-list`
     - Arguments: `{ "CheckID": "4de7ac8b-495b-4884-9a69-1050c6793cd6", "Page": 2, "PerPage": 50 }`
+
+- Get details for Alert Policy with UUID 2dacd69e-44f3-409d-ab58-70df9cf64b92:
+    - Tool: `digitalocean-alert-policy-get`
+    - Arguments: `{ "UUID": "2dacd69e-44f3-409d-ab58-70df9cf64b92" }`
+
+- List Alert Policies (page 2, 50 per page):
+    - Tool: `digitalocean-alert-policy-list`
+    - Arguments: `{ "Page": 2, "PerPage": 50 }`
+
+- Create a new Alert Policy for CPU monitoring:
+    - Tool: `digitalocean-alert-policy-create`
+    - Arguments:
+      ```json
+      {
+        "Type": "v1/insights/droplet/cpu",
+        "Description": "Alert when CPU usage is high",
+        "Compare": "GreaterThan",
+        "Value": 80,
+        "Window": "5m",
+        "Entities": ["508599038", "509144791"],
+        "Tags": ["production"],
+        "Alerts": {
+          "Email": ["ops@example.com"],
+          "Slack": [
+            {
+              "Channel": "#alerts",
+              "URL": "https://hooks.slack.com/services/T1234567/AAAAAAAA/ZZZZZZ"
+            }
+          ]
+        },
+        "Enabled": true
+      }
+      ```
+
+- Update an existing Alert Policy:
+    - Tool: `digitalocean-alert-policy-update`
+    - Arguments:
+      ```json
+      {
+        "UUID": "2dacd69e-44f3-409d-ab58-70df9cf64b92",
+        "Type": "v1/insights/droplet/cpu",
+        "Description": "Alert when CPU usage is very high",
+        "Compare": "GreaterThan",
+        "Value": 90,
+        "Window": "5m",
+        "Entities": ["508599038", "509144791", "509144792"],
+        "Tags": ["production"],
+        "Alerts": {
+          "Email": ["ops@example.com", "admin@example.com"],
+          "Slack": [
+            {
+              "Channel": "#alerts",
+              "URL": "https://hooks.slack.com/services/T1234567/AAAAAAAA/ZZZZZZ"
+            }
+          ]
+        },
+        "Enabled": true
+      }
+      ```
+
+- Delete Alert Policy with UUID 2dacd69e-44f3-409d-ab58-70df9cf64b92:
+    - Tool: `digitalocean-alert-policy-delete`
+    - Arguments: `{ "UUID": "2dacd69e-44f3-409d-ab58-70df9cf64b92" }`
 
 ---
 

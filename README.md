@@ -59,13 +59,13 @@ npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
 
 The MCP DigitalOcean Integration supports a variety of services, allowing users to manage their DigitalOcean infrastructure effectively. The following services are currently supported:
 
-| **Service**    | **Description**                                                                                                     |
-|----------------|---------------------------------------------------------------------------------------------------------------------|
-| **Apps**       | Manage DigitalOcean App Platform applications, including deployments and configurations.                            |
-| **Droplets**   | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                          |
-| **Account**    | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                          |
-| **Networking** | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.            |
-| **Insights**   | Monitors your endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring.          |
+| **Service**    | **Description**                                                                                                    |
+|----------------|--------------------------------------------------------------------------------------------------------------------|
+| **Apps**       | Manage DigitalOcean App Platform applications, including deployments and configurations.                           |
+| **Droplets**   | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                         |
+| **Account**    | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                         |
+| **Networking** | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.   |
+| **Insights**   | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring. |
 
 
 ---

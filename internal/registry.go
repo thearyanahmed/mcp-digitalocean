@@ -90,6 +90,7 @@ func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 func registerInsightsTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(insights.NewUptimeTool(c).Tools()...)
 	s.AddTools(insights.NewUptimeCheckAlertTool(c).Tools()...)
+	s.AddTools(insights.NewAlertPolicyTool(c).Tools()...)
 	return nil
 }
 
