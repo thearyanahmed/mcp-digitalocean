@@ -14,17 +14,19 @@ Prerequisites:
 #### Local Installation
 
 ```bash
-npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
+npx @digitalocean/mcp --services apps,droplets --log-level debug
 ```
 
 #### Using Cursor IDE
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=digitalocean&config=JTdCJTIyY29tbWFuZCUyMiUzQSUyMm5weCUyMCU0MGRpZ2l0YWxvY2VhbiUyRm1jcCUyMC0tc2VydmljZXMlMjBhcHBzJTIyJTJDJTIyZW52JTIyJTNBJTdCJTIyRElHSVRBTE9DRUFOX0FQSV9UT0tFTiUyMiUzQSUyMllPVVJfRE9fVE9LRU4lMjIlN0QlN0Q%3D)
 
 ```json
 {
   "mcpServers": {
     "digitalocean": {
       "command": "npx",
-      "args": ["@digitalocean/mcp-digitalocean", "--services apps"],
+      "args": ["@digitalocean/mcp", "--services apps"],
       "env": {
         "DIGITALOCEAN_API_TOKEN": "YOUR_API_TOKEN"
       }
@@ -42,7 +44,7 @@ npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
             "mcpDigitalOcean": {
                 "command": "npx",
                 "args": [
-                    "@digitalocean/mcp-digitalocean",
+                    "@digitalocean/mcp",
                     "--services",
                     "apps"
                 ],
@@ -106,7 +108,7 @@ To configure tools, you use the `--services` flag to specify which service you w
 enable the services you need to reduce context size and improve accuracy.
 
 ```bash
-npx @digitalocean/mcp-digitalocean --services apps,droplets
+npx @digitalocean/mcp --services apps,droplets
 ```
 
 ---
