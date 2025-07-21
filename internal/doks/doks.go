@@ -33,7 +33,7 @@ func (d *DoksTool) getDoksCluster(ctx context.Context, req mcp.CallToolRequest) 
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Make the API call
@@ -45,7 +45,7 @@ func (d *DoksTool) getDoksCluster(ctx context.Context, req mcp.CallToolRequest) 
 	// Marshal the response
 	clusterJSON, err := json.MarshalIndent(cluster, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
 	}
 
 	return mcp.NewToolResultText(string(clusterJSON)), nil
@@ -80,7 +80,7 @@ func (d *DoksTool) listDOKSClusters(ctx context.Context, req mcp.CallToolRequest
 	// Marshal the response
 	clustersJSON, err := json.MarshalIndent(clusters, "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("marshal error: %w", err)
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
 	}
 
 	return mcp.NewToolResultText(string(clustersJSON)), nil
@@ -95,7 +95,7 @@ func (d *DoksTool) createDOKSCluster(ctx context.Context, req mcp.CallToolReques
 
 	createRequest := &godo.KubernetesClusterCreateRequest{}
 	if err := json.Unmarshal(jsonBytes, createRequest); err != nil {
-		return nil, fmt.Errorf("failed to parse cluster create request: %w", err)
+		return mcp.NewToolResultErrorFromErr("failed to parse cluster create request", err), nil
 	}
 
 	// Make the API call
@@ -103,15 +103,15 @@ func (d *DoksTool) createDOKSCluster(ctx context.Context, req mcp.CallToolReques
 	if err != nil {
 		// Include more context in the error message for better debugging
 		if resp != nil {
-			return nil, fmt.Errorf("failed to create cluster: %w (status: %d)", err, resp.StatusCode)
+			return mcp.NewToolResultErrorFromErr(fmt.Sprintf("failed to create cluster: (status: %d)", resp.StatusCode), err), nil
 		}
-		return nil, fmt.Errorf("failed to create cluster: %w", err)
+		return mcp.NewToolResultErrorFromErr("failed to create cluster", err), nil
 	}
 
 	// Marshal the response
 	clusterJSON, err := json.MarshalIndent(cluster, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to marshal cluster", err), nil
 	}
 
 	return mcp.NewToolResultText(string(clusterJSON)), nil
@@ -124,7 +124,7 @@ func (d *DoksTool) updateDOKSCluster(ctx context.Context, req mcp.CallToolReques
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Extract name if provided
@@ -145,7 +145,7 @@ func (d *DoksTool) updateDOKSCluster(ctx context.Context, req mcp.CallToolReques
 				Day:       godo.KubernetesMaintenancePolicyDay(getDayFromString(day)),
 			}
 		} else {
-			return nil, fmt.Errorf("MaintenancePolicy requires both 'StartTime' and 'Day' fields")
+			return mcp.NewToolResultError("MaintenancePolicy requires both 'StartTime' and 'Day' fields"), nil
 		}
 	}
 
@@ -183,13 +183,13 @@ func (d *DoksTool) updateDOKSCluster(ctx context.Context, req mcp.CallToolReques
 	// Make the API call
 	cluster, _, err := d.client.Kubernetes.Update(ctx, clusterID, updateRequest)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to update cluster", err), nil
 	}
 
 	// Marshal the response
 	clusterJSON, err := json.MarshalIndent(cluster, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to marshal cluster", err), nil
 	}
 
 	return mcp.NewToolResultText(string(clusterJSON)), nil
@@ -202,13 +202,13 @@ func (d *DoksTool) deleteDOKSCluster(ctx context.Context, req mcp.CallToolReques
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Make the API call
 	_, err := d.client.Kubernetes.Delete(ctx, clusterID)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to delete cluster", err), nil
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Cluster %s deleted successfully", clusterID)), nil
@@ -221,13 +221,13 @@ func (d *DoksTool) upgradeDOKSCluster(ctx context.Context, req mcp.CallToolReque
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Extract version
 	version, ok := args["VersionSlug"].(string)
 	if !ok {
-		return nil, fmt.Errorf("VersionSlug is required and must be a string")
+		return mcp.NewToolResultError("VersionSlug is required and must be a string"), nil
 	}
 
 	// Make the API call
@@ -235,7 +235,7 @@ func (d *DoksTool) upgradeDOKSCluster(ctx context.Context, req mcp.CallToolReque
 		VersionSlug: version,
 	})
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to upgrade cluster", err), nil
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Cluster %s upgraded to %s", clusterID, version)), nil
@@ -248,19 +248,19 @@ func (d *DoksTool) getDOKSClusterUpgrades(ctx context.Context, req mcp.CallToolR
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Make the API call
 	upgrades, _, err := d.client.Kubernetes.GetUpgrades(ctx, clusterID)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to get upgrades", err), nil
 	}
 
 	// Marshal the response
 	upgradesJSON, err := json.MarshalIndent(upgrades, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to marshal upgrades", err), nil
 	}
 
 	return mcp.NewToolResultText(string(upgradesJSON)), nil
@@ -273,13 +273,13 @@ func (d *DoksTool) getDOKSClusterKubeConfig(ctx context.Context, req mcp.CallToo
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Make the API call
 	kubecfg, _, err := d.client.Kubernetes.GetKubeConfig(ctx, clusterID)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to get kubeconfig", err), nil
 	}
 
 	return mcp.NewToolResultText(string(kubecfg.KubeconfigYAML)), nil
@@ -292,13 +292,13 @@ func (d *DoksTool) getDOKSClusterCredentials(ctx context.Context, req mcp.CallTo
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Make the API call
 	credentials, _, err := d.client.Kubernetes.GetCredentials(ctx, clusterID, &godo.KubernetesClusterCredentialsGetRequest{})
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to get credentials", err), nil
 	}
 
 	// Build response
@@ -321,7 +321,7 @@ func (d *DoksTool) getDOKSClusterCredentials(ctx context.Context, req mcp.CallTo
 	// Marshal the response
 	resultJSON, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
 	}
 
 	return mcp.NewToolResultText(string(resultJSON)), nil
@@ -334,35 +334,35 @@ func (d *DoksTool) createDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 	// Extract cluster ID
 	clusterID, ok := args["cluster_id"].(string)
 	if !ok {
-		return nil, fmt.Errorf("cluster_id is required and must be a string")
+		return mcp.NewToolResultError("cluster_id is required and must be a string"), nil
 	}
 
 	// Extract cluster ID
 	createNPRequest, ok := args["node_pool_create_request"].(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("node_pool_create_request is required, and must be a json as []byte")
+		return mcp.NewToolResultError("node_pool_create_request is required, and must be a json as []byte"), nil
 	}
 
 	jsonBytes, err := json.Marshal(createNPRequest)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal arguments: %w", err)
+		return mcp.NewToolResultErrorFromErr("marshal error", err), nil
 	}
 
 	createRequest := &godo.KubernetesNodePoolCreateRequest{}
 	if err := json.Unmarshal(jsonBytes, createRequest); err != nil {
-		return nil, fmt.Errorf("failed to parse node pool create request: %w", err)
+		return mcp.NewToolResultErrorFromErr("failed to parse node pool create request", err), nil
 	}
 
 	// Make the API call
 	nodePool, _, err := d.client.Kubernetes.CreateNodePool(ctx, clusterID, createRequest)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to create node pool", err), nil
 	}
 
 	// Marshal the response
 	nodePoolJSON, err := json.MarshalIndent(nodePool, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to marshal node pool", err), nil
 	}
 
 	return mcp.NewToolResultText(string(nodePoolJSON)), nil
@@ -375,25 +375,25 @@ func (d *DoksTool) getDOKSNodePool(ctx context.Context, req mcp.CallToolRequest)
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Extract node pool ID
 	nodePoolID, ok := args["NodePoolID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("NodePoolID is required and must be a string")
+		return mcp.NewToolResultError("NodePoolID is required and must be a string"), nil
 	}
 
 	// Make the API call
 	nodePool, _, err := d.client.Kubernetes.GetNodePool(ctx, clusterID, nodePoolID)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to get node pool", err), nil
 	}
 
 	// Marshal the response
 	nodePoolJSON, err := json.MarshalIndent(nodePool, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to marshal node pool", err), nil
 	}
 
 	return mcp.NewToolResultText(string(nodePoolJSON)), nil
@@ -406,19 +406,19 @@ func (d *DoksTool) listDOKSNodePools(ctx context.Context, req mcp.CallToolReques
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Make the API call
 	nodePools, _, err := d.client.Kubernetes.ListNodePools(ctx, clusterID, nil)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to list node pools", err), nil
 	}
 
 	// Marshal the response
 	nodePoolsJSON, err := json.MarshalIndent(nodePools, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to marshal node pools", err), nil
 	}
 
 	return mcp.NewToolResultText(string(nodePoolsJSON)), nil
@@ -431,13 +431,13 @@ func (d *DoksTool) updateDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Extract node pool ID
 	nodePoolID, ok := args["NodePoolID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("NodePoolID is required and must be a string")
+		return mcp.NewToolResultError("NodePoolID is required and must be a string"), nil
 	}
 
 	// Extract name if provided
@@ -528,13 +528,13 @@ func (d *DoksTool) updateDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 	// Make the API call
 	nodePool, _, err := d.client.Kubernetes.UpdateNodePool(ctx, clusterID, nodePoolID, updateRequest)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to update node pool", err), nil
 	}
 
 	// Marshal the response
 	nodePoolJSON, err := json.MarshalIndent(nodePool, "", "  ")
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to marshal node pool", err), nil
 	}
 
 	return mcp.NewToolResultText(string(nodePoolJSON)), nil
@@ -547,19 +547,19 @@ func (d *DoksTool) deleteDOKSNodePool(ctx context.Context, req mcp.CallToolReque
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Extract node pool ID
 	nodePoolID, ok := args["NodePoolID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("NodePoolID is required and must be a string")
+		return mcp.NewToolResultError("NodePoolID is required and must be a string"), nil
 	}
 
 	// Make the API call
 	_, err := d.client.Kubernetes.DeleteNodePool(ctx, clusterID, nodePoolID)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to delete node pool", err), nil
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Node pool %s deleted successfully", nodePoolID)), nil
@@ -572,19 +572,19 @@ func (d *DoksTool) deleteDOKSNode(ctx context.Context, req mcp.CallToolRequest) 
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Extract node pool ID
 	nodePoolID, ok := args["NodePoolID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("NodePoolID is required and must be a string")
+		return mcp.NewToolResultError("NodePoolID is required and must be a string"), nil
 	}
 
 	// Extract node ID
 	nodeID, ok := args["NodeID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("NodeID is required and must be a string")
+		return mcp.NewToolResultError("NodeID is required and must be a string"), nil
 	}
 
 	// Extract skip drain if provided
@@ -605,7 +605,7 @@ func (d *DoksTool) deleteDOKSNode(ctx context.Context, req mcp.CallToolRequest) 
 		Replace:   replace,
 	})
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to delete node", err), nil
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Node %s deleted successfully", nodeID)), nil
@@ -618,13 +618,13 @@ func (d *DoksTool) recycleDOKSNodes(ctx context.Context, req mcp.CallToolRequest
 	// Extract cluster ID
 	clusterID, ok := args["ClusterID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("ClusterID is required and must be a string")
+		return mcp.NewToolResultError("ClusterID is required and must be a string"), nil
 	}
 
 	// Extract node pool ID
 	nodePoolID, ok := args["NodePoolID"].(string)
 	if !ok {
-		return nil, fmt.Errorf("NodePoolID is required and must be a string")
+		return mcp.NewToolResultError("NodePoolID is required and must be a string"), nil
 	}
 
 	// Extract node IDs
@@ -639,7 +639,7 @@ func (d *DoksTool) recycleDOKSNodes(ctx context.Context, req mcp.CallToolRequest
 
 	// If no node IDs provided, return error
 	if len(nodeIDs) == 0 {
-		return nil, fmt.Errorf("NodeIDs is required and must be a non-empty array of strings")
+		return mcp.NewToolResultError("NodeIDs is required and must be a non-empty array of strings"), nil
 	}
 
 	// Make the API call
@@ -647,7 +647,7 @@ func (d *DoksTool) recycleDOKSNodes(ctx context.Context, req mcp.CallToolRequest
 		Nodes: nodeIDs,
 	})
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultErrorFromErr("failed to recycle nodes", err), nil
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Successfully recycled %d nodes in node pool %s", len(nodeIDs), nodePoolID)), nil
