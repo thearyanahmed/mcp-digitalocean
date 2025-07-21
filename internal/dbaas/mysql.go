@@ -44,22 +44,28 @@ func (s *MysqlTool) updateMySQLConfig(ctx context.Context, req mcp.CallToolReque
 	if !ok || id == "" {
 		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
-	configStr, ok := args["config_json"].(string)
-	if !ok || configStr == "" {
-		return mcp.NewToolResultError("config_json is required (JSON for MySQLConfig)"), nil
+
+	configMap, ok := args["config"].(map[string]any)
+	if !ok {
+		return mcp.NewToolResultError("Invalid or missing 'config' object (expected structured object)"), nil
 	}
-	var config godo.MySQLConfig
-	err := json.Unmarshal([]byte(configStr), &config)
+
+	cfgBytes, err := json.Marshal(configMap)
 	if err != nil {
-		return mcp.NewToolResultError("Invalid config_json: " + err.Error()), nil
+		return nil, fmt.Errorf("marshal error: %w", err)
 	}
+
+	var config godo.MySQLConfig
+	if err := json.Unmarshal(cfgBytes, &config); err != nil {
+		return mcp.NewToolResultError("Invalid config object: " + err.Error()), nil
+	}
+
 	_, err = s.client.Databases.UpdateMySQLConfig(ctx, id, &config)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("MySQL config updated successfully"), nil
 }
-
 func (s *MysqlTool) getSQLMode(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 	id, ok := args["id"].(string)
@@ -109,9 +115,48 @@ func (s *MysqlTool) Tools() []server.ServerTool {
 		{
 			Handler: s.updateMySQLConfig,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-update-mysql-config",
-				mcp.WithDescription("Update the MySQL config for a cluster by its id. Accepts a JSON string for the config."),
+				mcp.WithDescription("Update the MySQL config for a cluster by its id. Accepts a structured 'config' object."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the MySQLConfig to set")),
+				mcp.WithObject("config",
+					mcp.Required(),
+					mcp.Description("Structured configuration for MySQL"),
+					mcp.Properties(map[string]any{
+						"connect_timeout":                  map[string]any{"type": "integer"},
+						"default_time_zone":                map[string]any{"type": "string"},
+						"innodb_log_buffer_size":           map[string]any{"type": "integer"},
+						"innodb_online_alter_log_max_size": map[string]any{"type": "integer"},
+						"innodb_lock_wait_timeout":         map[string]any{"type": "integer"},
+						"interactive_timeout":              map[string]any{"type": "integer"},
+						"max_allowed_packet":               map[string]any{"type": "integer"},
+						"net_read_timeout":                 map[string]any{"type": "integer"},
+						"sort_buffer_size":                 map[string]any{"type": "integer"},
+						"sql_mode":                         map[string]any{"type": "string"},
+						"sql_require_primary_key":          map[string]any{"type": "boolean"},
+						"wait_timeout":                     map[string]any{"type": "integer"},
+						"net_write_timeout":                map[string]any{"type": "integer"},
+						"group_concat_max_len":             map[string]any{"type": "integer"},
+						"information_schema_stats_expiry":  map[string]any{"type": "integer"},
+						"innodb_ft_min_token_size":         map[string]any{"type": "integer"},
+						"innodb_ft_server_stopword_table":  map[string]any{"type": "string"},
+						"innodb_print_all_deadlocks":       map[string]any{"type": "boolean"},
+						"innodb_rollback_on_timeout":       map[string]any{"type": "boolean"},
+						"internal_tmp_mem_storage_engine":  map[string]any{"type": "string"},
+						"max_heap_table_size":              map[string]any{"type": "integer"},
+						"tmp_table_size":                   map[string]any{"type": "integer"},
+						"slow_query_log":                   map[string]any{"type": "boolean"},
+						"long_query_time":                  map[string]any{"type": "number"},
+						"backup_hour":                      map[string]any{"type": "integer"},
+						"backup_minute":                    map[string]any{"type": "integer"},
+						"binlog_retention_period":          map[string]any{"type": "integer"},
+						"innodb_change_buffer_max_size":    map[string]any{"type": "integer"},
+						"innodb_flush_neighbors":           map[string]any{"type": "integer"},
+						"innodb_read_io_threads":           map[string]any{"type": "integer"},
+						"innodb_thread_concurrency":        map[string]any{"type": "integer"},
+						"innodb_write_io_threads":          map[string]any{"type": "integer"},
+						"net_buffer_length":                map[string]any{"type": "integer"},
+						"log_output":                       map[string]any{"type": "string"},
+					}),
+				),
 			),
 		},
 		{

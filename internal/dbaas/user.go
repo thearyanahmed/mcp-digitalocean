@@ -36,6 +36,7 @@ func (s *UserTool) getUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.C
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
+
 	jsonUser, err := json.MarshalIndent(dbUser, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal error: %w", err)
@@ -50,13 +51,13 @@ func (s *UserTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp
 		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
 
-	// Optional pagination
 	page := 0
 	if pStr, ok := args["page"].(string); ok && pStr != "" {
 		if p, err := strconv.Atoi(pStr); err == nil {
 			page = p
 		}
 	}
+
 	perPage := 0
 	if pp, ok := args["per_page"].(int); ok {
 		perPage = pp
@@ -71,23 +72,19 @@ func (s *UserTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
+
 	jsonUsers, err := json.MarshalIndent(users, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal error: %w", err)
 	}
+
 	return mcp.NewToolResultText(string(jsonUsers)), nil
 }
 
 func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["id"].(string)
-	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster id is required"), nil
-	}
-	name, ok := args["name"].(string)
-	if !ok || name == "" {
-		return mcp.NewToolResultError("User name is required"), nil
-	}
+	id, _ := args["id"].(string)
+	name, _ := args["name"].(string)
 
 	createReq := &godo.DatabaseCreateUserRequest{Name: name}
 
@@ -95,11 +92,11 @@ func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 		createReq.MySQLSettings = &godo.DatabaseMySQLUserSettings{AuthPlugin: plugin}
 	}
 
-	if settingsStr, ok := args["settings_json"].(string); ok && settingsStr != "" {
+	if settingsMap, ok := args["settings"].(map[string]any); ok {
+		settingsBytes, _ := json.Marshal(settingsMap)
 		var settings godo.DatabaseUserSettings
-		err := json.Unmarshal([]byte(settingsStr), &settings)
-		if err != nil {
-			return mcp.NewToolResultError("Invalid settings_json: " + err.Error()), nil
+		if err := json.Unmarshal(settingsBytes, &settings); err != nil {
+			return mcp.NewToolResultError("Invalid settings object: " + err.Error()), nil
 		}
 		createReq.Settings = &settings
 	}
@@ -108,31 +105,27 @@ func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
+
 	jsonUser, err := json.MarshalIndent(dbUser, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal error: %w", err)
 	}
+
 	return mcp.NewToolResultText(string(jsonUser)), nil
 }
 
 func (s *UserTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["id"].(string)
-	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster id is required"), nil
-	}
-	user, ok := args["user"].(string)
-	if !ok || user == "" {
-		return mcp.NewToolResultError("User name is required"), nil
-	}
+	id, _ := args["id"].(string)
+	user, _ := args["user"].(string)
 
 	updateReq := &godo.DatabaseUpdateUserRequest{}
 
-	if settingsStr, ok := args["settings_json"].(string); ok && settingsStr != "" {
+	if settingsMap, ok := args["settings"].(map[string]any); ok {
+		settingsBytes, _ := json.Marshal(settingsMap)
 		var settings godo.DatabaseUserSettings
-		err := json.Unmarshal([]byte(settingsStr), &settings)
-		if err != nil {
-			return mcp.NewToolResultError("Invalid settings_json: " + err.Error()), nil
+		if err := json.Unmarshal(settingsBytes, &settings); err != nil {
+			return mcp.NewToolResultError("Invalid settings object: " + err.Error()), nil
 		}
 		updateReq.Settings = &settings
 	}
@@ -141,23 +134,19 @@ func (s *UserTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
+
 	jsonUser, err := json.MarshalIndent(dbUser, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal error: %w", err)
 	}
+
 	return mcp.NewToolResultText(string(jsonUser)), nil
 }
 
 func (s *UserTool) deleteUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, ok := args["id"].(string)
-	if !ok || id == "" {
-		return mcp.NewToolResultError("Cluster id is required"), nil
-	}
-	user, ok := args["user"].(string)
-	if !ok || user == "" {
-		return mcp.NewToolResultError("User name is required"), nil
-	}
+	id, _ := args["id"].(string)
+	user, _ := args["user"].(string)
 
 	_, err := s.client.Databases.DeleteUser(ctx, id, user)
 	if err != nil {
@@ -165,21 +154,22 @@ func (s *UserTool) deleteUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 	}
 	return mcp.NewToolResultText("User deleted successfully"), nil
 }
+
 func (s *UserTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getUser,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-get-user",
 				mcp.WithDescription("Get a database user by cluster id and user name"),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster ID")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
 			),
 		},
 		{
 			Handler: s.listUsers,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-list-users",
-				mcp.WithDescription("List database users for a cluster by its id"),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
+				mcp.WithDescription("List database users for a cluster"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster ID")),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional)")),
 				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional)")),
 			),
@@ -187,28 +177,99 @@ func (s *UserTool) Tools() []server.ServerTool {
 		{
 			Handler: s.createUser,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-create-user",
-				mcp.WithDescription("Create a database user for a cluster by its id"),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
+				mcp.WithDescription("Create a new database user for a cluster"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster ID")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("The user name")),
-				mcp.WithString("mysql_auth_plugin", mcp.Description("MySQL auth plugin (optional, e.g., mysql_native_password)")),
-				mcp.WithString("settings_json", mcp.Description("Raw JSON for DatabaseUserSettings (optional)")),
+				mcp.WithString("mysql_auth_plugin", mcp.Description("MySQL auth plugin (optional)")),
+				mcp.WithObject("settings",
+					mcp.Description("Optional user settings object"),
+					mcp.Properties(map[string]any{
+						"acl": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type": "object",
+								"properties": map[string]any{
+									"id":         map[string]any{"type": "string"},
+									"permission": map[string]any{"type": "string"},
+									"topic":      map[string]any{"type": "string"},
+								},
+							},
+						},
+						"opensearch_acl": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type": "object",
+								"properties": map[string]any{
+									"index":      map[string]any{"type": "string"},
+									"permission": map[string]any{"type": "string"},
+								},
+							},
+						},
+						"mongo_user_settings": map[string]any{
+							"type": "object",
+							"properties": map[string]any{
+								"databases": map[string]any{
+									"type":  "array",
+									"items": map[string]any{"type": "string"},
+								},
+								"role": map[string]any{"type": "string"},
+							},
+						},
+					}),
+				),
 			),
 		},
 		{
 			Handler: s.updateUser,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-update-user",
-				mcp.WithDescription("Update a database user for a cluster by its id and user name"),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster id (UUID)")),
+				mcp.WithDescription("Update a database user's settings"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster ID")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name")),
-				mcp.WithString("settings_json", mcp.Description("Raw JSON for DatabaseUserSettings (optional)")),
+				mcp.WithObject("settings",
+					mcp.Description("Optional user settings object"),
+					mcp.Properties(map[string]any{
+						"acl": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type": "object",
+								"properties": map[string]any{
+									"id":         map[string]any{"type": "string"},
+									"permission": map[string]any{"type": "string"},
+									"topic":      map[string]any{"type": "string"},
+								},
+							},
+						},
+						"opensearch_acl": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type": "object",
+								"properties": map[string]any{
+									"index":      map[string]any{"type": "string"},
+									"permission": map[string]any{"type": "string"},
+								},
+							},
+						},
+						"mongo_user_settings": map[string]any{
+							"type": "object",
+							"properties": map[string]any{
+								"databases": map[string]any{
+									"type":  "array",
+									"items": map[string]any{"type": "string"},
+								},
+								"role": map[string]any{"type": "string"},
+							},
+						},
+					}),
+				),
 			),
 		},
 		{
 			Handler: s.deleteUser,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-delete-user",
-				mcp.WithDescription("Delete a database user by cluster id and user name"),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Delete a database user from a cluster"),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster ID")),
 				mcp.WithString("user", mcp.Required(), mcp.Description("The user name to delete")),
 			),
-		}}
+		},
+	}
 }

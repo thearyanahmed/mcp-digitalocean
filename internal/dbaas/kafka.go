@@ -17,9 +17,7 @@ type KafkaTool struct {
 }
 
 func NewKafkaTool(client *godo.Client) *KafkaTool {
-	return &KafkaTool{
-		client: client,
-	}
+	return &KafkaTool{client: client}
 }
 
 func (s *KafkaTool) getKafkaConfig(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -45,14 +43,18 @@ func (s *KafkaTool) updateKafkaConfig(ctx context.Context, req mcp.CallToolReque
 	if !ok || id == "" {
 		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
-	configStr, ok := args["config_json"].(string)
-	if !ok || configStr == "" {
-		return mcp.NewToolResultError("config_json is required (JSON for KafkaConfig)"), nil
+
+	cfgMap, ok := args["config"].(map[string]any)
+	if !ok {
+		return mcp.NewToolResultError("Missing or invalid 'config' object"), nil
+	}
+	cfgBytes, err := json.Marshal(cfgMap)
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
 	}
 	var config godo.KafkaConfig
-	err := json.Unmarshal([]byte(configStr), &config)
-	if err != nil {
-		return mcp.NewToolResultError("Invalid config_json: " + err.Error()), nil
+	if err = json.Unmarshal(cfgBytes, &config); err != nil {
+		return mcp.NewToolResultError("Invalid config object: " + err.Error()), nil
 	}
 	_, err = s.client.Databases.UpdateKafkaConfig(ctx, id, &config)
 	if err != nil {
@@ -67,18 +69,15 @@ func (s *KafkaTool) listTopics(ctx context.Context, req mcp.CallToolRequest) (*m
 	if !ok || id == "" {
 		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
-
 	opts := &godo.ListOptions{}
 	if pStr, ok := args["page"].(string); ok && pStr != "" {
 		if p, err := strconv.Atoi(pStr); err == nil {
 			opts.Page = p
 		}
 	}
-
 	if pp, ok := args["per_page"].(int); ok {
 		opts.PerPage = pp
 	}
-
 	if wpStr, ok := args["with_projects"].(string); ok && wpStr != "" {
 		if wp, err := strconv.ParseBool(wpStr); err == nil {
 			opts.WithProjects = wp
@@ -143,11 +142,11 @@ func (s *KafkaTool) createTopic(ctx context.Context, req mcp.CallToolRequest) (*
 	}
 
 	var topicConfig *godo.TopicConfig
-	if cfgStr, ok := args["config_json"].(string); ok && cfgStr != "" {
+	if cfgMap, ok := args["config"].(map[string]any); ok {
+		cfgBytes, _ := json.Marshal(cfgMap)
 		var cfg godo.TopicConfig
-		err := json.Unmarshal([]byte(cfgStr), &cfg)
-		if err != nil {
-			return mcp.NewToolResultError("Invalid config_json: " + err.Error()), nil
+		if err := json.Unmarshal(cfgBytes, &cfg); err != nil {
+			return mcp.NewToolResultError("Invalid config object: " + err.Error()), nil
 		}
 		topicConfig = &cfg
 	}
@@ -234,11 +233,11 @@ func (s *KafkaTool) updateTopic(ctx context.Context, req mcp.CallToolRequest) (*
 	}
 
 	var topicConfig *godo.TopicConfig
-	if cfgStr, ok := args["config_json"].(string); ok && cfgStr != "" {
+	if cfgMap, ok := args["config"].(map[string]any); ok {
+		cfgBytes, _ := json.Marshal(cfgMap)
 		var cfg godo.TopicConfig
-		err := json.Unmarshal([]byte(cfgStr), &cfg)
-		if err != nil {
-			return mcp.NewToolResultError("Invalid config_json: " + err.Error()), nil
+		if err := json.Unmarshal(cfgBytes, &cfg); err != nil {
+			return mcp.NewToolResultError("Invalid config object: " + err.Error()), nil
 		}
 		topicConfig = &cfg
 	}
@@ -260,67 +259,141 @@ func (s *KafkaTool) Tools() []server.ServerTool {
 		{
 			Handler: s.listTopics,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-list-topics",
-				mcp.WithDescription("List topics for a database cluster by its id (Kafka clusters). Supports all ListOptions: page, per_page, with_projects, only_deployed, public_only, usecases (comma-separated)."),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
-				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional, integer)")),
-				mcp.WithString("with_projects", mcp.Description("Whether to include project_id fields (optional, bool as string)")),
-				mcp.WithString("only_deployed", mcp.Description("Only list deployed agents (optional, bool as string)")),
-				mcp.WithString("public_only", mcp.Description("Include only public models (optional, bool as string)")),
-				mcp.WithString("usecases", mcp.Description("Comma-separated usecases to filter (optional)")),
+				mcp.WithDescription("List topics for a Kafka cluster by its ID. Supports pagination and filtering."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("The Kafka cluster UUID")),
+				mcp.WithString("page", mcp.Description("Page number (string)")),
+				mcp.WithNumber("per_page", mcp.Description("Number of results per page (integer)")),
+				mcp.WithString("with_projects", mcp.Description("Include project field (bool as string)")),
+				mcp.WithString("only_deployed", mcp.Description("Only deployed topics (bool as string)")),
+				mcp.WithString("public_only", mcp.Description("Only public models (bool as string)")),
+				mcp.WithString("usecases", mcp.Description("Comma-separated usecases (optional)")),
 			),
 		},
 		{
 			Handler: s.createTopic,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-create-topic",
-				mcp.WithDescription("Create a topic for a Kafka database cluster by its id. Accepts name (required), partition_count, replication_factor, and config_json (TopicConfig as JSON, all optional)."),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to create")),
-				mcp.WithString("partition_count", mcp.Description("Number of partitions (optional, integer as string)")),
-				mcp.WithString("replication_factor", mcp.Description("Replication factor (optional, integer as string)")),
-				mcp.WithString("config_json", mcp.Description("TopicConfig as JSON (optional)")),
+				mcp.WithDescription("Create a topic for a Kafka cluster."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
+				mcp.WithString("partition_count", mcp.Description("Number of partitions")),
+				mcp.WithString("replication_factor", mcp.Description("Replication factor")),
+				mcp.WithObject("config",
+					mcp.Description("Kafka topic configuration (optional)"),
+					mcp.Properties(map[string]any{
+						"cleanup_policy":                      map[string]any{"type": "string"},
+						"compression_type":                    map[string]any{"type": "string"},
+						"delete_retention_ms":                 map[string]any{"type": "integer"},
+						"flush_messages":                      map[string]any{"type": "integer"},
+						"flush_ms":                            map[string]any{"type": "integer"},
+						"index_interval_bytes":                map[string]any{"type": "integer"},
+						"max_compaction_lag_ms":               map[string]any{"type": "integer"},
+						"max_message_bytes":                   map[string]any{"type": "integer"},
+						"message_down_conversion_enable":      map[string]any{"type": "boolean"},
+						"message_format_version":              map[string]any{"type": "string"},
+						"message_timestamp_difference_max_ms": map[string]any{"type": "integer"},
+						"message_timestamp_type":              map[string]any{"type": "string"},
+						"min_cleanable_dirty_ratio":           map[string]any{"type": "number"},
+						"min_compaction_lag_ms":               map[string]any{"type": "integer"},
+						"min_insync_replicas":                 map[string]any{"type": "integer"},
+						"preallocate":                         map[string]any{"type": "boolean"},
+						"retention_bytes":                     map[string]any{"type": "integer"},
+						"retention_ms":                        map[string]any{"type": "integer"},
+						"segment_bytes":                       map[string]any{"type": "integer"},
+						"segment_index_bytes":                 map[string]any{"type": "integer"},
+						"segment_jitter_ms":                   map[string]any{"type": "integer"},
+						"segment_ms":                          map[string]any{"type": "integer"},
+					}),
+				),
 			),
 		},
 		{
 			Handler: s.getTopic,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-get-topic",
-				mcp.WithDescription("Get a topic for a Kafka database cluster by its id and topic name."),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to get")),
+				mcp.WithDescription("Get a Kafka topic by name."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
 			),
 		},
 		{
 			Handler: s.deleteTopic,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-delete-topic",
-				mcp.WithDescription("Delete a topic for a Kafka database cluster by its id and topic name."),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to delete")),
+				mcp.WithDescription("Delete a Kafka topic by name."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
 			),
 		},
 		{
 			Handler: s.updateTopic,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-update-topic",
-				mcp.WithDescription("Update a topic for a Kafka database cluster by its id and topic name. Accepts partition_count, replication_factor, and config_json (TopicConfig as JSON, all optional)."),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("name", mcp.Required(), mcp.Description("The topic name to update")),
-				mcp.WithString("partition_count", mcp.Description("Number of partitions (optional, integer as string)")),
-				mcp.WithString("replication_factor", mcp.Description("Replication factor (optional, integer as string)")),
-				mcp.WithString("config_json", mcp.Description("TopicConfig as JSON (optional)")),
+				mcp.WithDescription("Update a Kafka topic's partition count, replication factor, or config."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
+				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
+				mcp.WithString("partition_count", mcp.Description("Number of partitions")),
+				mcp.WithString("replication_factor", mcp.Description("Replication factor")),
+				mcp.WithObject("config",
+					mcp.Description("Kafka topic configuration (optional)"),
+					mcp.Properties(map[string]any{
+						"cleanup_policy":                      map[string]any{"type": "string"},
+						"compression_type":                    map[string]any{"type": "string"},
+						"delete_retention_ms":                 map[string]any{"type": "integer"},
+						"flush_messages":                      map[string]any{"type": "integer"},
+						"flush_ms":                            map[string]any{"type": "integer"},
+						"index_interval_bytes":                map[string]any{"type": "integer"},
+						"max_compaction_lag_ms":               map[string]any{"type": "integer"},
+						"max_message_bytes":                   map[string]any{"type": "integer"},
+						"message_down_conversion_enable":      map[string]any{"type": "boolean"},
+						"message_format_version":              map[string]any{"type": "string"},
+						"message_timestamp_difference_max_ms": map[string]any{"type": "integer"},
+						"message_timestamp_type":              map[string]any{"type": "string"},
+						"min_cleanable_dirty_ratio":           map[string]any{"type": "number"},
+						"min_compaction_lag_ms":               map[string]any{"type": "integer"},
+						"min_insync_replicas":                 map[string]any{"type": "integer"},
+						"preallocate":                         map[string]any{"type": "boolean"},
+						"retention_bytes":                     map[string]any{"type": "integer"},
+						"retention_ms":                        map[string]any{"type": "integer"},
+						"segment_bytes":                       map[string]any{"type": "integer"},
+						"segment_index_bytes":                 map[string]any{"type": "integer"},
+						"segment_jitter_ms":                   map[string]any{"type": "integer"},
+						"segment_ms":                          map[string]any{"type": "integer"},
+					}),
+				),
 			),
 		},
 		{
 			Handler: s.getKafkaConfig,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-get-kafka-config",
-				mcp.WithDescription("Get the Kafka config for a cluster by its id"),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
+				mcp.WithDescription("Get the Kafka config for a cluster."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateKafkaConfig,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-update-kafka-config",
-				mcp.WithDescription("Update the Kafka config for a cluster by its id. Accepts a JSON string for the config."),
-				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the KafkaConfig to set")),
+				mcp.WithDescription("Update the Kafka cluster configuration."),
+				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
+				mcp.WithObject("config",
+					mcp.Required(),
+					mcp.Description("Kafka configuration object"),
+					mcp.Properties(map[string]any{
+						"group_initial_rebalance_delay_ms":        map[string]any{"type": "integer"},
+						"group_min_session_timeout_ms":            map[string]any{"type": "integer"},
+						"group_max_session_timeout_ms":            map[string]any{"type": "integer"},
+						"message_max_bytes":                       map[string]any{"type": "integer"},
+						"log_cleaner_delete_retention_ms":         map[string]any{"type": "integer"},
+						"log_cleaner_min_compaction_lag_ms":       map[string]any{"type": "integer"},
+						"log_flush_interval_ms":                   map[string]any{"type": "integer"},
+						"log_index_interval_bytes":                map[string]any{"type": "integer"},
+						"log_message_downconversion_enable":       map[string]any{"type": "boolean"},
+						"log_message_timestamp_difference_max_ms": map[string]any{"type": "integer"},
+						"log_preallocate":                         map[string]any{"type": "boolean"},
+						"log_retention_bytes":                     map[string]any{"type": "integer"},
+						"log_retention_hours":                     map[string]any{"type": "integer"},
+						"log_retention_ms":                        map[string]any{"type": "integer"},
+						"log_roll_jitter_ms":                      map[string]any{"type": "integer"},
+						"log_segment_delete_delay_ms":             map[string]any{"type": "integer"},
+						"auto_create_topics_enable":               map[string]any{"type": "boolean"},
+					}),
+				),
 			),
 		},
 	}

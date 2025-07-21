@@ -43,19 +43,27 @@ func (s *MongoTool) updateMongoDBConfig(ctx context.Context, req mcp.CallToolReq
 	if !ok || id == "" {
 		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
-	configStr, ok := args["config_json"].(string)
-	if !ok || configStr == "" {
-		return mcp.NewToolResultError("config_json is required (JSON for MongoDBConfig)"), nil
+
+	cfgMap, ok := args["config"].(map[string]any)
+	if !ok {
+		return mcp.NewToolResultError("Missing or invalid 'config' object (expected structured object)"), nil
 	}
-	var config godo.MongoDBConfig
-	err := json.Unmarshal([]byte(configStr), &config)
+
+	cfgBytes, err := json.Marshal(cfgMap)
 	if err != nil {
-		return mcp.NewToolResultError("Invalid config_json: " + err.Error()), nil
+		return nil, fmt.Errorf("marshal error: %w", err)
 	}
+
+	var config godo.MongoDBConfig
+	if err := json.Unmarshal(cfgBytes, &config); err != nil {
+		return mcp.NewToolResultError("Invalid config object: " + err.Error()), nil
+	}
+
 	_, err = s.client.Databases.UpdateMongoDBConfig(ctx, id, &config)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
+
 	return mcp.NewToolResultText("MongoDB config updated successfully"), nil
 }
 
@@ -71,9 +79,34 @@ func (s *MongoTool) Tools() []server.ServerTool {
 		{
 			Handler: s.updateMongoDBConfig,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-update-mongodb-config",
-				mcp.WithDescription("Update the MongoDB config for a cluster by its id. Accepts a JSON string for the config."),
+				mcp.WithDescription("Update the MongoDB config for a cluster by its id. Accepts a structured config object."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the MongoDBConfig to set")),
+				mcp.WithObject("config",
+					mcp.Required(),
+					mcp.Description("Configuration parameters for MongoDB"),
+					mcp.Properties(map[string]any{
+						"default_read_concern": map[string]any{
+							"type":        "string",
+							"description": "Specifies the default read concern (e.g., 'local', 'majority')",
+						},
+						"default_write_concern": map[string]any{
+							"type":        "string",
+							"description": "Specifies the default write concern (e.g., 'majority')",
+						},
+						"transaction_lifetime_limit_seconds": map[string]any{
+							"type":        "integer",
+							"description": "Time in seconds a transaction can run before expiring",
+						},
+						"slow_op_threshold_ms": map[string]any{
+							"type":        "integer",
+							"description": "Threshold in milliseconds to log slow operations",
+						},
+						"verbosity": map[string]any{
+							"type":        "integer",
+							"description": "Level of MongoDB logging verbosity (typically 0–5)",
+						},
+					}),
+				),
 			),
 		},
 	}

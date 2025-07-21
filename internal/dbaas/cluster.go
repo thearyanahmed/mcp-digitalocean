@@ -238,20 +238,28 @@ func (s *ClusterTool) upgradeMajorVersion(ctx context.Context, req mcp.CallToolR
 	return mcp.NewToolResultText("Major version upgrade initiated successfully"), nil
 }
 
+// Handler implementation for startOnlineMigration using structured object
 func (s *ClusterTool) startOnlineMigration(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
+
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
 		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
-	sourceStr, ok := args["source_json"].(string)
-	if !ok || sourceStr == "" {
-		return mcp.NewToolResultError("source_json is required (JSON for DatabaseOnlineMigrationConfig)"), nil
+
+	sourceMap, ok := args["source"].(map[string]any)
+	if !ok {
+		return mcp.NewToolResultError("Missing or invalid 'source' object (expected structured object)"), nil
 	}
-	var source godo.DatabaseOnlineMigrationConfig
-	err := json.Unmarshal([]byte(sourceStr), &source)
+
+	sourceBytes, err := json.Marshal(sourceMap)
 	if err != nil {
-		return mcp.NewToolResultError("Invalid source_json: " + err.Error()), nil
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	var source godo.DatabaseOnlineMigrationConfig
+	if err := json.Unmarshal(sourceBytes, &source); err != nil {
+		return mcp.NewToolResultError("Invalid source object: " + err.Error()), nil
 	}
 	disableSSL := false
 	if dssl, ok := args["disable_ssl"].(bool); ok {
@@ -397,11 +405,36 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		{
 			Handler: s.startOnlineMigration,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-start-online-migration",
-				mcp.WithDescription("Start an online migration for a database cluster by its id. Accepts source_json (DatabaseOnlineMigrationConfig as JSON, required), disable_ssl (optional, bool as boolean), and ignore_dbs (optional, comma-separated)."),
+				mcp.WithDescription("Start an online migration for a database cluster by its id."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("source_json", mcp.Required(), mcp.Description("DatabaseOnlineMigrationConfig as JSON (required)")),
-				mcp.WithBoolean("disable_ssl", mcp.Description("Disable SSL for migration (optional, bool as boolean)")),
-				mcp.WithString("ignore_dbs", mcp.Description("Comma-separated list of DBs to ignore (optional)")),
+				mcp.WithObject("source",
+					mcp.Required(),
+					mcp.Description("The source database configuration"),
+					mcp.Properties(map[string]any{
+						"host": map[string]any{
+							"type":        "string",
+							"description": "Hostname or IP of the source database",
+						},
+						"port": map[string]any{
+							"type":        "integer",
+							"description": "Source database port",
+						},
+						"dbname": map[string]any{
+							"type":        "string",
+							"description": "Name of the database to migrate",
+						},
+						"username": map[string]any{
+							"type":        "string",
+							"description": "Username for source connection",
+						},
+						"password": map[string]any{
+							"type":        "string",
+							"description": "Password for source connection",
+						},
+					}),
+				),
+				mcp.WithBoolean("disable_ssl", mcp.Description("Disable SSL on source connection (optional)")),
+				mcp.WithString("ignore_dbs", mcp.Description("Comma-separated list of databases to ignore")),
 			),
 		},
 		{

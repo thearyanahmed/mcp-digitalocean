@@ -30,6 +30,7 @@ func (s *RedisTool) getRedisConfig(ctx context.Context, req mcp.CallToolRequest)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
+
 	jsonCfg, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal error: %w", err)
@@ -43,19 +44,27 @@ func (s *RedisTool) updateRedisConfig(ctx context.Context, req mcp.CallToolReque
 	if !ok || id == "" {
 		return mcp.NewToolResultError("Cluster id is required"), nil
 	}
-	configStr, ok := args["config_json"].(string)
-	if !ok || configStr == "" {
-		return mcp.NewToolResultError("config_json is required (JSON for RedisConfig)"), nil
+
+	configMap, ok := args["config"].(map[string]any)
+	if !ok {
+		return mcp.NewToolResultError("Missing or invalid 'config' object (expected structured object)"), nil
 	}
-	var config godo.RedisConfig
-	err := json.Unmarshal([]byte(configStr), &config)
+
+	cfgBytes, err := json.Marshal(configMap)
 	if err != nil {
-		return mcp.NewToolResultError("Invalid config_json: " + err.Error()), nil
+		return nil, fmt.Errorf("marshal error: %w", err)
 	}
+
+	var config godo.RedisConfig
+	if err := json.Unmarshal(cfgBytes, &config); err != nil {
+		return mcp.NewToolResultError("Invalid config object: " + err.Error()), nil
+	}
+
 	_, err = s.client.Databases.UpdateRedisConfig(ctx, id, &config)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
+
 	return mcp.NewToolResultText("Redis config updated successfully"), nil
 }
 
@@ -64,16 +73,56 @@ func (s *RedisTool) Tools() []server.ServerTool {
 		{
 			Handler: s.getRedisConfig,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-get-redis-config",
-				mcp.WithDescription("Get the Redis config for a cluster by its id"),
+				mcp.WithDescription("Get the Redis config for a cluster by its id."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateRedisConfig,
 			Tool: mcp.NewTool("digitalocean-databases-cluster-update-redis-config",
-				mcp.WithDescription("Update the Redis config for a cluster by its id. Accepts a JSON string for the config."),
+				mcp.WithDescription("Update the Redis config for a cluster by its id. Accepts a structured config object."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
-				mcp.WithString("config_json", mcp.Required(), mcp.Description("JSON for the RedisConfig to set")),
+				mcp.WithObject("config",
+					mcp.Required(),
+					mcp.Description("Structured configuration for Redis database"),
+					mcp.Properties(map[string]any{
+						"redis_maxmemory_policy": map[string]any{
+							"type":        "string",
+							"description": "Policy for eviction when memory is full (e.g., allkeys-lru)",
+						},
+						"redis_pubsub_client_output_buffer_limit": map[string]any{
+							"type": "integer",
+						},
+						"redis_number_of_databases": map[string]any{
+							"type": "integer",
+						},
+						"redis_io_threads": map[string]any{
+							"type": "integer",
+						},
+						"redis_lfu_log_factor": map[string]any{
+							"type": "integer",
+						},
+						"redis_lfu_decay_time": map[string]any{
+							"type": "integer",
+						},
+						"redis_ssl": map[string]any{
+							"type": "boolean",
+						},
+						"redis_timeout": map[string]any{
+							"type": "integer",
+						},
+						"redis_notify_keyspace_events": map[string]any{
+							"type": "string",
+						},
+						"redis_persistence": map[string]any{
+							"type":        "string",
+							"description": "Persistence mode (e.g., aof, rdb, none)",
+						},
+						"redis_acl_channels_default": map[string]any{
+							"type": "string",
+						},
+					}),
+				),
 			),
 		},
 	}
