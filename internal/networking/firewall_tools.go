@@ -69,12 +69,28 @@ func (f *FirewallTool) createFirewall(ctx context.Context, req mcp.CallToolReque
 	outboundProtocol := req.GetArguments()["OutboundProtocol"].(string)
 	outboundPortRange := req.GetArguments()["OutboundPortRange"].(string)
 	outboundDestination := req.GetArguments()["OutboundDestination"].(string)
-	dropletIDs := req.GetArguments()["DropletIDs"].([]float64)
-	tags := req.GetArguments()["Tags"].([]string)
+
+	dropletIDs := make([]any, 0)
+	if v, ok := req.GetArguments()["DropletIDs"].([]any); ok {
+		dropletIDs = v
+	}
+	tags := make([]any, 0)
+	if v, ok := req.GetArguments()["Tags"].([]any); ok {
+		tags = v
+	}
 
 	dIDs := make([]int, len(dropletIDs))
 	for i, v := range dropletIDs {
-		dIDs[i] = int(v)
+		if stringID, ok := v.(float64); ok {
+			dIDs[i] = int(stringID)
+		}
+	}
+
+	tagsStr := make([]string, len(tags))
+	for i, v := range tags {
+		if tag, ok := v.(string); ok {
+			tagsStr[i] = tag
+		}
 	}
 
 	inboundRule := godo.InboundRule{
@@ -94,7 +110,7 @@ func (f *FirewallTool) createFirewall(ctx context.Context, req mcp.CallToolReque
 		InboundRules:  []godo.InboundRule{inboundRule},
 		OutboundRules: []godo.OutboundRule{outboundRule},
 		DropletIDs:    dIDs,
-		Tags:          tags,
+		Tags:          tagsStr,
 	}
 
 	firewall, _, err := f.client.Firewalls.Create(ctx, firewallRequest)
@@ -123,10 +139,12 @@ func (f *FirewallTool) deleteFirewall(ctx context.Context, req mcp.CallToolReque
 // addDroplets adds one or more droplet to a firewall
 func (f *FirewallTool) addDroplets(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	firewallID := req.GetArguments()["ID"].(string)
-	dropletIDs := req.GetArguments()["DropletIDs"].([]float64)
+	dropletIDs := req.GetArguments()["DropletIDs"].([]any)
 	dIDs := make([]int, len(dropletIDs))
 	for i, id := range dropletIDs {
-		dIDs[i] = int(id)
+		if did, ok := id.(float64); ok {
+			dIDs[i] = int(did)
+		}
 	}
 	_, err := f.client.Firewalls.AddDroplets(ctx, firewallID, dIDs...)
 	if err != nil {
@@ -137,10 +155,12 @@ func (f *FirewallTool) addDroplets(ctx context.Context, req mcp.CallToolRequest)
 
 func (f *FirewallTool) removeDroplets(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	firewallID := req.GetArguments()["ID"].(string)
-	dropletIDs := req.GetArguments()["DropletIDs"].([]float64)
+	dropletIDs := req.GetArguments()["DropletIDs"].([]any)
 	dIDs := make([]int, len(dropletIDs))
 	for i, id := range dropletIDs {
-		dIDs[i] = int(id)
+		if did, ok := id.(float64); ok {
+			dIDs[i] = int(did)
+		}
 	}
 	_, err := f.client.Firewalls.RemoveDroplets(ctx, firewallID, dIDs...)
 	if err != nil {
@@ -152,8 +172,14 @@ func (f *FirewallTool) removeDroplets(ctx context.Context, req mcp.CallToolReque
 // addTags adds one or more tags to a firewall
 func (f *FirewallTool) addTags(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	firewallID := req.GetArguments()["ID"].(string)
-	tagNames := req.GetArguments()["Tags"].([]string)
-	_, err := f.client.Firewalls.AddTags(ctx, firewallID, tagNames...)
+	tagNames := req.GetArguments()["Tags"].([]any)
+	tagNamesStr := make([]string, len(tagNames))
+	for i, v := range tagNames {
+		if tag, ok := v.(string); ok {
+			tagNamesStr[i] = tag
+		}
+	}
+	_, err := f.client.Firewalls.AddTags(ctx, firewallID, tagNamesStr...)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -163,12 +189,162 @@ func (f *FirewallTool) addTags(ctx context.Context, req mcp.CallToolRequest) (*m
 // removeTags removes one or more tags from a firewall
 func (f *FirewallTool) removeTags(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	firewallID := req.GetArguments()["ID"].(string)
-	tagNames := req.GetArguments()["Tags"].([]string)
-	_, err := f.client.Firewalls.RemoveTags(ctx, firewallID, tagNames...)
+	tagNames := req.GetArguments()["Tags"].([]any)
+	tagNamesStr := make([]string, len(tagNames))
+	for i, v := range tagNames {
+		if tag, ok := v.(string); ok {
+			tagNamesStr[i] = tag
+		}
+	}
+	_, err := f.client.Firewalls.RemoveTags(ctx, firewallID, tagNamesStr...)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	return mcp.NewToolResultText("Tag(s) removed from firewall successfully"), nil
+}
+
+// addRules adds one or more rules to a firewall
+func (f *FirewallTool) addRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	firewallID := req.GetArguments()["ID"].(string)
+
+	var inboundRules []godo.InboundRule
+	var outboundRules []godo.OutboundRule
+
+	// Process inbound rules if provided
+	if inboundData, ok := req.GetArguments()["InboundRules"]; ok && inboundData != nil {
+		inboundRulesList := inboundData.([]any)
+		for _, ruleData := range inboundRulesList {
+			rule := ruleData.(map[string]any)
+
+			protocol := rule["Protocol"].(string)
+			portRange := rule["PortRange"].(string)
+			sources := rule["Sources"].([]any)
+
+			sourceAddresses := make([]string, len(sources))
+			for i, source := range sources {
+				sourceAddresses[i] = source.(string)
+			}
+
+			inboundRule := godo.InboundRule{
+				Protocol:  protocol,
+				PortRange: portRange,
+				Sources:   &godo.Sources{Addresses: sourceAddresses},
+			}
+			inboundRules = append(inboundRules, inboundRule)
+		}
+	}
+
+	// Process outbound rules if provided
+	if outboundData, ok := req.GetArguments()["OutboundRules"]; ok && outboundData != nil {
+		outboundRulesList := outboundData.([]any)
+		for _, ruleData := range outboundRulesList {
+			rule := ruleData.(map[string]any)
+
+			protocol := rule["Protocol"].(string)
+			portRange := rule["PortRange"].(string)
+			destinations := rule["Destinations"].([]any)
+
+			destAddresses := make([]string, len(destinations))
+			for i, dest := range destinations {
+				destAddresses[i] = dest.(string)
+			}
+
+			outboundRule := godo.OutboundRule{
+				Protocol:     protocol,
+				PortRange:    portRange,
+				Destinations: &godo.Destinations{Addresses: destAddresses},
+			}
+			outboundRules = append(outboundRules, outboundRule)
+		}
+	}
+
+	if len(inboundRules) == 0 && len(outboundRules) == 0 {
+		return mcp.NewToolResultError("At least one inbound or outbound rule must be provided"), nil
+	}
+
+	rulesRequest := &godo.FirewallRulesRequest{
+		InboundRules:  inboundRules,
+		OutboundRules: outboundRules,
+	}
+
+	_, err := f.client.Firewalls.AddRules(ctx, firewallID, rulesRequest)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	return mcp.NewToolResultText("Rule(s) added to firewall successfully"), nil
+}
+
+// removeRules removes one or more rules from a firewall
+func (f *FirewallTool) removeRules(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	firewallID := req.GetArguments()["ID"].(string)
+
+	var inboundRules []godo.InboundRule
+	var outboundRules []godo.OutboundRule
+
+	// Process inbound rules if provided
+	if inboundData, ok := req.GetArguments()["InboundRules"]; ok && inboundData != nil {
+		inboundRulesList := inboundData.([]any)
+		for _, ruleData := range inboundRulesList {
+			rule := ruleData.(map[string]any)
+
+			protocol := rule["Protocol"].(string)
+			portRange := rule["PortRange"].(string)
+			sources := rule["Sources"].([]any)
+
+			sourceAddresses := make([]string, len(sources))
+			for i, source := range sources {
+				sourceAddresses[i] = source.(string)
+			}
+
+			inboundRule := godo.InboundRule{
+				Protocol:  protocol,
+				PortRange: portRange,
+				Sources:   &godo.Sources{Addresses: sourceAddresses},
+			}
+			inboundRules = append(inboundRules, inboundRule)
+		}
+	}
+
+	// Process outbound rules if provided
+	if outboundData, ok := req.GetArguments()["OutboundRules"]; ok && outboundData != nil {
+		outboundRulesList := outboundData.([]any)
+		for _, ruleData := range outboundRulesList {
+			rule := ruleData.(map[string]any)
+
+			protocol := rule["Protocol"].(string)
+			portRange := rule["PortRange"].(string)
+			destinations := rule["Destinations"].([]any)
+
+			destAddresses := make([]string, len(destinations))
+			for i, dest := range destinations {
+				destAddresses[i] = dest.(string)
+			}
+
+			outboundRule := godo.OutboundRule{
+				Protocol:     protocol,
+				PortRange:    portRange,
+				Destinations: &godo.Destinations{Addresses: destAddresses},
+			}
+			outboundRules = append(outboundRules, outboundRule)
+		}
+	}
+
+	if len(inboundRules) == 0 && len(outboundRules) == 0 {
+		return mcp.NewToolResultError("At least one inbound or outbound rule must be provided"), nil
+	}
+
+	rulesRequest := &godo.FirewallRulesRequest{
+		InboundRules:  inboundRules,
+		OutboundRules: outboundRules,
+	}
+
+	_, err := f.client.Firewalls.RemoveRules(ctx, firewallID, rulesRequest)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	return mcp.NewToolResultText("Rule(s) removed from firewall successfully"), nil
 }
 
 // Tools returns a list of tool functions
@@ -259,6 +435,112 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 				mcp.WithArray("Tags", mcp.Required(), mcp.Description("Tags to remove from the firewall"), mcp.Items(map[string]any{
 					"type":        "string",
 					"description": "Tag to remove",
+				})),
+			),
+		},
+		{
+			Handler: f.addRules,
+			Tool: mcp.NewTool("digitalocean-firewall-add-rules",
+				mcp.WithDescription("Add one or more rules to a firewall"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to add rules to")),
+				mcp.WithArray("InboundRules", mcp.Description("Inbound rules to add"), mcp.Items(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"Protocol": map[string]any{
+							"type":        "string",
+							"description": "Protocol (tcp, udp, icmp)",
+						},
+						"PortRange": map[string]any{
+							"type":        "string",
+							"description": "Port range (e.g., '80', '443', '8000-8080')",
+						},
+						"Sources": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type":        "string",
+								"description": "Source IP address or CIDR block",
+							},
+							"description": "List of source addresses",
+						},
+					},
+					"required":    []string{"Protocol", "PortRange", "Sources"},
+					"description": "Inbound firewall rule",
+				})),
+				mcp.WithArray("OutboundRules", mcp.Description("Outbound rules to add"), mcp.Items(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"Protocol": map[string]any{
+							"type":        "string",
+							"description": "Protocol (tcp, udp, icmp)",
+						},
+						"PortRange": map[string]any{
+							"type":        "string",
+							"description": "Port range (e.g., '80', '443', '8000-8080')",
+						},
+						"Destinations": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type":        "string",
+								"description": "Destination IP address or CIDR block",
+							},
+							"description": "List of destination addresses",
+						},
+					},
+					"required":    []string{"Protocol", "PortRange", "Destinations"},
+					"description": "Outbound firewall rule",
+				})),
+			),
+		},
+		{
+			Handler: f.removeRules,
+			Tool: mcp.NewTool("digitalocean-firewall-remove-rules",
+				mcp.WithDescription("Remove one or more rules from a firewall"),
+				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to remove rules from")),
+				mcp.WithArray("InboundRules", mcp.Description("Inbound rules to remove"), mcp.Items(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"Protocol": map[string]any{
+							"type":        "string",
+							"description": "Protocol (tcp, udp, icmp)",
+						},
+						"PortRange": map[string]any{
+							"type":        "string",
+							"description": "Port range (e.g., '80', '443', '8000-8080')",
+						},
+						"Sources": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type":        "string",
+								"description": "Source IP address or CIDR block",
+							},
+							"description": "List of source addresses",
+						},
+					},
+					"required":    []string{"Protocol", "PortRange", "Sources"},
+					"description": "Inbound firewall rule",
+				})),
+				mcp.WithArray("OutboundRules", mcp.Description("Outbound rules to remove"), mcp.Items(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"Protocol": map[string]any{
+							"type":        "string",
+							"description": "Protocol (tcp, udp, icmp)",
+						},
+						"PortRange": map[string]any{
+							"type":        "string",
+							"description": "Port range (e.g., '80', '443', '8000-8080')",
+						},
+						"Destinations": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type":        "string",
+								"description": "Destination IP address or CIDR block",
+							},
+							"description": "List of destination addresses",
+						},
+					},
+					"required":    []string{"Protocol", "PortRange", "Destinations"},
+					"description": "Outbound firewall rule",
 				})),
 			),
 		},

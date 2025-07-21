@@ -30,3 +30,5 @@ scripts/npm/node_modules/
 scripts/npm/dist/
 
 .vscode/
+docode/*
+dist/

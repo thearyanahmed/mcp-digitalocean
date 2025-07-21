@@ -1,4 +1,4 @@
-package networking
+package spaces
 
 import (
 	"context"
@@ -67,12 +67,10 @@ func (c *CDNTool) listCDNs(ctx context.Context, req mcp.CallToolRequest) (*mcp.C
 func (c *CDNTool) createCDN(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	origin := req.GetArguments()["Origin"].(string)
 	ttl := uint32(req.GetArguments()["TTL"].(float64))
-	customDomain, _ := req.GetArguments()["CustomDomain"].(string)
 
 	createRequest := &godo.CDNCreateRequest{
-		Origin:       origin,
-		TTL:          ttl,
-		CustomDomain: customDomain,
+		Origin: origin,
+		TTL:    ttl,
 	}
 
 	cdn, _, err := c.client.CDNs.Create(ctx, createRequest)
@@ -102,10 +100,17 @@ func (c *CDNTool) deleteCDN(ctx context.Context, req mcp.CallToolRequest) (*mcp.
 // flushCDNCache flushes the cache of a CDN
 func (c *CDNTool) flushCDNCache(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	cdnID := req.GetArguments()["ID"].(string)
-	files := req.GetArguments()["Files"].([]string)
+	files := req.GetArguments()["Files"].([]any)
+
+	filesStr := make([]string, len(files))
+	for i, file := range files {
+		if fileStr, ok := file.(string); ok {
+			filesStr[i] = fileStr
+		}
+	}
 
 	flushRequest := &godo.CDNFlushCacheRequest{
-		Files: files,
+		Files: filesStr,
 	}
 
 	_, err := c.client.CDNs.FlushCache(ctx, cdnID, flushRequest)
@@ -121,14 +126,14 @@ func (c *CDNTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: c.getCDN,
-			Tool: mcp.NewTool("digitalocean-cdn-get",
+			Tool: mcp.NewTool("digitalocean-spaces-cdn-get",
 				mcp.WithDescription("Get CDN information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the CDN")),
 			),
 		},
 		{
 			Handler: c.listCDNs,
-			Tool: mcp.NewTool("digitalocean-cdn-list",
+			Tool: mcp.NewTool("digitalocean-spaces-cdn-list",
 				mcp.WithDescription("List CDNs with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -136,26 +141,26 @@ func (c *CDNTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.createCDN,
-			Tool: mcp.NewTool("digitalocean-cdn-create",
+			Tool: mcp.NewTool("digitalocean-spaces-cdn-create",
 				mcp.WithDescription("Create a new CDN"),
 				mcp.WithString("Origin", mcp.Required(), mcp.Description("Origin URL for the CDN")),
 				mcp.WithNumber("TTL", mcp.Required(), mcp.Description("Time-to-live for the CDN cache")),
-				mcp.WithString("CustomDomain", mcp.Description("Custom domain for the CDN")),
 			),
 		},
 		{
 			Handler: c.deleteCDN,
-			Tool: mcp.NewTool("digitalocean-cdn-delete",
+			Tool: mcp.NewTool("digitalocean-spaces-cdn-delete",
 				mcp.WithDescription("Delete a CDN"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the CDN to delete")),
 			),
 		},
+
 		{
 			Handler: c.flushCDNCache,
-			Tool: mcp.NewTool("digitalocean-cdn-flush-cache",
+			Tool: mcp.NewTool("digitalocean-spaces-cdn-flush-cache",
 				mcp.WithDescription("Flush the cache of a CDN"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the CDN")),
-				mcp.WithArray("Files", mcp.Required(), mcp.Description("file names to flush from the cache"), mcp.Items(map[string]any{
+				mcp.WithArray("Files", mcp.Required(), mcp.Description("file names to flush from the cache (max 50 per request)"), mcp.Items(map[string]any{
 					"type":        "string",
 					"description": "name of file",
 				})),
