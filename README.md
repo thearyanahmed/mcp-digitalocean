@@ -78,11 +78,11 @@ The MCP DigitalOcean Integration supports the following services, allowing users
 Each service provides a detailed README describing all available tools, resources, arguments, and example queries.
 See the following files for full documentation:
 
-- [Apps Service README](./internal/apps/README.md)
-- [Droplet Service README](./internal/droplet/README.md)
-- [Account Service README](./internal/account/README.md)
-- [Networking Service README](./internal/networking/README.md)
-- [DBaaS Service README](./internal/dbaas/README.md)
+- [Apps Service](./internal/apps/README.md)
+- [Droplet Service](./internal/droplet/README.md)
+- [Account Service](./internal/account/README.md)
+- [Networking Service](./internal/networking/README.md)
+- [DBaaS Service](./internal/dbaas/README.md)
 - [Insights Service](./internal/insights/README.md)
 - [Spaces Service](./internal/spaces/README.md)
 
