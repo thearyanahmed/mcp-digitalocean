@@ -7,23 +7,30 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/server"
+
 	"mcp-digitalocean/internal/account"
 	"mcp-digitalocean/internal/apps"
 	"mcp-digitalocean/internal/common"
+	"mcp-digitalocean/internal/dbaas"
+	"mcp-digitalocean/internal/doks"
 	"mcp-digitalocean/internal/droplet"
 	"mcp-digitalocean/internal/insights"
+	"mcp-digitalocean/internal/marketplace"
 	"mcp-digitalocean/internal/networking"
 	"mcp-digitalocean/internal/spaces"
 )
 
 // supportedServices is a set of services that we support in this MCP server.
 var supportedServices = map[string]struct{}{
-	"apps":       {},
-	"networking": {},
-	"droplets":   {},
-	"accounts":   {},
-	"spaces":     {},
-	"insights":   {},
+	"apps":        {},
+	"networking":  {},
+	"droplets":    {},
+	"accounts":    {},
+	"spaces":      {},
+	"databases":   {},
+	"marketplace": {},
+	"insights":    {},
+	"doks":        {},
 }
 
 // registerAppTools registers the app platform tools with the MCP server.
@@ -48,6 +55,7 @@ func registerCommonTools(s *server.MCPServer, c *godo.Client) error {
 // registerDropletTools registers the droplet tools with the MCP server.
 func registerDropletTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(droplet.NewDropletTool(c).Tools()...)
+	s.AddTools(droplet.NewDropletActionsTool(c).Tools()...)
 	s.AddTools(droplet.NewImagesTool(c).Tools()...)
 	s.AddTools(droplet.NewSizesTool(c).Tools()...)
 	return nil
@@ -86,11 +94,37 @@ func registerSpacesTools(s *server.MCPServer, c *godo.Client) error {
 	return nil
 }
 
-// registerInsightsTools registers the account tools with the MCP server.
+// registerMarketplaceTools registers the marketplace tools with the MCP server.
+func registerMarketplaceTools(s *server.MCPServer, c *godo.Client) error {
+	s.AddTools(marketplace.NewOneClickTool(c).Tools()...)
+
+	return nil
+}
+
 func registerInsightsTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(insights.NewUptimeTool(c).Tools()...)
 	s.AddTools(insights.NewUptimeCheckAlertTool(c).Tools()...)
 	s.AddTools(insights.NewAlertPolicyTool(c).Tools()...)
+	return nil
+}
+
+func registerDOKSTools(s *server.MCPServer, c *godo.Client) error {
+	s.AddTools(doks.NewDoksTool(c).Tools()...)
+
+	return nil
+}
+
+func registerDatabasesTools(s *server.MCPServer, c *godo.Client) error {
+	s.AddTools(dbaas.NewClusterTool(c).Tools()...)
+	s.AddTools(dbaas.NewFirewallTool(c).Tools()...)
+	s.AddTools(dbaas.NewKafkaTool(c).Tools()...)
+	s.AddTools(dbaas.NewMongoTool(c).Tools()...)
+	s.AddTools(dbaas.NewMysqlTool(c).Tools()...)
+	s.AddTools(dbaas.NewOpenSearchTool(c).Tools()...)
+	s.AddTools(dbaas.NewPostgreSQLTool(c).Tools()...)
+	s.AddTools(dbaas.NewRedisTool(c).Tools()...)
+	s.AddTools(dbaas.NewUserTool(c).Tools()...)
+
 	return nil
 }
 
@@ -126,9 +160,21 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 			if err := registerSpacesTools(s, c); err != nil {
 				return fmt.Errorf("failed to register spaces tools: %w", err)
 			}
+		case "databases":
+			if err := registerDatabasesTools(s, c); err != nil {
+				return fmt.Errorf("failed to register databases tools: %w", err)
+			}
+		case "marketplace":
+			if err := registerMarketplaceTools(s, c); err != nil {
+				return fmt.Errorf("failed to register marketplace tools: %w", err)
+			}
 		case "insights":
 			if err := registerInsightsTools(s, c); err != nil {
 				return fmt.Errorf("failed to register insights tools: %w", err)
+			}
+		case "doks":
+			if err := registerDOKSTools(s, c); err != nil {
+				return fmt.Errorf("failed to register DOKS tools: %w", err)
 			}
 		default:
 			return fmt.Errorf("unsupported service: %s, supported service are: %v", svc, setToString(supportedServices))
