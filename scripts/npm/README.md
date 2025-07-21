@@ -1,11 +1,3 @@
-# NPM Wrapper Script 
+# Digitalocean MCP Server
 
-inspired by https://github.com/Azure/azure-mcp/blob/main/eng/npm/wrapper/index.js
-
-Wrapper script that runs the mcp server as a child process and pipes the output to the console.
-
-## Debugging
-
-```
- DIGITALOCEAN_API_TOKEN=your_do_token npm run mcp-digitalocean
-```
+NPM package for DigitalOcean MCP server, providing integration with DigitalOcean's services. For full documentation, see [DigitalOcean MCP](https://github.com/digitalocean-labs/mcp-digitalocean/blob/main/README.md)
