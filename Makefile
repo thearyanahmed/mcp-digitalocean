@@ -2,10 +2,6 @@ all: lint test build-dist
 build-dist: build-bin dist
 
 build-bin:
-	@if ! command -v goreleaser >/dev/null 2>&1; then \
-		echo "goreleaser not found, installing..."; \
-		go install github.com/goreleaser/goreleaser@latest; \
-	fi
 	goreleaser build --auto-snapshot --clean --skip validate
 
 .PHONY: dist

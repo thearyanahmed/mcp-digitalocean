@@ -1,6 +1,6 @@
 {
-  "name": "@digitalocean/mcp-server",
-  "version": "0.1.1",
+  "name": "@digitalocean/mcp",
+  "version": "1.0.0",
   "description": "DigitalOcean MCP Implementation,",
   "author": "DigitalOcean",
   "homepage": "https://github.com/digitalocean-labs/mcp-digitalocean?tab=readme-ov-file#mcp-digitalocean-integration",
@@ -29,8 +29,8 @@
     "mcp-digitalocean-darwin-amd64": "./dist/mcp-digitalocean-darwin-amd64",
     "mcp-digitalocean-linux-arm64": "./dist/mcp-digitalocean-linux-arm64",
     "mcp-digitalocean-linux-amd64": "./dist/mcp-digitalocean-linux-amd64",
-    "mcp-digitalocean-win32-arm64": "./dist/mcp-digitalocean-win32-arm64",
-    "mcp-digitalocean-win32-amd64": "./dist/mcp-digitalocean-win32-amd64"
+    "mcp-digitalocean-win32-arm64": "./dist/mcp-digitalocean-windows-arm64",
+    "mcp-digitalocean-win32-amd64": "./dist/mcp-digitalocean-windows-amd64"
   },
   "os": [
     "darwin",

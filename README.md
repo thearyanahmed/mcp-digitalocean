@@ -14,17 +14,19 @@ Prerequisites:
 #### Local Installation
 
 ```bash
-npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
+npx @digitalocean/mcp --services apps,droplets --log-level debug
 ```
 
 #### Using Cursor IDE
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=digitalocean&config=eyJjb21tYW5kIjoibnB4IEBkaWdpdGFsb2NlYW4vbWNwIC0tc2VydmljZXMgYXBwcyIsImVudiI6eyJESUdJVEFMT0NFQU5fQVBJX1RPS0VOIjoiWU9VUl9ET19UT0tFTiJ9fQ%3D%3D)
 
 ```json
 {
   "mcpServers": {
     "digitalocean": {
       "command": "npx",
-      "args": ["@digitalocean/mcp-digitalocean", "--services apps"],
+      "args": ["@digitalocean/mcp", "--services apps"],
       "env": {
         "DIGITALOCEAN_API_TOKEN": "YOUR_API_TOKEN"
       }
@@ -42,7 +44,7 @@ npx @digitalocean/mcp-digitalocean --services apps,droplets --log-level debug
             "mcpDigitalOcean": {
                 "command": "npx",
                 "args": [
-                    "@digitalocean/mcp-digitalocean",
+                    "@digitalocean/mcp",
                     "--services",
                     "apps"
                 ],
@@ -76,11 +78,11 @@ The MCP DigitalOcean Integration supports the following services, allowing users
 Each service provides a detailed README describing all available tools, resources, arguments, and example queries.
 See the following files for full documentation:
 
-- [Apps Service README](./internal/apps/README.md)
-- [Droplet Service README](./internal/droplet/README.md)
-- [Account Service README](./internal/account/README.md)
-- [Networking Service README](./internal/networking/README.md)
-- [DBaaS Service README](./internal/dbaas/README.md)
+- [Apps Service](./internal/apps/README.md)
+- [Droplet Service](./internal/droplet/README.md)
+- [Account Service](./internal/account/README.md)
+- [Networking Service](./internal/networking/README.md)
+- [DBaaS Service](./internal/dbaas/README.md)
 - [Insights Service](./internal/insights/README.md)
 - [Spaces Service](./internal/spaces/README.md)
 
@@ -106,7 +108,7 @@ To configure tools, you use the `--services` flag to specify which service you w
 enable the services you need to reduce context size and improve accuracy.
 
 ```bash
-npx @digitalocean/mcp-digitalocean --services apps,droplets
+npx @digitalocean/mcp --services apps,droplets
 ```
 
 ---

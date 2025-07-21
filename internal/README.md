@@ -14,6 +14,8 @@ To onboard a new service you'll need to do the following:
 
 When developing tools for the MCP DigitalOcean integration, you may want to run the MCP server locally to test your changes. To do this, you can use the following command:
 
+> We use goreleaser to build the binaries. To install it, follow the instructions at [goreleaser installation](https://goreleaser.com/install/).
+
 ```bash
 # build the MCP server
 make build-dist
