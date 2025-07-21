@@ -2,7 +2,6 @@ package dbaas
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	"mcp-digitalocean/internal/dbaas/mocks"
@@ -10,46 +9,49 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"go.uber.org/mock/gomock"
 )
 
 func TestFirewallTool_getFirewallRules(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("GetFirewallRules", mock.Anything, "cid").Return([]godo.DatabaseFirewallRule{{UUID: "rule1"}}, nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().GetFirewallRules(gomock.Any(), "cid").Return([]godo.DatabaseFirewallRule{{UUID: "rule1"}}, nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ft := &FirewallTool{client: client}
-	args := map[string]interface{}{"ID": "cid"}
+	args := map[string]interface{}{"id": "cid"}
 	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err := ft.getFirewallRules(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "rule1")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
+	// Error case: missing id (should not expect a call to GetFirewallRules)
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = ft.getFirewallRules(context.Background(), reqMissing)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Cluster ID is required")
+	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Cluster id is required")
 }
 
 func TestFirewallTool_updateFirewallRules(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("UpdateFirewallRules", mock.Anything, "cid", mock.Anything).Return(nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().UpdateFirewallRules(gomock.Any(), "cid", gomock.Any()).Return(nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ft := &FirewallTool{client: client}
-	rules := []*godo.DatabaseFirewallRule{{UUID: "rule2"}}
-	rulesJSON, _ := json.Marshal(rules)
-	args := map[string]interface{}{"ID": "cid", "rules_json": string(rulesJSON)}
+	rules := []any{
+		map[string]any{"uuid": "rule2"},
+	}
+	args := map[string]interface{}{"id": "cid", "rules": rules}
 	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err := ft.updateFirewallRules(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Firewall rules updated successfully")
-	mockDB.AssertExpectations(t)
-	// Error case: missing rules_json
-	args = map[string]interface{}{"ID": "cid"}
+	// Error case: missing rules
+	args = map[string]interface{}{"id": "cid"}
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err = ft.updateFirewallRules(context.Background(), req)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "rules_json is required")
+	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Missing or invalid 'rules' array object")
 }

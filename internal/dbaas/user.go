@@ -83,8 +83,14 @@ func (s *UserTool) listUsers(ctx context.Context, req mcp.CallToolRequest) (*mcp
 
 func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, _ := args["id"].(string)
-	name, _ := args["name"].(string)
+	id, ok := args["id"].(string)
+	if !ok || id == "" {
+		return mcp.NewToolResultError("Cluster id is required"), nil
+	}
+	name, ok := args["name"].(string)
+	if !ok || name == "" {
+		return mcp.NewToolResultError("User name is required"), nil
+	}
 
 	createReq := &godo.DatabaseCreateUserRequest{Name: name}
 
@@ -92,13 +98,22 @@ func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 		createReq.MySQLSettings = &godo.DatabaseMySQLUserSettings{AuthPlugin: plugin}
 	}
 
-	if settingsMap, ok := args["settings"].(map[string]any); ok {
+	if settingsVal, ok := args["settings"]; ok {
+		settingsMap, ok := settingsVal.(map[string]any)
+		if !ok {
+			return mcp.NewToolResultError("Invalid settings object: must be an object"), nil
+		}
 		settingsBytes, _ := json.Marshal(settingsMap)
 		var settings godo.DatabaseUserSettings
 		if err := json.Unmarshal(settingsBytes, &settings); err != nil {
 			return mcp.NewToolResultError("Invalid settings object: " + err.Error()), nil
 		}
 		createReq.Settings = &settings
+	}
+
+	// Nil check for s.client.Databases after argument validation
+	if s.client == nil || s.client.Databases == nil {
+		return mcp.NewToolResultError("internal error: database client is not configured"), nil
 	}
 
 	dbUser, _, err := s.client.Databases.CreateUser(ctx, id, createReq)
@@ -116,18 +131,33 @@ func (s *UserTool) createUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 
 func (s *UserTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, _ := args["id"].(string)
-	user, _ := args["user"].(string)
+	id, ok := args["id"].(string)
+	if !ok || id == "" {
+		return mcp.NewToolResultError("Cluster id is required"), nil
+	}
+	user, ok := args["user"].(string)
+	if !ok || user == "" {
+		return mcp.NewToolResultError("User name is required"), nil
+	}
 
 	updateReq := &godo.DatabaseUpdateUserRequest{}
 
-	if settingsMap, ok := args["settings"].(map[string]any); ok {
+	if settingsVal, ok := args["settings"]; ok {
+		settingsMap, ok := settingsVal.(map[string]any)
+		if !ok {
+			return mcp.NewToolResultError("Invalid settings object: must be an object"), nil
+		}
 		settingsBytes, _ := json.Marshal(settingsMap)
 		var settings godo.DatabaseUserSettings
 		if err := json.Unmarshal(settingsBytes, &settings); err != nil {
 			return mcp.NewToolResultError("Invalid settings object: " + err.Error()), nil
 		}
 		updateReq.Settings = &settings
+	}
+
+	// Nil check for s.client.Databases after argument validation and settings validation
+	if s.client == nil || s.client.Databases == nil {
+		return mcp.NewToolResultError("internal error: database client is not configured"), nil
 	}
 
 	dbUser, _, err := s.client.Databases.UpdateUser(ctx, id, user, updateReq)
@@ -145,8 +175,14 @@ func (s *UserTool) updateUser(ctx context.Context, req mcp.CallToolRequest) (*mc
 
 func (s *UserTool) deleteUser(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
-	id, _ := args["id"].(string)
-	user, _ := args["user"].(string)
+	id, ok := args["id"].(string)
+	if !ok || id == "" {
+		return mcp.NewToolResultError("Cluster id is required"), nil
+	}
+	user, ok := args["user"].(string)
+	if !ok || user == "" {
+		return mcp.NewToolResultError("User name is required"), nil
+	}
 
 	_, err := s.client.Databases.DeleteUser(ctx, id, user)
 	if err != nil {

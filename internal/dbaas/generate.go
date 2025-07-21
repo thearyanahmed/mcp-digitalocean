@@ -1,3 +1,5 @@
 package dbaas
 
-//mockery --name=DatabasesService --output=internal/dbaas/mocks --outpkg=mocks --case=underscore --dir=$(go list -f '{{ .Dir }}' -m github.com/digitalocean/godo)
+// mockgen -destination=internal/dbaas/mocks/databases_service_mock.go \
+// -package=mocks \
+// github.com/digitalocean/godo DatabasesService

@@ -9,7 +9,7 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"go.uber.org/mock/gomock"
 )
 
 func getText(res *mcp.CallToolResult) string {
@@ -22,8 +22,10 @@ func getText(res *mcp.CallToolResult) string {
 }
 
 func TestClusterTool_listCluster(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("List", mock.Anything, (*godo.ListOptions)(nil)).Return([]godo.Database{{Name: "test-db"}}, nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().List(gomock.Any(), (*godo.ListOptions)(nil)).Return([]godo.Database{{Name: "test-db"}}, nil, nil)
 
 	client := &godo.Client{}
 	client.Databases = mockDB
@@ -33,35 +35,37 @@ func TestClusterTool_listCluster(t *testing.T) {
 	res, err := ct.listCluster(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "test-db")
-	mockDB.AssertExpectations(t)
 }
 
 func TestClusterTool_getCluster(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
 	cluster := &godo.Database{Name: "my-cluster"}
-	mockDB.On("Get", mock.Anything, "abc").Return(cluster, nil, nil)
+	mockDB.EXPECT().Get(gomock.Any(), "abc").Return(cluster, nil, nil)
 
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ct := &ClusterTool{client: client}
 
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"ID": "abc"}}}
+	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"id": "abc"}}}
 	res, err := ct.getCluster(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "my-cluster")
-	mockDB.AssertExpectations(t)
 
-	// Error case: missing ID
+	// Error case: missing id (should not expect a call to Get)
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = ct.getCluster(context.Background(), reqMissing)
 	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
+	assert.Contains(t, getText(res), "Cluster id is required")
 }
 
 func TestClusterTool_createCluster(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
 	created := &godo.Database{Name: "new-cluster"}
-	mockDB.On("Create", mock.Anything, mock.AnythingOfType("*godo.DatabaseCreateRequest")).Return(created, nil, nil)
+	mockDB.EXPECT().Create(gomock.Any(), gomock.Any()).Return(created, nil, nil)
 
 	client := &godo.Client{}
 	client.Databases = mockDB
@@ -79,98 +83,106 @@ func TestClusterTool_createCluster(t *testing.T) {
 	res, err := ct.createCluster(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "new-cluster")
-	mockDB.AssertExpectations(t)
 
 	// Error case: API error
-	mockDB2 := &mocks.DatabasesService{}
-	mockDB2.On("Create", mock.Anything, mock.Anything).Return(nil, nil, assert.AnError)
-	client.Databases = mockDB2
-	ct = &ClusterTool{client: client}
-	res, err = ct.createCluster(context.Background(), req)
+	ctrl2 := gomock.NewController(t)
+	defer ctrl2.Finish()
+	mockDB2 := mocks.NewMockDatabasesService(ctrl2)
+	mockDB2.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, nil, assert.AnError)
+	client2 := &godo.Client{}
+	client2.Databases = mockDB2
+	ct2 := &ClusterTool{client: client2}
+	res, err = ct2.createCluster(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "api error")
 }
 
 func TestClusterTool_deleteCluster(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("Delete", mock.Anything, "abc").Return(nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().Delete(gomock.Any(), "abc").Return(nil, nil)
 
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ct := &ClusterTool{client: client}
 
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"ID": "abc"}}}
+	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"id": "abc"}}}
 	res, err := ct.deleteCluster(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "Cluster deleted successfully")
-	mockDB.AssertExpectations(t)
 
-	// Error case: missing ID
+	// Error case: missing id
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = ct.deleteCluster(context.Background(), reqMissing)
 	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
+	assert.Contains(t, getText(res), "Cluster id is required")
 }
 
 func TestClusterTool_resizeCluster(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("Resize", mock.Anything, "abc", mock.AnythingOfType("*godo.DatabaseResizeRequest")).Return(nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().Resize(gomock.Any(), "abc", gomock.Any()).Return(nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ct := &ClusterTool{client: client}
-	args := map[string]interface{}{"ID": "abc", "size": "db-s-2vcpu-4gb", "num_nodes": float64(3)}
+	args := map[string]interface{}{"id": "abc", "size": "db-s-2vcpu-4gb", "num_nodes": float64(3)}
 	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err := ct.resizeCluster(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "Cluster resize initiated successfully")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
+	// Error case: missing id
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = ct.resizeCluster(context.Background(), reqMissing)
 	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
+	assert.Contains(t, getText(res), "Cluster id is required")
 }
 
 func TestClusterTool_getCA(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
 	ca := &godo.DatabaseCA{Certificate: []byte("cert-data")}
-	mockDB.On("GetCA", mock.Anything, "abc").Return(ca, nil, nil)
+	mockDB.EXPECT().GetCA(gomock.Any(), "abc").Return(ca, nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ct := &ClusterTool{client: client}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"ID": "abc"}}}
+	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"id": "abc"}}}
 	res, err := ct.getCA(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "Y2VydC1kYXRh")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
+	// Error case: missing id
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = ct.getCA(context.Background(), reqMissing)
 	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
+	assert.Contains(t, getText(res), "Cluster id is required")
 }
 
 func TestClusterTool_listBackups(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("ListBackups", mock.Anything, "abc", mock.Anything).Return([]godo.DatabaseBackup{{CreatedAt: time.Now()}}, nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().ListBackups(gomock.Any(), "abc", gomock.Any()).Return([]godo.DatabaseBackup{{CreatedAt: time.Now()}}, nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ct := &ClusterTool{client: client}
-	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"ID": "abc"}}}
+	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{"id": "abc"}}}
 	res, err := ct.listBackups(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "created_at")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
+	// Error case: missing id
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = ct.listBackups(context.Background(), reqMissing)
 	assert.NoError(t, err)
-	assert.Contains(t, getText(res), "Cluster ID is required")
+	assert.Contains(t, getText(res), "Cluster id is required")
 }
 
 func TestClusterTool_listOptions(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("ListOptions", mock.Anything).Return(&godo.DatabaseOptions{}, nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().ListOptions(gomock.Any()).Return(&godo.DatabaseOptions{}, nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ct := &ClusterTool{client: client}
@@ -178,23 +190,23 @@ func TestClusterTool_listOptions(t *testing.T) {
 	res, err := ct.listOptions(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "pg")
-	mockDB.AssertExpectations(t)
 }
 
 func TestClusterTool_upgradeMajorVersion(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
-	mockDB.On("UpgradeMajorVersion", mock.Anything, "abc", mock.AnythingOfType("*godo.UpgradeVersionRequest")).Return(nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
+	mockDB.EXPECT().UpgradeMajorVersion(gomock.Any(), "abc", gomock.Any()).Return(nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	ct := &ClusterTool{client: client}
-	args := map[string]interface{}{"ID": "abc", "version": "15"}
+	args := map[string]interface{}{"id": "abc", "version": "15"}
 	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err := ct.upgradeMajorVersion(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, getText(res), "Major version upgrade initiated successfully")
-	mockDB.AssertExpectations(t)
 	// Error case: missing version
-	args = map[string]interface{}{"ID": "abc"}
+	args = map[string]interface{}{"id": "abc"}
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err = ct.upgradeMajorVersion(context.Background(), req)
 	assert.NoError(t, err)

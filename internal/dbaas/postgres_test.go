@@ -2,7 +2,6 @@ package dbaas
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	"mcp-digitalocean/internal/dbaas/mocks"
@@ -10,30 +9,31 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPostgreSQLTool_getPostgreSQLConfig(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
 	val := 42
-	mockDB.On("GetPostgreSQLConfig", mock.Anything, "cid").Return(&godo.PostgreSQLConfig{BackupHour: &val}, nil, nil)
+	mockDB.EXPECT().GetPostgreSQLConfig(gomock.Any(), "cid").Return(&godo.PostgreSQLConfig{BackupHour: &val}, nil, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	pt := &PostgreSQLTool{client: client}
-	args := map[string]interface{}{"ID": "cid"}
+	args := map[string]interface{}{"id": "cid"}
 	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err := pt.getPostgreSQLConfig(context.Background(), req)
 	assert.NoError(t, err)
 	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "42")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
+	// Error case: missing id (should not expect a call to GetPostgreSQLConfig)
 	reqMissing := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]interface{}{}}}
 	res, err = pt.getPostgreSQLConfig(context.Background(), reqMissing)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Cluster ID is required")
+	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Cluster id is required")
 	// API error
-	mockDB.On("GetPostgreSQLConfig", mock.Anything, "badid").Return(nil, nil, assert.AnError)
-	args = map[string]interface{}{"ID": "badid"}
+	mockDB.EXPECT().GetPostgreSQLConfig(gomock.Any(), "badid").Return(nil, nil, assert.AnError)
+	args = map[string]interface{}{"id": "badid"}
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err = pt.getPostgreSQLConfig(context.Background(), req)
 	assert.NoError(t, err)
@@ -41,41 +41,41 @@ func TestPostgreSQLTool_getPostgreSQLConfig(t *testing.T) {
 }
 
 func TestPostgreSQLTool_updatePostgreSQLConfig(t *testing.T) {
-	mockDB := &mocks.DatabasesService{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDB := mocks.NewMockDatabasesService(ctrl)
 	val := 99
-	mockDB.On("UpdatePostgreSQLConfig", mock.Anything, "cid", mock.Anything).Return(&godo.Response{}, nil)
+	mockDB.EXPECT().UpdatePostgreSQLConfig(gomock.Any(), "cid", gomock.Any()).Return(&godo.Response{}, nil)
 	client := &godo.Client{}
 	client.Databases = mockDB
 	pt := &PostgreSQLTool{client: client}
-	config := godo.PostgreSQLConfig{BackupHour: &val}
-	configBytes, _ := json.Marshal(config)
-	args := map[string]interface{}{"ID": "cid", "config_json": string(configBytes)}
+	config := map[string]any{"backup_hour": val}
+	args := map[string]interface{}{"id": "cid", "config": config}
 	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err := pt.updatePostgreSQLConfig(context.Background(), req)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "updated successfully")
-	mockDB.AssertExpectations(t)
-	// Error case: missing ID
-	args = map[string]interface{}{"config_json": string(configBytes)}
+	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "PostgreSQL config updated successfully")
+	// Error case: missing id
+	args = map[string]interface{}{"config": config}
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err = pt.updatePostgreSQLConfig(context.Background(), req)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Cluster ID is required")
-	// Error case: missing config_json
-	args = map[string]interface{}{"ID": "cid"}
+	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Cluster id is required")
+	// Error case: missing config
+	args = map[string]interface{}{"id": "cid"}
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err = pt.updatePostgreSQLConfig(context.Background(), req)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "config_json is required")
-	// Error case: invalid config_json
-	args = map[string]interface{}{"ID": "cid", "config_json": "notjson"}
+	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Missing or invalid 'config' object")
+	// Error case: invalid config (not a map)
+	args = map[string]interface{}{"id": "cid", "config": "notmap"}
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err = pt.updatePostgreSQLConfig(context.Background(), req)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Invalid config_json")
+	assert.Contains(t, res.Content[0].(mcp.TextContent).Text, "Missing or invalid 'config' object")
 	// API error
-	mockDB.On("UpdatePostgreSQLConfig", mock.Anything, "badid", mock.Anything).Return(nil, assert.AnError)
-	args = map[string]interface{}{"ID": "badid", "config_json": string(configBytes)}
+	mockDB.EXPECT().UpdatePostgreSQLConfig(gomock.Any(), "badid", gomock.Any()).Return(nil, assert.AnError)
+	args = map[string]interface{}{"id": "badid", "config": config}
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
 	res, err = pt.updatePostgreSQLConfig(context.Background(), req)
 	assert.NoError(t, err)
