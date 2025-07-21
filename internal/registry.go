@@ -22,12 +22,12 @@ import (
 
 // supportedServices is a set of services that we support in this MCP server.
 var supportedServices = map[string]struct{}{
-	"apps":       {},
-	"networking": {},
-	"droplets":   {},
-	"accounts":   {},
-	"spaces":     {},
-	"databases":  {},
+	"apps":        {},
+	"networking":  {},
+	"droplets":    {},
+	"accounts":    {},
+	"spaces":      {},
+	"databases":   {},
 	"marketplace": {},
 	"insights":    {},
 	"doks":        {},
@@ -162,7 +162,7 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 		case "databases":
 			if err := registerDatabasesTools(s, c); err != nil {
 				return fmt.Errorf("failed to register databases tools: %w", err)
-      }
+			}
 		case "marketplace":
 			if err := registerMarketplaceTools(s, c); err != nil {
 				return fmt.Errorf("failed to register marketplace tools: %w", err)
