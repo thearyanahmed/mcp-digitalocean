@@ -5,18 +5,19 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/digitalocean/godo"
+	"github.com/mark3labs/mcp-go/server"
+
 	"mcp-digitalocean/internal/account"
 	"mcp-digitalocean/internal/apps"
 	"mcp-digitalocean/internal/common"
 	"mcp-digitalocean/internal/dbaas"
+	"mcp-digitalocean/internal/doks"
 	"mcp-digitalocean/internal/droplet"
 	"mcp-digitalocean/internal/insights"
 	"mcp-digitalocean/internal/marketplace"
 	"mcp-digitalocean/internal/networking"
 	"mcp-digitalocean/internal/spaces"
-
-	"github.com/digitalocean/godo"
-	"github.com/mark3labs/mcp-go/server"
 )
 
 // supportedServices is a set of services that we support in this MCP server.
@@ -29,6 +30,7 @@ var supportedServices = map[string]struct{}{
 	"databases":  {},
 	"marketplace": {},
 	"insights":    {},
+	"doks":        {},
 }
 
 // registerAppTools registers the app platform tools with the MCP server.
@@ -99,10 +101,14 @@ func registerMarketplaceTools(s *server.MCPServer, c *godo.Client) error {
 	return nil
 }
 
-// registerInsightsTools registers the account tools with the MCP server.
 func registerInsightsTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(insights.NewUptimeTool(c).Tools()...)
 	s.AddTools(insights.NewUptimeCheckAlertTool(c).Tools()...)
+	return nil
+}
+
+func registerDOKSTools(s *server.MCPServer, c *godo.Client) error {
+	s.AddTools(doks.NewDoksTool(c).Tools()...)
 
 	return nil
 }
@@ -164,6 +170,10 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 		case "insights":
 			if err := registerInsightsTools(s, c); err != nil {
 				return fmt.Errorf("failed to register insights tools: %w", err)
+			}
+		case "doks":
+			if err := registerDOKSTools(s, c); err != nil {
+				return fmt.Errorf("failed to register DOKS tools: %w", err)
 			}
 		default:
 			return fmt.Errorf("unsupported service: %s, supported service are: %v", svc, setToString(supportedServices))
