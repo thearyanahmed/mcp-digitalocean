@@ -11,7 +11,6 @@ import (
 	"mcp-digitalocean/internal/account"
 	"mcp-digitalocean/internal/apps"
 	"mcp-digitalocean/internal/common"
-	"mcp-digitalocean/internal/dbaas"
 	"mcp-digitalocean/internal/doks"
 	"mcp-digitalocean/internal/droplet"
 	"mcp-digitalocean/internal/insights"
@@ -27,7 +26,6 @@ var supportedServices = map[string]struct{}{
 	"droplets":    {},
 	"accounts":    {},
 	"spaces":      {},
-	"databases":   {},
 	"marketplace": {},
 	"insights":    {},
 	"doks":        {},
@@ -113,20 +111,6 @@ func registerDOKSTools(s *server.MCPServer, c *godo.Client) error {
 	return nil
 }
 
-func registerDatabasesTools(s *server.MCPServer, c *godo.Client) error {
-	s.AddTools(dbaas.NewClusterTool(c).Tools()...)
-	s.AddTools(dbaas.NewFirewallTool(c).Tools()...)
-	s.AddTools(dbaas.NewKafkaTool(c).Tools()...)
-	s.AddTools(dbaas.NewMongoTool(c).Tools()...)
-	s.AddTools(dbaas.NewMysqlTool(c).Tools()...)
-	s.AddTools(dbaas.NewOpenSearchTool(c).Tools()...)
-	s.AddTools(dbaas.NewPostgreSQLTool(c).Tools()...)
-	s.AddTools(dbaas.NewRedisTool(c).Tools()...)
-	s.AddTools(dbaas.NewUserTool(c).Tools()...)
-
-	return nil
-}
-
 // Register registers the set of tools for the specified services with the MCP server.
 // We either register a subset of tools of the services are specified, or we register all tools if no services are specified.
 func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, servicesToActivate ...string) error {
@@ -158,10 +142,6 @@ func Register(logger *slog.Logger, s *server.MCPServer, c *godo.Client, services
 		case "spaces":
 			if err := registerSpacesTools(s, c); err != nil {
 				return fmt.Errorf("failed to register spaces tools: %w", err)
-			}
-		case "databases":
-			if err := registerDatabasesTools(s, c); err != nil {
-				return fmt.Errorf("failed to register databases tools: %w", err)
 			}
 		case "marketplace":
 			if err := registerMarketplaceTools(s, c); err != nil {
