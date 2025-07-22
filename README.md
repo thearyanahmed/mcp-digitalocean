@@ -85,6 +85,8 @@ See the following files for full documentation:
 - [DBaaS Service](./internal/dbaas/README.md)
 - [Insights Service](./internal/insights/README.md)
 - [Spaces Service](./internal/spaces/README.md)
+- [Marketplace Service](./internal/marketplace/README.md)
+- [DOKS Service](./internal/doks/README.md)
 
 ---
 
