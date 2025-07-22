@@ -69,9 +69,8 @@ The MCP DigitalOcean Integration supports the following services, allowing users
 | **Networking**  | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.   |
 | **Insights**    | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring. |
 | **Spaces**      | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage.                               |
-| **DOKS**        | Manage DigitalOcean Kubernetes clusters and node pools.                                                            |
 | **Marketplace** | Discover and manage DigitalOcean Marketplace applications.                                                         |
-
+| **DOKS**        | Manage DigitalOcean Kubernetes clusters and node pools.                                                            |
 ---
 ### Service Documentation
 
