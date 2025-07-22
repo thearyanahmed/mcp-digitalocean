@@ -61,16 +61,16 @@ npx @digitalocean/mcp --services apps,droplets --log-level debug
 
 The MCP DigitalOcean Integration supports the following services, allowing users to manage their DigitalOcean infrastructure effectively
 
-
-| **Service**    | **Description**                                                                                                     |
-|----------------|---------------------------------------------------------------------------------------------------------------------|
-| **Apps**       | Manage DigitalOcean App Platform applications, including deployments and configurations.                            |
-| **Droplets**   | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                          |
-| **Account**    | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                          |
-| **Networking** | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.    |
-| **Insights**   | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring.  |
-| **Spaces**     | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage.                                |
-
+| **Service**     | **Description**                                                                                                    |
+|-----------------|--------------------------------------------------------------------------------------------------------------------|
+| **Apps**        | Manage DigitalOcean App Platform applications, including deployments and configurations.                           |
+| **Droplets**    | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                         |
+| **Account**     | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                         |
+| **Networking**  | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.   |
+| **Insights**    | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring. |
+| **Spaces**      | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage.                               |
+| **DOKS**        | Manage DigitalOcean Kubernetes clusters and node pools.                                                            |
+| **Marketplace** | Discover and manage DigitalOcean Marketplace applications.                                                         |
 
 ---
 ### Service Documentation
