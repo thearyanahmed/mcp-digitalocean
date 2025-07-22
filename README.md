@@ -69,8 +69,9 @@ The MCP DigitalOcean Integration supports the following services, allowing users
 | **Networking**  | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.   |
 | **Insights**    | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring. |
 | **Spaces**      | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage.                               |
+| **Databases**   | Provision, manage, and monitor managed database clusters (Postgres, MySQL, Redis, etc.).                           |
 | **Marketplace** | Discover and manage DigitalOcean Marketplace applications.                                                         |
-| **DOKS**        | Manage DigitalOcean Kubernetes clusters and node pools.                                                            |
+| **DOKS**        | Manage DigitalOcean Kubernetes clusters and node pools.                                                            |                                                   |
 ---
 ### Service Documentation
 
@@ -81,7 +82,7 @@ See the following files for full documentation:
 - [Droplet Service](./internal/droplet/README.md)
 - [Account Service](./internal/account/README.md)
 - [Networking Service](./internal/networking/README.md)
-- [DBaaS Service](./internal/dbaas/README.md)
+- [Databases Service](./internal/dbaas/README.md)
 - [Insights Service](./internal/insights/README.md)
 - [Spaces Service](./internal/spaces/README.md)
 - [Marketplace Service](./internal/marketplace/README.md)
