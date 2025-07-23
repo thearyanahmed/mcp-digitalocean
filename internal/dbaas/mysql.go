@@ -107,14 +107,14 @@ func (s *MysqlTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getMySQLConfig,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-get-mysql-config",
+			Tool: mcp.NewTool("digitalocean-db-cluster-get-mysql-config",
 				mcp.WithDescription("Get the MySQL config for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateMySQLConfig,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-update-mysql-config",
+			Tool: mcp.NewTool("digitalocean-db-cluster-update-mysql-config",
 				mcp.WithDescription("Update the MySQL config for a cluster by its id. Accepts a structured 'config' object."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithObject("config",
@@ -161,14 +161,14 @@ func (s *MysqlTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.getSQLMode,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-get-sql-mode",
+			Tool: mcp.NewTool("digitalocean-db-cluster-get-sql-mode",
 				mcp.WithDescription("Get the SQL mode for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.setSQLMode,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-set-sql-mode",
+			Tool: mcp.NewTool("digitalocean-db-cluster-set-sql-mode",
 				mcp.WithDescription("Set the SQL mode for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("modes", mcp.Required(), mcp.Description("Comma-separated SQL modes to set")),

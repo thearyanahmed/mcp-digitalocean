@@ -8,26 +8,26 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Cluster Tools
 
-- **`digitalocean-databases-cluster-list`**
+- **`digitalocean-db-cluster-list`**
 
   - Get list of clusters.
   - **Arguments:**
     - `page` (optional, integer as string): Page number for pagination
     - `per_page` (optional, integer): Number of results per page
 
-- **`digitalocean-databases-cluster-get`**
+- **`digitalocean-db-cluster-get`**
 
   - Get a cluster by its ID.
   - **Arguments:**
     - `id` (required): The ID of the cluster to retrieve
 
-- **`digitalocean-databases-cluster-get-ca`**
+- **`digitalocean-db-cluster-get-ca`**
 
   - Get the CA certificate for a cluster by its ID.
   - **Arguments:**
     - `id` (required): The ID of the cluster to retrieve the CA for
 
-- **`digitalocean-databases-cluster-create`**
+- **`digitalocean-db-cluster-create`**
 
   - Create a new database cluster.
   - **Arguments:**
@@ -39,13 +39,13 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `num_nodes` (required, number): The number of nodes
     - `tags` (optional, string): Comma-separated tags
 
-- **`digitalocean-databases-cluster-delete`**
+- **`digitalocean-db-cluster-delete`**
 
   - Delete a database cluster by its ID.
   - **Arguments:**
     - `id` (required): The ID of the cluster to delete
 
-- **`digitalocean-databases-cluster-resize`**
+- **`digitalocean-db-cluster-resize`**
 
   - Resize a database cluster by its ID. At least one of the following must be provided: `size`, `num_nodes`, or `storage_size_mib`.
   - **Arguments:**
@@ -54,7 +54,7 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `num_nodes` (optional, number): The new number of nodes
     - `storage_size_mib` (optional, number): New storage size in MiB
 
-- **`digitalocean-databases-cluster-list-backups`**
+- **`digitalocean-db-cluster-list-backups`**
 
   - List backups for a database cluster by its ID.
   - **Arguments:**
@@ -62,19 +62,19 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `page` (optional, integer as string): Page number
     - `per_page` (optional, integer): Results per page
 
-- **`digitalocean-databases-cluster-list-options`**
+- **`digitalocean-db-cluster-list-options`**
 
   - List available cluster creation options, including engines, sizes, and regions.
   - **Arguments:** None
 
-- **`digitalocean-databases-cluster-upgrade-major-version`**
+- **`digitalocean-db-cluster-upgrade-major-version`**
 
   - Upgrade the major database version of a cluster.
   - **Arguments:**
     - `id` (required): The cluster ID
     - `version` (required): Target major version (e.g., 15)
 
-- **`digitalocean-databases-cluster-start-online-migration`**
+- **`digitalocean-db-cluster-start-online-migration`**
 
   - Start an online migration for a cluster.
   - **Arguments:**
@@ -88,14 +88,14 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `disable_ssl` (optional, boolean): Disable SSL
     - `ignore_dbs` (optional, string): Comma-separated DBs to ignore
 
-- **`digitalocean-databases-cluster-stop-online-migration`**
+- **`digitalocean-db-cluster-stop-online-migration`**
 
   - Cancel an ongoing online migration.
   - **Arguments:**
     - `id` (required): Cluster ID
     - `migration_id` (required): Migration ID to stop
 
-- **`digitalocean-databases-cluster-get-online-migration-status`**
+- **`digitalocean-db-cluster-get-migration`**
 
   - Query the current status of an online migration.
   - **Arguments:**
@@ -104,13 +104,13 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Firewall Tools
 
-- **`digitalocean-databases-cluster-get-firewall-rules`**
+- **`digitalocean-db-cluster-get-firewall-rules`**
 
   - Get the firewall rules for a cluster by its ID.
   - **Arguments:**
     - `id` (required, string): The cluster UUID
 
-- **`digitalocean-databases-cluster-update-firewall-rules`**
+- **`digitalocean-db-cluster-update-firewall-rules`**
 
   - Update the firewall rules for a cluster by its ID.
   - **Arguments:**
@@ -123,7 +123,7 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Kafka Tools
 
-- **`digitalocean-databases-cluster-list-topics`**
+- **`digitalocean-db-cluster-list-topics`**
 
   - List topics for a Kafka cluster by its ID. Supports list options and filters.
   - **Arguments:**
@@ -135,7 +135,7 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `public_only` (optional, bool as string): Only include public topics
     - `usecases` (optional, string): Comma-separated list of usecases to include
 
-- **`digitalocean-databases-cluster-create-topic`**
+- **`digitalocean-db-cluster-create-topic`**
 
   - Create a topic for a Kafka database cluster.
   - **Arguments:**
@@ -151,21 +151,21 @@ This directory contains tools and resources for managing DigitalOcean managed da
       - `preallocate`, `retention_bytes`, `retention_ms`, `segment_bytes`, `segment_index_bytes`,
       - `segment_jitter_ms`, `segment_ms`
 
-- **`digitalocean-databases-cluster-get-topic`**
+- **`digitalocean-db-cluster-get-topic`**
 
   - Get a topic’s details from a Kafka database cluster.
   - **Arguments:**
     - `id` (required, string): The Kafka cluster UUID
     - `name` (required, string): The topic name
 
-- **`digitalocean-databases-cluster-delete-topic`**
+- **`digitalocean-db-cluster-delete-topic`**
 
   - Delete a topic for a Kafka database cluster.
   - **Arguments:**
     - `id` (required, string): The Kafka cluster UUID
     - `name` (required, string): The topic name
 
-- **`digitalocean-databases-cluster-update-topic`**
+- **`digitalocean-db-cluster-update-topic`**
 
   - Update a topic's partition count, replication factor, or config settings.
   - **Arguments:**
@@ -175,13 +175,13 @@ This directory contains tools and resources for managing DigitalOcean managed da
     - `replication_factor` (optional, integer as string): Updated replication factor
     - `config` (optional, object): Same fields as `create-topic`'s `config` object
 
-- **`digitalocean-databases-cluster-get-kafka-config`**
+- **`digitalocean-db-cluster-get-kafka-config`**
 
   - Get the Kafka configuration for a cluster.
   - **Arguments:**
     - `id` (required, string): The Kafka cluster UUID
 
-- **`digitalocean-databases-cluster-update-kafka-config`**
+- **`digitalocean-db-cluster-update-kafka-config`**
 
   - Update the Kafka cluster configuration using a structured object.
   - **Arguments:**
@@ -196,13 +196,13 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### Mongo Tools
 
-- **`digitalocean-databases-cluster-get-mongodb-config`**
+- **`digitalocean-db-cluster-get-mongodb-config`**
 
   - Get the MongoDB config for a cluster by its ID.
   - **Arguments:**
     - `id` (required, string): The cluster UUID
 
-- **`digitalocean-databases-cluster-update-mongodb-config`**
+- **`digitalocean-db-cluster-update-mongodb-config`**
 
   - Update the MongoDB config for a cluster by its ID using a structured object.
   - **Arguments:**
@@ -216,26 +216,26 @@ This directory contains tools and resources for managing DigitalOcean managed da
 
 ### MySQL Tools
 
-- **`digitalocean-databases-cluster-get-mysql-config`**
+- **`digitalocean-db-cluster-get-mysql-config`**
 
   - Get the MySQL config for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`digitalocean-databases-cluster-update-mysql-config`**
+- **`digitalocean-db-cluster-update-mysql-config`**
 
   - Update the MySQL config for a cluster by its ID. Accepts a JSON string for the config.
   - **Arguments:**
     - `ID` (required): The cluster UUID
     - `config_json` (required): JSON for the MySQLConfig to set
 
-- **`digitalocean-databases-cluster-get-sql-mode`**
+- **`digitalocean-db-cluster-get-sql-mode`**
 
   - Get the SQL mode for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
 
-- **`digitalocean-databases-cluster-set-sql-mode`**
+- **`digitalocean-db-cluster-set-sql-mode`**
   - Set the SQL mode for a cluster by its ID.
   - **Arguments:**
     - `ID` (required): The cluster UUID
@@ -246,13 +246,13 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
 
 ### MySQL Tools
 
-- **`digitalocean-databases-cluster-get-sql-mode`**
+- **`digitalocean-db-cluster-get-sql-mode`**
 
   - Get the SQL mode for a cluster.
   - **Arguments:**
     - `id` (required, string): The cluster UUID
 
-- **`digitalocean-databases-cluster-set-sql-mode`**
+- **`digitalocean-db-cluster-set-sql-mode`**
 
   - Set the SQL mode for a cluster using a comma-separated list.
   - **Arguments:**
@@ -262,13 +262,13 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
 
 ### Opensearch Tools
 
-- **`digitalocean-databases-cluster-get-opensearch-config`**
+- **`digitalocean-db-cluster-get-opensearch-config`**
 
   - Get the OpenSearch config for a cluster by its ID.
   - **Arguments:**
     - `id` (required, string): The cluster UUID
 
-- **`digitalocean-databases-cluster-update-opensearch-config`**
+- **`digitalocean-db-cluster-update-os-config`**
 
   - Update the OpenSearch config for a cluster using a structured object.
   - **Arguments:**
@@ -286,13 +286,13 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
 
 ### Postgres Tools
 
-- **`digitalocean-databases-cluster-get-postgresql-config`**
+- **`digitalocean-db-cluster-get-postgresql-config`**
 
   - Get the PostgreSQL config for a cluster by its ID.
   - **Arguments:**
     - `id` (required, string): The cluster UUID
 
-- **`digitalocean-databases-cluster-update-postgresql-config`**
+- **`digitalocean-db-cluster-update-psql-config`**
 
   - Update the PostgreSQL config for a cluster using a structured object.
   - **Arguments:**
@@ -310,13 +310,13 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
 
 ### Redis Tools
 
-- **`digitalocean-databases-cluster-get-redis-config`**
+- **`digitalocean-db-cluster-get-redis-config`**
 
   - Get the Redis config for a cluster by its ID.
   - **Arguments:**
     - `id` (required, string): The cluster UUID
 
-- **`digitalocean-databases-cluster-update-redis-config`**
+- **`digitalocean-db-cluster-update-redis-config`**
 
   - Update the Redis config for a cluster by its ID using a structured `config` object.
   - **Arguments:**
@@ -336,14 +336,14 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
 
 ### User Tools
 
-- **`digitalocean-databases-cluster-get-user`**
+- **`digitalocean-db-cluster-get-user`**
 
   - Get a database user by cluster ID and user name.
   - **Arguments:**
     - `id` (required, string): The cluster ID (UUID)
     - `user` (required, string): The user name
 
-- **`digitalocean-databases-cluster-list-users`**
+- **`digitalocean-db-cluster-list-users`**
 
   - List database users for a cluster by its ID.
   - **Arguments:**
@@ -351,7 +351,7 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
     - `page` (optional, string): Page number for pagination
     - `per_page` (optional, integer): Number of results per page
 
-- **`digitalocean-databases-cluster-create-user`**
+- **`digitalocean-db-cluster-create-user`**
 
   - Create a database user for a cluster.
   - **Arguments:**
@@ -370,7 +370,7 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
         - `databases` (array of strings)
         - `role` (string)
 
-- **`digitalocean-databases-cluster-update-user`**
+- **`digitalocean-db-cluster-update-user`**
 
   - Update a user’s settings in a given database cluster.
   - **Arguments:**
@@ -378,7 +378,7 @@ Absolutely! Based on your provided updated `MysqlTool` code, here's the ✅ upda
     - `user` (required, string): The user name
     - `settings` (optional, object): Same structure as in `create-user`
 
-- **`digitalocean-databases-cluster-delete-user`**
+- **`digitalocean-db-cluster-delete-user`**
 
   - Delete a user from a database cluster.
   - **Arguments:**
@@ -397,47 +397,47 @@ Below are some example natural language queries you might use, along with the co
 
 | Example Query                                 | Tool                                 | Arguments                                                                                                           |
 |----------------------------------------------|--------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| Could you please list all DBaaS clusters?     | digitalocean-databases-cluster-list  | `{ "page": "1", "per_page": 10 }`                                                                                   |
-| Show me details for cluster ``  | digitalocean-databases-cluster-get   | `{ "id": "" }`                                                                                       |
-| Create a DBaaS cluster called "my-db" in nyc1 | digitalocean-databases-cluster-create| `{ "name": "my-db", "engine": "mysql", "version": "8", "region": "nyc1", "size": "db-s-1vcpu-1gb", "num_nodes": 1 }`|
-| Delete the cluster ``           | digitalocean-databases-cluster-delete| `{ "id": "" }`                                                                                       |
-| Resize cluster `` to 2 nodes    | digitalocean-databases-cluster-resize| `{ "id": "", "num_nodes": 2 }`                                                                       |
+| Could you please list all DBaaS clusters?     | digitalocean-db-cluster-list  | `{ "page": "1", "per_page": 10 }`                                                                                   |
+| Show me details for cluster ``  | digitalocean-db-cluster-get   | `{ "id": "" }`                                                                                       |
+| Create a DBaaS cluster called "my-db" in nyc1 | digitalocean-db-cluster-create| `{ "name": "my-db", "engine": "mysql", "version": "8", "region": "nyc1", "size": "db-s-1vcpu-1gb", "num_nodes": 1 }`|
+| Delete the cluster ``           | digitalocean-db-cluster-delete| `{ "id": "" }`                                                                                       |
+| Resize cluster `` to 2 nodes    | digitalocean-db-cluster-resize| `{ "id": "", "num_nodes": 2 }`                                                                       |
 
 ### Users
 
 | Example Query                                            | Tool                                      | Arguments                                                                                |
 |----------------------------------------------------------|-------------------------------------------|-------------------------------------------------------------------------------------------|
-| List all users for cluster ``              | digitalocean-databases-cluster-list-users | `{ "id": "" }`                                                             |
-| Add a user named "readonly" to cluster ``  | digitalocean-databases-cluster-create-user| `{ "id": "", "name": "readonly" }`                                         |
-| Remove the user "readonly" from cluster `` | digitalocean-databases-cluster-delete-user| `{ "id": "", "user": "readonly" }`                                         |
-| Update user "readonly" with ACL settings                 | digitalocean-databases-cluster-update-user| `{ "id": "", "user": "readonly", "settings": { "acl": [{...}] } }`         |
+| List all users for cluster ``              | digitalocean-db-cluster-list-users | `{ "id": "" }`                                                             |
+| Add a user named "readonly" to cluster ``  | digitalocean-db-cluster-create-user| `{ "id": "", "name": "readonly" }`                                         |
+| Remove the user "readonly" from cluster `` | digitalocean-db-cluster-delete-user| `{ "id": "", "user": "readonly" }`                                         |
+| Update user "readonly" with ACL settings                 | digitalocean-db-cluster-update-user| `{ "id": "", "user": "readonly", "settings": { "acl": [{...}] } }`         |
 
 ### Firewalls
 
 | Example Query                                             | Tool                                           | Arguments                                                                                           |
 |-----------------------------------------------------------|------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| What are the firewall rules for cluster ``? | digitalocean-databases-cluster-get-firewall-rules   | `{ "id": "" }`                                                                        |
-| Update firewall rules for cluster ``        | digitalocean-databases-cluster-update-firewall-rules| `{ "id": "", "rules": [ { "type": "ip_addr", "value": "1.2.3.4" } ] }`                |
+| What are the firewall rules for cluster ``? | digitalocean-db-cluster-get-firewall-rules   | `{ "id": "" }`                                                                        |
+| Update firewall rules for cluster ``        | digitalocean-db-cluster-update-firewall-rules| `{ "id": "", "rules": [ { "type": "ip_addr", "value": "1.2.3.4" } ] }`                |
 
 ### Configuration
 
 | Example Query                                              | Tool                                                | Arguments                                                             |
 |------------------------------------------------------------|-----------------------------------------------------|-----------------------------------------------------------------------|
-| Show me the MySQL config for cluster ``      | digitalocean-databases-cluster-get-mysql-config     | `{ "id": "" }`                                          |
-| Update the MongoDB config for cluster ``     | digitalocean-databases-cluster-update-mongodb-config| `{ "id": "", "config": { "verbosity": 3 } }`           |
-| Get the Redis config for cluster ``          | digitalocean-databases-cluster-get-redis-config     | `{ "id": "" }`                                          |
-| Update the PostgreSQL config for cluster ``  | digitalocean-databases-cluster-update-postgresql-config | `{ "id": "", "config": { "timezone": "UTC" } }`     |
+| Show me the MySQL config for cluster ``      | digitalocean-db-cluster-get-mysql-config     | `{ "id": "" }`                                          |
+| Update the MongoDB config for cluster ``     | digitalocean-db-cluster-update-mongodb-config| `{ "id": "", "config": { "verbosity": 3 } }`           |
+| Get the Redis config for cluster ``          | digitalocean-db-cluster-get-redis-config     | `{ "id": "" }`                                          |
+| Update the PostgreSQL config for cluster ``  | digitalocean-db-cluster-update-psql-config | `{ "id": "", "config": { "timezone": "UTC" } }`     |
 
 ### Kafka Topics
 
 | Example Query                                                      | Tool                                       | Arguments                                                                            |
 |--------------------------------------------------------------------|--------------------------------------------|---------------------------------------------------------------------------------------|
-| List all topics in Kafka cluster ``                  | digitalocean-databases-cluster-list-topics | `{ "id": "" }`                                                         |
-| Create a topic named "my-topic" in cluster ``        | digitalocean-databases-cluster-create-topic| `{ "id": "", "name": "my-topic" }`                                     |
-| Delete the topic "my-topic" from Kafka cluster ``    | digitalocean-databases-cluster-delete-topic| `{ "id": "", "name": "my-topic" }`                                     |
-| Update topic "events" to have 6 partitions                         | digitalocean-databases-cluster-update-topic| `{ "id": "", "name": "events", "partition_count": "6" }`               |
-| Get Kafka config for cluster ``                      | digitalocean-databases-cluster-get-kafka-config | `{ "id": "" }`                                                    |
-| Update Kafka config                                                | digitalocean-databases-cluster-update-kafka-config | `{ "id": "", "config": { "log_retention_ms": 86400000 } }`       |
+| List all topics in Kafka cluster ``                  | digitalocean-db-cluster-list-topics | `{ "id": "" }`                                                         |
+| Create a topic named "my-topic" in cluster ``        | digitalocean-db-cluster-create-topic| `{ "id": "", "name": "my-topic" }`                                     |
+| Delete the topic "my-topic" from Kafka cluster ``    | digitalocean-db-cluster-delete-topic| `{ "id": "", "name": "my-topic" }`                                     |
+| Update topic "events" to have 6 partitions                         | digitalocean-db-cluster-update-topic| `{ "id": "", "name": "events", "partition_count": "6" }`               |
+| Get Kafka config for cluster ``                      | digitalocean-db-cluster-get-kafka-config | `{ "id": "" }`                                                    |
+| Update Kafka config                                                | digitalocean-db-cluster-update-kafka-config | `{ "id": "", "config": { "log_retention_ms": 86400000 } }`       |
 
 
 
