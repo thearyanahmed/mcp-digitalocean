@@ -18,7 +18,7 @@ import (
 
 const (
 	mcpName    = "mcp-digitalocean"
-	mcpVersion = "1.0.3"
+	mcpVersion = "1.0.4"
 )
 
 func main() {
