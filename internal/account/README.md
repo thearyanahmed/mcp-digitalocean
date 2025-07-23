@@ -1,17 +1,17 @@
-# DigitalOcean Account Tools
+# Account Tools
 
-This directory provides tool-based handlers for interacting with DigitalOcean account-related features via the MCP Server. All account operations are exposed as tools that accept structured arguments—no resource URIs are used. Pagination and filtering are supported where applicable.
+This directory provides tool-based handlers for interacting with account-related features via the MCP Server. All account operations are exposed as tools that accept structured arguments—no resource URIs are used. Pagination and filtering are supported where applicable.
 
 ## Supported Tools
 
 ### Actions
 
-- **digitalocean-action-get**
+- **action-get**
   - Get a specific action by its ID.
   - Arguments:
     - `ID` (number, required): The action ID.
 
-- **digitalocean-action-list**
+- **action-list**
   - List actions with pagination.
   - Arguments:
     - `Page` (number, default: 1): Page number.
@@ -19,13 +19,13 @@ This directory provides tool-based handlers for interacting with DigitalOcean ac
 
 ### Balance
 
-- **digitalocean-balance-get**
+- **balance-get**
   - Get balance information for the user account.
   - Arguments: _none_
 
 ### Billing
 
-- **digitalocean-billing-history-list**
+- **billing-history-list**
   - List billing history with pagination.
   - Arguments:
     - `Page` (number, default: 1): Page number.
@@ -33,7 +33,7 @@ This directory provides tool-based handlers for interacting with DigitalOcean ac
 
 ### Invoices
 
-- **digitalocean-invoice-list**
+- **invoice-list**
   - List invoices with pagination.
   - Arguments:
     - `Page` (number, default: 1): Page number.
@@ -41,32 +41,32 @@ This directory provides tool-based handlers for interacting with DigitalOcean ac
 
 ### SSH Keys
 
-- **digitalocean-key-create**
+- **key-create**
   - Create a new SSH key.
   - Arguments:
     - `Name` (string, required): Name of the SSH key.
     - `PublicKey` (string, required): Public key content.
 
-- **digitalocean-key-delete**
-  - Delete an SSH key by its ID.
+- **key-delete**
+  - Delete an SSH key.
   - Arguments:
-    - `ID` (number, required): ID of the SSH key to delete.
+    - `ID` (number, required): The SSH key ID.
 
-- **digitalocean-key-get**
-  - Get a specific SSH key by its ID.
+- **key-get**
+  - Get a specific SSH key by ID.
   - Arguments:
-    - `ID` (number, required): ID of the SSH key.
+    - `ID` (number, required): The SSH key ID.
 
-- **digitalocean-key-list**
+- **key-list**
   - List SSH keys with pagination.
   - Arguments:
     - `Page` (number, default: 1): Page number.
     - `PerPage` (number, default: 30): Items per page.
 
-### Account Information
+### Account Info
 
-- **digitalocean-account-get-information**
-  - Retrieves account information for the current user.
+- **account-get-information**
+  - Get information about the current account.
   - Arguments: _none_
 
 ---
@@ -74,43 +74,43 @@ This directory provides tool-based handlers for interacting with DigitalOcean ac
 ## Example Usage
 
 - Get details for action ID 123456:
-  - Tool: `digitalocean-action-get`
+  - Tool: `action-get`
   - Arguments: `{ "ID": 123456 }`
 
 - List actions (page 2, 50 per page):
-  - Tool: `digitalocean-action-list`
+  - Tool: `action-list`
   - Arguments: `{ "Page": 2, "PerPage": 50 }`
 
 - Get current account balance:
-  - Tool: `digitalocean-balance-get`
+  - Tool: `balance-get`
   - Arguments: `{}`
 
 - List billing history (first page, 10 items per page):
-  - Tool: `digitalocean-billing-history-list`
+  - Tool: `billing-history-list`
   - Arguments: `{ "Page": 1, "PerPage": 10 }`
 
 - List invoices (default pagination):
-  - Tool: `digitalocean-invoice-list`
+  - Tool: `invoice-list`
   - Arguments: `{}`
 
 - Create a new SSH key:
-  - Tool: `digitalocean-key-create`
+  - Tool: `key-create`
   - Arguments: `{ "Name": "my-key", "PublicKey": "ssh-rsa AAAA..." }`
 
 - Delete SSH key with ID 98765:
-  - Tool: `digitalocean-key-delete`
+  - Tool: `key-delete`
   - Arguments: `{ "ID": 98765 }`
 
 - Get SSH key by ID:
-  - Tool: `digitalocean-key-get`
+  - Tool: `key-get`
   - Arguments: `{ "ID": 12345 }`
 
 - List SSH keys (page 3, 20 per page):
-  - Tool: `digitalocean-key-list`
+  - Tool: `key-list`
   - Arguments: `{ "Page": 3, "PerPage": 20 }`
 
 - Get current account information:
-  - Tool: `digitalocean-account-get-information`
+  - Tool: `account-get-information`
   - Arguments: `{}`
 
 ---

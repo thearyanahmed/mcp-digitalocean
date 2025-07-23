@@ -212,7 +212,7 @@ func (d *DropletTool) Tools() []server.ServerTool {
 	tools := []server.ServerTool{
 		{
 			Handler: d.createDroplet,
-			Tool: mcp.NewTool("digitalocean-create-droplet",
+			Tool: mcp.NewTool("droplet-create",
 				mcp.WithDescription("Create a new droplet"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the droplet")),
 				mcp.WithString("Size", mcp.Required(), mcp.Description("Slug of the droplet size (e.g., s-1vcpu-1gb)")),
@@ -224,35 +224,35 @@ func (d *DropletTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.deleteDroplet,
-			Tool: mcp.NewTool("digitalocean-delete-droplet",
+			Tool: mcp.NewTool("droplet-delete",
 				mcp.WithDescription("Delete a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet to delete")),
 			),
 		},
 		{
 			Handler: d.enablePrivateNetworking,
-			Tool: mcp.NewTool("digitalocean-enable-private-net-droplet",
+			Tool: mcp.NewTool("droplet-enable-private-net",
 				mcp.WithDescription("Enable private networking on a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
 			),
 		},
 		{
 			Handler: d.getDropletKernels,
-			Tool: mcp.NewTool("digitalocean-get-droplet-kernels",
+			Tool: mcp.NewTool("droplet-kernels",
 				mcp.WithDescription("Get available kernels for a droplet"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the droplet")),
 			),
 		},
 		{
 			Handler: d.getDropletByID,
-			Tool: mcp.NewTool("digitalocean-get-droplet",
+			Tool: mcp.NewTool("droplet-get",
 				mcp.WithDescription("Get a droplet by its ID"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("Droplet ID")),
 			),
 		},
 		{
 			Handler: d.getDropletActionByID,
-			Tool: mcp.NewTool("digitalocean-get-droplet-action",
+			Tool: mcp.NewTool("droplet-action",
 				mcp.WithDescription("Get a droplet action by droplet ID and action ID"),
 				mcp.WithNumber("DropletID", mcp.Required(), mcp.Description("Droplet ID")),
 				mcp.WithNumber("ActionID", mcp.Required(), mcp.Description("Action ID")),
@@ -260,7 +260,7 @@ func (d *DropletTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.getDroplets,
-			Tool: mcp.NewTool("digitalocean-get-droplets",
+			Tool: mcp.NewTool("droplet-list",
 				mcp.WithDescription("List all droplets for the user. Supports pagination."),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(50), mcp.Description("Items per page")),

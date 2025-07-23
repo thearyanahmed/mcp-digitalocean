@@ -1,54 +1,50 @@
 # DigitalOcean Insights Tools
 
-This directory provides tool-based handlers for interacting with DigitalOcean insights-related features via the MCP
-Server. All insight operations are exposed as tools that accept structured arguments—no resource URIs are used.
-Pagination and filtering are supported where applicable.
+This directory provides tool-based handlers for interacting with insights-related features via the MCP Server. All insight operations are exposed as tools that accept structured arguments—no resource URIs are used. Pagination and filtering are supported where applicable.
 
 ## Supported Tools
 
 ### UptimeCheck
 
-- **digitalocean-uptimecheck-get**
+- **uptimecheck-get**
     - Get a specific uptimecheck by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
 
-- **digitalocean-uptimecheck-get-state**
+- **uptimecheck-get-state**
     - Get a specific uptimecheck state by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
 
-- **digitalocean-uptimecheck-list**
+- **uptimecheck-list**
     - List uptimechecks with pagination.
     - Arguments:
         - `Page` (number, default: 1): Page number.
         - `PerPage` (number, default: 30): Items per page.
 
-- **digitalocean-uptimecheck-create**
+- **uptimecheck-create**
     - Create a new uptimecheck.
     - Arguments:
         - `Name` (string, required): A human-friendly display name.
-        - `Type`    (string, required) : ping,http or https. The type of health check to perform.
-        - `Target`  (string, required)  :The endpoint to perform healthchecks on.
-        - `Regions` ([]string, required) : An array containing the selected regions to perform healthchecks from.
-          values : "us_east","us_west","eu_west" and "se_asia"
-        - `Enabled` (bool, required)     : A boolean value indicating whether the check is enabled/disabled.
+        - `Type` (string, required): ping, http, or https. The type of health check to perform.
+        - `Target` (string, required): The endpoint to perform healthchecks on.
+        - `Regions` (array of strings, required): Selected regions to perform healthchecks from. Values: "us_east", "us_west", "eu_west", "se_asia"
+        - `Enabled` (bool, required): Whether the check is enabled/disabled.
 
-- **digitalocean-uptimecheck-delete**
+- **uptimecheck-delete**
     - Delete a specific uptimecheck by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
 
-- **digitalocean-uptimecheck-update**
-    - Update a existing uptimecheck by its ID.
+- **uptimecheck-update**
+    - Update an existing uptimecheck by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
         - `Name` (string): A human-friendly display name.
-        - `Type`    (string) : ping,http or https. The type of health check to perform.
-        - `Target`  (string)  :The endpoint to perform healthchecks on.
-        - `Regions` ([]string) : An array containing the selected regions to perform healthchecks from. values : "
-          us_east","us_west","eu_west" and "se_asia"
-        - `Enabled` (bool)     : A boolean value indicating whether the check is enabled/disabled.
+        - `Type` (string): ping, http, or https. The type of health check to perform.
+        - `Target` (string): The endpoint to perform healthchecks on.
+        - `Regions` (array of strings): Selected regions to perform healthchecks from. Values: "us_east", "us_west", "eu_west", "se_asia"
+        - `Enabled` (bool): Whether the check is enabled/disabled.
 
 ### UptimeAlert
 
@@ -142,29 +138,29 @@ Pagination and filtering are supported where applicable.
 ## Example Usage
 
 - Get details for check ID 4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-get`
+    - Tool: `uptimecheck-get`
     - Arguments: `{ "ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 - Get state for check ID 4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-get-state`
+    - Tool: `uptimecheck-get-state`
     - Arguments: `{ "ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 - List uptimechecks (page 2, 50 per page):
-    - Tool: `digitalocean-uptimecheck-list`
+    - Tool: `uptimecheck-list`
     - Arguments: `{ "Page": 2, "PerPage": 50 }`
 
 - Create a new uptime check:
-    - Tool: `digitalocean-uptimecheck-create`
+    - Tool: `uptimecheck-create`
     - Arguments:
       `{ "Name": "Landing page check", "type": "https", "target": "https://www.landingpage.com", "regions": ["us_east","eu_west"], "enabled": true}`
 
 - Update a existing uptime check:
-    - Tool: `digitalocean-uptimecheck-update`
+    - Tool: `uptimecheck-update`
     - Arguments:
       `{"ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6"  "Name": "Landing page check", "type": "https", "target": "https://www.landingpage.com", "regions": ["us_east","eu_west"], "enabled": true}`
 
 - Delete uptimecheck with ID 4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-delete`
+    - Tool: `uptimecheck-delete`
     - Arguments: `{ "ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 

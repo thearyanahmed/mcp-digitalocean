@@ -40,7 +40,7 @@ func (b *BalanceTools) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: b.getBalance,
-			Tool: mcp.NewTool("digitalocean-balance-get",
+			Tool: mcp.NewTool("balance-get",
 				mcp.WithDescription("Get balance information for the user account"),
 			),
 		},

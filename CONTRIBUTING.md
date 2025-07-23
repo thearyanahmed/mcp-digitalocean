@@ -33,7 +33,7 @@ Thank you for your interest in contributing! Please follow these guidelines to h
 
 ## Naming Tools
 
-- **Tools Naming Convention:** Name tools using the format `digitalocean-<service>-<action>`, e.g., `digitalocean-apps-list` or `digitalocean-spaces-key-create`. Use lowercase and hyphens to separate words.
+- **Tools Naming Convention:** Name tools using the format `<service>-<action>`, e.g., `apps-list` or `spaces-key-create`. Use lowercase and hyphens to separate words.
 - **Tools Argument Naming:** Name tool arguments using UpperCamelCase (e.g., `AppID`, `PerPage`, `Request`). This matches the convention used in Go structs and tool definitions.
 
 ## Testing

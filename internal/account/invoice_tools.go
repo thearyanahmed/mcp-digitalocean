@@ -51,7 +51,7 @@ func (i *InvoiceTools) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: i.listInvoices,
-			Tool: mcp.NewTool("digitalocean-invoice-list",
+			Tool: mcp.NewTool("invoice-list",
 				mcp.WithDescription("List invoices with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultInvoicesPage), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultInvoicesPageSize), mcp.Description("Items per page")),

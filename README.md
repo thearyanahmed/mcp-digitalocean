@@ -92,14 +92,14 @@ See the following files for full documentation:
 
 ### Example Tool Usage
 
-- Deploy an app from a GitHub repo: `digitalocean-create-app-from-spec`
-- Resize a droplet: `digitalocean-droplet-resize`
-- Add a new SSH key: `digitalocean-key-create`
-- Create a new domain: `digitalocean-domain-create`
-- Enable backups on a droplet: `digitalocean-droplet-enable-backups`
-- Flush a CDN cache: `digitalocean-cdn-flush-cache`
-- Create a VPC peering connection: `digitalocean-vpc-peering-create`
-- Delete a VPC peering connection: `digitalocean-vpc-peering-delete`
+- Deploy an app from a GitHub repo: `create-app-from-spec`
+- Resize a droplet: `droplet-resize`
+- Add a new SSH key: `key-create`
+- Create a new domain: `domain-create`
+- Enable backups on a droplet: `droplet-enable-backups`
+- Flush a CDN cache: `cdn-flush-cache`
+- Create a VPC peering connection: `vpc-peering-create`
+- Delete a VPC peering connection: `vpc-peering-delete`
 
 ---
 

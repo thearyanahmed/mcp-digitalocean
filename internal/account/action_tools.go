@@ -68,14 +68,14 @@ func (a *ActionTools) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: a.getAction,
-			Tool: mcp.NewTool("digitalocean-action-get",
+			Tool: mcp.NewTool("action-get",
 				mcp.WithDescription("Get a specific action by ID"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("Action ID")),
 			),
 		},
 		{
 			Handler: a.listActions,
-			Tool: mcp.NewTool("digitalocean-action-list",
+			Tool: mcp.NewTool("action-list",
 				mcp.WithDescription("List actions with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultActionsPage), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultActionsPageSize), mcp.Description("Items per page")),
