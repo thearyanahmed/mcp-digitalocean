@@ -1,6 +1,6 @@
 # Droplet MCP Tools
 
-This directory contains tools for managing Droplets, Images, and Sizes via the MCP Server. All operations are exposed as tools with argument-based input—no resource URIs are used. Pagination and filtering are supported where applicable.
+This directory contains tools for managing DigitalOcean Droplets, Images, and Sizes via the MCP Server. All operations are exposed as tools with argument-based input—no resource URIs are used. Pagination and filtering are supported where applicable.
 
 ---
 
