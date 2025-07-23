@@ -100,14 +100,14 @@ func (t *VPCPeeringTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: t.getVPCPeering,
-			Tool: mcp.NewTool("digitalocean-vpc-peering-get",
+			Tool: mcp.NewTool("vpc-peering-get",
 				mcp.WithDescription("Get VPC Peering information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the VPC Peering connection")),
 			),
 		},
 		{
 			Handler: t.listVPCPeerings,
-			Tool: mcp.NewTool("digitalocean-vpc-peering-list",
+			Tool: mcp.NewTool("vpc-peering-list",
 				mcp.WithDescription("List VPC Peering connections with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -115,7 +115,7 @@ func (t *VPCPeeringTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: t.createPeering,
-			Tool: mcp.NewTool("digitalocean-vpc-peering-create",
+			Tool: mcp.NewTool("vpc-peering-create",
 				mcp.WithDescription("Create a new VPC Peering connection between two VPCs"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name for the Peering connection")),
 				mcp.WithString("Vpc1", mcp.Required(), mcp.Description("ID of the first VPC")),
@@ -124,7 +124,7 @@ func (t *VPCPeeringTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: t.deletePeering,
-			Tool: mcp.NewTool("digitalocean-vpc-peering-delete",
+			Tool: mcp.NewTool("vpc-peering-delete",
 				mcp.WithDescription("Delete a VPC Peering connection"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the VPC Peering connection to delete")),
 			),

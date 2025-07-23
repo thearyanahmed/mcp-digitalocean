@@ -126,14 +126,14 @@ func (c *CDNTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: c.getCDN,
-			Tool: mcp.NewTool("digitalocean-spaces-cdn-get",
+			Tool: mcp.NewTool("spaces-cdn-get",
 				mcp.WithDescription("Get CDN information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the CDN")),
 			),
 		},
 		{
 			Handler: c.listCDNs,
-			Tool: mcp.NewTool("digitalocean-spaces-cdn-list",
+			Tool: mcp.NewTool("spaces-cdn-list",
 				mcp.WithDescription("List CDNs with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -141,7 +141,7 @@ func (c *CDNTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.createCDN,
-			Tool: mcp.NewTool("digitalocean-spaces-cdn-create",
+			Tool: mcp.NewTool("spaces-cdn-create",
 				mcp.WithDescription("Create a new CDN"),
 				mcp.WithString("Origin", mcp.Required(), mcp.Description("Origin URL for the CDN")),
 				mcp.WithNumber("TTL", mcp.Required(), mcp.Description("Time-to-live for the CDN cache")),
@@ -149,7 +149,7 @@ func (c *CDNTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.deleteCDN,
-			Tool: mcp.NewTool("digitalocean-spaces-cdn-delete",
+			Tool: mcp.NewTool("spaces-cdn-delete",
 				mcp.WithDescription("Delete a CDN"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the CDN to delete")),
 			),
@@ -157,7 +157,7 @@ func (c *CDNTool) Tools() []server.ServerTool {
 
 		{
 			Handler: c.flushCDNCache,
-			Tool: mcp.NewTool("digitalocean-spaces-cdn-flush-cache",
+			Tool: mcp.NewTool("spaces-cdn-flush-cache",
 				mcp.WithDescription("Flush the cache of a CDN"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the CDN")),
 				mcp.WithArray("Files", mcp.Required(), mcp.Description("file names to flush from the cache (max 50 per request)"), mcp.Items(map[string]any{

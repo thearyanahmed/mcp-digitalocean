@@ -154,14 +154,14 @@ func (p *PartnerAttachmentTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: p.getPartnerAttachment,
-			Tool: mcp.NewTool("digitalocean-partner-attachment-get",
+			Tool: mcp.NewTool("partner-attachment-get",
 				mcp.WithDescription("Get partner attachment information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the partner attachment")),
 			),
 		},
 		{
 			Handler: p.listPartnerAttachments,
-			Tool: mcp.NewTool("digitalocean-partner-attachment-list",
+			Tool: mcp.NewTool("partner-attachment-list",
 				mcp.WithDescription("List partner attachments with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -169,7 +169,7 @@ func (p *PartnerAttachmentTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: p.createPartnerAttachment,
-			Tool: mcp.NewTool("digitalocean-partner-attachment-create",
+			Tool: mcp.NewTool("partner-attachment-create",
 				mcp.WithDescription("Create a new partner attachment"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the partner attachment")),
 				mcp.WithString("Region", mcp.Required(), mcp.Description("Region for the partner attachment")),
@@ -178,28 +178,28 @@ func (p *PartnerAttachmentTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: p.deletePartnerAttachment,
-			Tool: mcp.NewTool("digitalocean-partner-attachment-delete",
+			Tool: mcp.NewTool("partner-attachment-delete",
 				mcp.WithDescription("Delete a partner attachment"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the partner attachment to delete")),
 			),
 		},
 		{
 			Handler: p.getServiceKey,
-			Tool: mcp.NewTool("digitalocean-partner-attachment-get-service-key",
+			Tool: mcp.NewTool("partner-attachment-get-service-key",
 				mcp.WithDescription("Get the service key of a partner attachment"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the partner attachment")),
 			),
 		},
 		{
 			Handler: p.getBGPConfig,
-			Tool: mcp.NewTool("digitalocean-partner-attachment-get-bgp-config",
+			Tool: mcp.NewTool("partner-attachment-get-bgp-config",
 				mcp.WithDescription("Get the BGP configuration of a partner attachment"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the partner attachment")),
 			),
 		},
 		{
 			Handler: p.updatePartnerAttachment,
-			Tool: mcp.NewTool("digitalocean-partner-attachment-update",
+			Tool: mcp.NewTool("partner-attachment-update",
 				mcp.WithDescription("Update a partner attachment"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the partner attachment to update")),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("New name for the partner attachment")),

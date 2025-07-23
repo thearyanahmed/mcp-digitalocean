@@ -216,14 +216,14 @@ func (t *ReservedIPTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: t.getReservedIPv4,
-			Tool: mcp.NewTool("digitalocean-reserved-ipv4-get",
+			Tool: mcp.NewTool("reserved-ipv4-get",
 				mcp.WithDescription("Get reserved IPv4 information by IP"),
 				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IPv4 address")),
 			),
 		},
 		{
 			Handler: t.listReservedIPv4s,
-			Tool: mcp.NewTool("digitalocean-reserved-ipv4-list",
+			Tool: mcp.NewTool("reserved-ipv4-list",
 				mcp.WithDescription("List reserved IPv4 addresses with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number (default: 1)")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page (default: 20)")),
@@ -231,14 +231,14 @@ func (t *ReservedIPTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: t.getReservedIPv6,
-			Tool: mcp.NewTool("digitalocean-reserved-ipv6-get",
+			Tool: mcp.NewTool("reserved-ipv6-get",
 				mcp.WithDescription("Get reserved IPv6 information by IP"),
 				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IPv6 address")),
 			),
 		},
 		{
 			Handler: t.listReservedIPv6s,
-			Tool: mcp.NewTool("digitalocean-reserved-ipv6-list",
+			Tool: mcp.NewTool("reserved-ipv6-list",
 				mcp.WithDescription("List reserved IPv6 addresses with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number (default: 1)")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page (default: 20)")),
@@ -246,7 +246,7 @@ func (t *ReservedIPTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: t.reserveIP,
-			Tool: mcp.NewTool("digitalocean-reserved-ip-reserve",
+			Tool: mcp.NewTool("reserved-ip-reserve",
 				mcp.WithDescription("Reserve a new IPv4 or IPv6"),
 				mcp.WithString("Region", mcp.Required(), mcp.Description("Region to reserve the IP in")),
 				mcp.WithString("Type", mcp.Required(), mcp.Description("Type of IP to reserve ('ipv4' or 'ipv6')")),
@@ -254,7 +254,7 @@ func (t *ReservedIPTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: t.releaseIP,
-			Tool: mcp.NewTool("digitalocean-reserved-ip-release",
+			Tool: mcp.NewTool("reserved-ip-release",
 				mcp.WithDescription("Release a reserved IPv4 or IPv6"),
 				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IP to release")),
 				mcp.WithString("Type", mcp.Required(), mcp.Description("Type of IP to release ('ipv4' or 'ipv6')")),
@@ -262,7 +262,7 @@ func (t *ReservedIPTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: t.assignIP,
-			Tool: mcp.NewTool("digitalocean-reserved-ip-assign",
+			Tool: mcp.NewTool("reserved-ip-assign",
 				mcp.WithDescription("Assign a reserved IP to a droplet"),
 				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IP to assign")),
 				mcp.WithNumber("DropletID", mcp.Required(), mcp.Description("The ID of the droplet to assign the IP to")),
@@ -271,7 +271,7 @@ func (t *ReservedIPTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: t.unassignIP,
-			Tool: mcp.NewTool("digitalocean-reserved-ip-unassign",
+			Tool: mcp.NewTool("reserved-ip-unassign",
 				mcp.WithDescription("Unassign a reserved IP from a droplet"),
 				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IP to unassign")),
 				mcp.WithString("Type", mcp.Required(), mcp.Description("Type of IP to unassign ('ipv4' or 'ipv6')")),
