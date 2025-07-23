@@ -153,6 +153,61 @@ func (d *DropletTool) getDropletActionByID(ctx context.Context, req mcp.CallTool
 	return mcp.NewToolResultText(string(jsonData)), nil
 }
 
+// getDroplets lists all droplets for a user
+func (d *DropletTool) getDroplets(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	page, ok := req.GetArguments()["Page"].(float64)
+	if !ok {
+		page = 1
+	}
+	perPage, ok := req.GetArguments()["PerPage"].(float64)
+	if !ok {
+		perPage = 50
+	}
+
+	opt := &godo.ListOptions{
+		Page:    int(page),
+		PerPage: int(perPage),
+	}
+	droplets, _, err := d.client.Droplets.List(ctx, opt)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	filteredDroplets := make([]map[string]any, len(droplets))
+	for i, droplet := range droplets {
+		filteredDroplets[i] = map[string]any{
+			"id":                 droplet.ID,
+			"name":               droplet.Name,
+			"memory":             droplet.Memory,
+			"vcpus":              droplet.Vcpus,
+			"disk":               droplet.Disk,
+			"region":             droplet.Region,
+			"image":              droplet.Image,
+			"size":               droplet.Size,
+			"size_slug":          droplet.SizeSlug,
+			"backup_ids":         droplet.BackupIDs,
+			"next_backup_window": droplet.NextBackupWindow,
+			"snapshot_ids":       droplet.SnapshotIDs,
+			"features":           droplet.Features,
+			"locked":             droplet.Locked,
+			"status":             droplet.Status,
+			"networks":           droplet.Networks,
+			"created_at":         droplet.Created,
+			"kernel":             droplet.Kernel,
+			"tags":               droplet.Tags,
+			"volume_ids":         droplet.VolumeIDs,
+			"vpc_uuid":           droplet.VPCUUID,
+		}
+	}
+
+	jsonData, err := json.MarshalIndent(filteredDroplets, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(jsonData)), nil
+}
+
 func (d *DropletTool) Tools() []server.ServerTool {
 	tools := []server.ServerTool{
 		{
@@ -201,6 +256,14 @@ func (d *DropletTool) Tools() []server.ServerTool {
 				mcp.WithDescription("Get a droplet action by droplet ID and action ID"),
 				mcp.WithNumber("DropletID", mcp.Required(), mcp.Description("Droplet ID")),
 				mcp.WithNumber("ActionID", mcp.Required(), mcp.Description("Action ID")),
+			),
+		},
+		{
+			Handler: d.getDroplets,
+			Tool: mcp.NewTool("digitalocean-get-droplets",
+				mcp.WithDescription("List all droplets for the user. Supports pagination."),
+				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
+				mcp.WithNumber("PerPage", mcp.DefaultNumber(50), mcp.Description("Items per page")),
 			),
 		},
 	}
