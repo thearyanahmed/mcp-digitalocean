@@ -270,14 +270,14 @@ func (c *AlertPolicyTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: c.getAlertPolicy,
-			Tool: mcp.NewTool("digitalocean-alert-policy-get",
+			Tool: mcp.NewTool("alert-policy-get",
 				mcp.WithDescription("Get Alert Policy information by UUID"),
 				mcp.WithString("UUID", mcp.Required(), mcp.Description("UUID of the Alert Policy to retrieve (format: 00000000-0000-0000-0000-000000000000)")),
 			),
 		},
 		{
 			Handler: c.listAlertPolicies,
-			Tool: mcp.NewTool("digitalocean-alert-policy-list",
+			Tool: mcp.NewTool("alert-policy-list",
 				mcp.WithDescription("List all Alert Policies in your account with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultAlertPoliciesPage), mcp.Description("Page number for pagination (starts from 1)")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultAlertPoliciesPageSize), mcp.Description("Number of items per page (1-200, default 20)")),
@@ -285,7 +285,7 @@ func (c *AlertPolicyTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.createAlertPolicy,
-			Tool: mcp.NewTool("digitalocean-alert-policy-create",
+			Tool: mcp.NewTool("alert-policy-create",
 				mcp.WithDescription("Create a new Alert Policy"),
 				mcp.WithString("Type", mcp.Required(), mcp.Description(`Type of the Alert Policy. Available types:
 Droplet metrics:
@@ -346,7 +346,7 @@ Database metrics:
 		},
 		{
 			Handler: c.updateAlertPolicy,
-			Tool: mcp.NewTool("digitalocean-alert-policy-update",
+			Tool: mcp.NewTool("alert-policy-update",
 				mcp.WithDescription("Update an Alert Policy"),
 				mcp.WithString("UUID", mcp.Required(), mcp.Description("UUID of the Alert Policy to update")),
 				mcp.WithString("Type", mcp.Required(), mcp.Description(`Type of the Alert Policy. Available types:
@@ -408,7 +408,7 @@ Database metrics:
 		},
 		{
 			Handler: c.deleteAlertPolicy,
-			Tool: mcp.NewTool("digitalocean-alert-policy-delete",
+			Tool: mcp.NewTool("alert-policy-delete",
 				mcp.WithDescription("Delete an Alert Policy permanently"),
 				mcp.WithString("UUID", mcp.Required(), mcp.Description("UUID of the Alert Policy to delete (format: 00000000-0000-0000-0000-000000000000)")),
 			),

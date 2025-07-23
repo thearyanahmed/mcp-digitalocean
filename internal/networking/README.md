@@ -1,6 +1,6 @@
 # Networking MCP Tools
 
-This directory contains tools and resources for managing networking features via the MCP Server. These tools enable you to create, modify, and query networking resources such as domains, certificates, firewalls, reserved IPs, VPCs, CDNs, and partner attachments.
+This directory contains tools and resources for managing DigitalOcean networking features via the MCP Server. These tools enable you to create, modify, and query networking resources such as domains, certificates, firewalls, reserved IPs, VPCs, CDNs, and partner attachments.
 
 ---
 

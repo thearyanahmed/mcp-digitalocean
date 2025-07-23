@@ -189,21 +189,21 @@ func (c *UptimeTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: c.getUptimeCheck,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-get",
+			Tool: mcp.NewTool("uptimecheck-get",
 				mcp.WithDescription("Get UptimeCheck information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the UptimeCheck")),
 			),
 		},
 		{
 			Handler: c.getUptimeCheckState,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-get-state",
+			Tool: mcp.NewTool("uptimecheck-get-state",
 				mcp.WithDescription("Get UptimeCheck information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the UptimeCheck")),
 			),
 		},
 		{
 			Handler: c.listUptimeChecks,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-list",
+			Tool: mcp.NewTool("uptimecheck-list",
 				mcp.WithDescription("List UptimeChecks with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultChecksPage), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultChecksPageSize), mcp.Description("Items per page")),
@@ -211,7 +211,7 @@ func (c *UptimeTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.createUptimeCheck,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-create",
+			Tool: mcp.NewTool("uptimecheck-create",
 				mcp.WithDescription("Create a new UptimeCheck"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the UptimeCheck")),
 				mcp.WithString("Type", mcp.Required(), mcp.Description("Type of the UptimeCheck. value : HTTPS, HTTP or PING")),
@@ -223,7 +223,7 @@ func (c *UptimeTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.updateUptimeCheck,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-update",
+			Tool: mcp.NewTool("uptimecheck-update",
 				mcp.WithDescription("Update a UptimeCheck"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the UptimeCheck")),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the UptimeCheck")),
@@ -236,7 +236,7 @@ func (c *UptimeTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.deleteUptimeCheck,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-delete",
+			Tool: mcp.NewTool("uptimecheck-delete",
 				mcp.WithDescription("Delete a uptimeCheck"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the uptimeCheck to delete")),
 			),

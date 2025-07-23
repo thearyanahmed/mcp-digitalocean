@@ -1,6 +1,7 @@
 # Spaces MCP Tools
 
-This directory contains tools for managing Spaces object storage and Spaces access keys via the MCP Server. All operations are exposed as tools with argument-based input—no resource URIs are used. Pagination and filtering are supported where applicable.
+
+This directory contains tools for managing DigitalOcean Spaces object storage and Spaces access keys via the MCP Server. All operations are exposed as tools with argument-based input—no resource URIs are used. Pagination and filtering are supported where applicable.
 
 ---
 
