@@ -28,6 +28,12 @@ This directory contains tools for managing DigitalOcean Droplets, Images, and Si
   **Arguments:**  
   - `ID` (number, required): Droplet ID
 
+- **digitalocean-get-droplets**  
+  List all droplets for the user. Supports pagination.  
+  **Arguments:**  
+  - `Page` (number, default: 1): Page number  
+  - `PerPage` (number, default: 50): Items per page
+
 ---
 
 ### Droplet Actions Tools
