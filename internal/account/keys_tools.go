@@ -102,7 +102,7 @@ func (k *KeysTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: k.createKey,
-			Tool: mcp.NewTool("digitalocean-key-create",
+			Tool: mcp.NewTool("key-create",
 				mcp.WithDescription("Create a new SSH key"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the SSH key")),
 				mcp.WithString("PublicKey", mcp.Required(), mcp.Description("Public key content")),
@@ -110,21 +110,21 @@ func (k *KeysTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: k.deleteKey,
-			Tool: mcp.NewTool("digitalocean-key-delete",
+			Tool: mcp.NewTool("key-delete",
 				mcp.WithDescription("Delete an SSH key"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the SSH key to delete")),
 			),
 		},
 		{
 			Handler: k.getKey,
-			Tool: mcp.NewTool("digitalocean-key-get",
+			Tool: mcp.NewTool("key-get",
 				mcp.WithDescription("Get a specific SSH key by ID"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("ID of the SSH key")),
 			),
 		},
 		{
 			Handler: k.listKeys,
-			Tool: mcp.NewTool("digitalocean-key-list",
+			Tool: mcp.NewTool("key-list",
 				mcp.WithDescription("List SSH keys with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultKeysPage), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultKeysPageSize), mcp.Description("Items per page")),

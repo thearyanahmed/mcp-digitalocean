@@ -38,7 +38,7 @@ func (a *AccountTools) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: a.getAccountInformation,
-			Tool: mcp.NewTool("digitalocean-account-get-information",
+			Tool: mcp.NewTool("account-get-information",
 				mcp.WithDescription("Retrieves account information for the current user"),
 			),
 		},

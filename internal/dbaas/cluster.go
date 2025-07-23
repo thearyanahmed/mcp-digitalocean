@@ -329,7 +329,7 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 
 		{
 			Handler: s.listCluster,
-			Tool: mcp.NewTool("digitalocean-db-cluster-list",
+			Tool: mcp.NewTool("db-cluster-list",
 				mcp.WithDescription("Get list of  Cluster"),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
 				mcp.WithNumber("per_page", mcp.Description("Number of results per page (optional, integer)")),
@@ -337,21 +337,21 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.getCluster,
-			Tool: mcp.NewTool("digitalocean-db-cluster-get",
+			Tool: mcp.NewTool("db-cluster-get",
 				mcp.WithDescription("Get a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to retrieve")),
 			),
 		},
 		{
 			Handler: s.getCA,
-			Tool: mcp.NewTool("digitalocean-db-cluster-get-ca",
+			Tool: mcp.NewTool("db-cluster-get-ca",
 				mcp.WithDescription("Get the CA certificate for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to retrieve the CA for")),
 			),
 		},
 		{
 			Handler: s.createCluster,
-			Tool: mcp.NewTool("digitalocean-db-cluster-create",
+			Tool: mcp.NewTool("db-cluster-create",
 				mcp.WithDescription("Create a new database cluster"),
 				mcp.WithString("name", mcp.Required(), mcp.Description("The name of the cluster")),
 				mcp.WithString("engine", mcp.Required(), mcp.Description("The engine slug (e.g., valkey, pg, mysql, etc.)")),
@@ -364,14 +364,14 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.deleteCluster,
-			Tool: mcp.NewTool("digitalocean-db-cluster-delete",
+			Tool: mcp.NewTool("db-cluster-delete",
 				mcp.WithDescription("Delete a database cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to delete")),
 			),
 		},
 		{
 			Handler: s.resizeCluster,
-			Tool: mcp.NewTool("digitalocean-db-cluster-resize",
+			Tool: mcp.NewTool("db-cluster-resize",
 				mcp.WithDescription("Resize a database cluster by its id. At least one of size, num_nodes, or storage_size_mib must be provided."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to resize")),
 				mcp.WithString("size", mcp.Description("The new size slug (e.g., db-s-2vcpu-4gb)")),
@@ -381,7 +381,7 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.listBackups,
-			Tool: mcp.NewTool("digitalocean-db-cluster-list-backups",
+			Tool: mcp.NewTool("db-cluster-list-backups",
 				mcp.WithDescription("List backups for a database cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The id of the cluster to list backups for")),
 				mcp.WithString("page", mcp.Description("Page number for pagination (optional, integer as string)")),
@@ -390,13 +390,13 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.listOptions,
-			Tool: mcp.NewTool("digitalocean-db-cluster-list-options",
+			Tool: mcp.NewTool("db-cluster-list-options",
 				mcp.WithDescription("List available database options (engines, versions, sizes, regions, etc) for DigitalOcean managed databases."),
 			),
 		},
 		{
 			Handler: s.upgradeMajorVersion,
-			Tool: mcp.NewTool("digitalocean-db-cluster-upgrade-major-version",
+			Tool: mcp.NewTool("db-cluster-upgrade-major-version",
 				mcp.WithDescription("Upgrade the major version of a database cluster by its id. Requires the target version."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("version", mcp.Required(), mcp.Description("The target major version to upgrade to (e.g., 15 for PostgreSQL)")),
@@ -404,7 +404,7 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.startOnlineMigration,
-			Tool: mcp.NewTool("digitalocean-db-cluster-start-online-migration",
+			Tool: mcp.NewTool("db-cluster-start-online-migration",
 				mcp.WithDescription("Start an online migration for a database cluster by its id."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithObject("source",
@@ -439,7 +439,7 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.stopOnlineMigration,
-			Tool: mcp.NewTool("digitalocean-db-cluster-stop-online-migration",
+			Tool: mcp.NewTool("db-cluster-stop-online-migration",
 				mcp.WithDescription("Stop an online migration for a database cluster by its id and migration_id."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithString("migration_id", mcp.Required(), mcp.Description("The migration id to stop")),
@@ -447,7 +447,7 @@ func (s *ClusterTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.getOnlineMigrationStatus,
-			Tool: mcp.NewTool("digitalocean-db-cluster-get-migration",
+			Tool: mcp.NewTool("db-cluster-get-migration",
 				mcp.WithDescription("Get the online migration status for a database cluster by its id."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),

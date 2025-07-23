@@ -127,14 +127,14 @@ func (v *VPCTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: v.getVPC,
-			Tool: mcp.NewTool("digitalocean-vpc-get",
+			Tool: mcp.NewTool("vpc-get",
 				mcp.WithDescription("Get VPC information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the VPC")),
 			),
 		},
 		{
 			Handler: v.listVPCs,
-			Tool: mcp.NewTool("digitalocean-vpc-list",
+			Tool: mcp.NewTool("vpc-list",
 				mcp.WithDescription("List VPCs with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -142,7 +142,7 @@ func (v *VPCTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: v.createVPC,
-			Tool: mcp.NewTool("digitalocean-vpc-create",
+			Tool: mcp.NewTool("vpc-create",
 				mcp.WithDescription("Create a new VPC"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the VPC")),
 				mcp.WithString("Region", mcp.Required(), mcp.Description("Region slug (e.g., nyc3)")),
@@ -152,14 +152,14 @@ func (v *VPCTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: v.listVPCMembers,
-			Tool: mcp.NewTool("digitalocean-vpc-list-members",
+			Tool: mcp.NewTool("vpc-list-members",
 				mcp.WithDescription("List members of a VPC"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the VPC")),
 			),
 		},
 		{
 			Handler: v.deleteVPC,
-			Tool: mcp.NewTool("digitalocean-vpc-delete",
+			Tool: mcp.NewTool("vpc-delete",
 				mcp.WithDescription("Delete a VPC"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the VPC to delete")),
 			),

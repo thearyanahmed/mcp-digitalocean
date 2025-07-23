@@ -58,7 +58,7 @@ func (b *BillingTools) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: b.listBillingHistory,
-			Tool: mcp.NewTool("digitalocean-billing-history-list",
+			Tool: mcp.NewTool("billing-history-list",
 				mcp.WithDescription("List billing history with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultBillingPage), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultBillingPageSize), mcp.Description("Items per page")),

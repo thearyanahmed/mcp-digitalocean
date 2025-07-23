@@ -90,7 +90,7 @@ func (i *ImagesTool) Tools() []server.ServerTool {
 		{
 			Handler: i.listImages,
 			Tool: mcp.NewTool(
-				"digitalocean-image-list",
+				"image-list",
 				mcp.WithDescription("List all available distribution images. Supports pagination."),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultImagesPage), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultImagesPageSize), mcp.Description("Items per page")),
@@ -99,7 +99,7 @@ func (i *ImagesTool) Tools() []server.ServerTool {
 		{
 			Handler: i.getImageByID,
 			Tool: mcp.NewTool(
-				"digitalocean-image-get",
+				"image-get",
 				mcp.WithDescription("Get a specific image by its numeric ID."),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("Image ID")),
 			),

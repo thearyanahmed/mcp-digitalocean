@@ -8,62 +8,60 @@ Pagination and filtering are supported where applicable.
 
 ### UptimeCheck
 
-- **digitalocean-uptimecheck-get**
+- **uptimecheck-get**
     - Get a specific uptimecheck by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
 
-- **digitalocean-uptimecheck-get-state**
+- **uptimecheck-get-state**
     - Get a specific uptimecheck state by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
 
-- **digitalocean-uptimecheck-list**
+- **uptimecheck-list**
     - List uptimechecks with pagination.
     - Arguments:
         - `Page` (number, default: 1): Page number.
         - `PerPage` (number, default: 30): Items per page.
 
-- **digitalocean-uptimecheck-create**
+- **uptimecheck-create**
     - Create a new uptimecheck.
     - Arguments:
         - `Name` (string, required): A human-friendly display name.
-        - `Type`    (string, required) : ping,http or https. The type of health check to perform.
-        - `Target`  (string, required)  :The endpoint to perform healthchecks on.
-        - `Regions` ([]string, required) : An array containing the selected regions to perform healthchecks from.
-          values : "us_east","us_west","eu_west" and "se_asia"
-        - `Enabled` (bool, required)     : A boolean value indicating whether the check is enabled/disabled.
+        - `Type` (string, required): ping, http, or https. The type of health check to perform.
+        - `Target` (string, required): The endpoint to perform healthchecks on.
+        - `Regions` (array of strings, required): Selected regions to perform healthchecks from. Values: "us_east", "us_west", "eu_west", "se_asia"
+        - `Enabled` (bool, required): Whether the check is enabled/disabled.
 
-- **digitalocean-uptimecheck-delete**
+- **uptimecheck-delete**
     - Delete a specific uptimecheck by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
 
-- **digitalocean-uptimecheck-update**
-    - Update a existing uptimecheck by its ID.
+- **uptimecheck-update**
+    - Update an existing uptimecheck by its ID.
     - Arguments:
         - `ID` (string, required): The uptimecheck ID.
         - `Name` (string): A human-friendly display name.
-        - `Type`    (string) : ping,http or https. The type of health check to perform.
-        - `Target`  (string)  :The endpoint to perform healthchecks on.
-        - `Regions` ([]string) : An array containing the selected regions to perform healthchecks from. values : "
-          us_east","us_west","eu_west" and "se_asia"
-        - `Enabled` (bool)     : A boolean value indicating whether the check is enabled/disabled.
+        - `Type` (string): ping, http, or https. The type of health check to perform.
+        - `Target` (string): The endpoint to perform healthchecks on.
+        - `Regions` (array of strings): Selected regions to perform healthchecks from. Values: "us_east", "us_west", "eu_west", "se_asia"
+        - `Enabled` (bool): Whether the check is enabled/disabled.
 
 ### UptimeAlert
 
-- **digitalocean-uptimecheck-alert-get**
+- **uptimecheck-alert-get**
     - Get uptime check alert information for the check id and alert id.
     - Arguments:
         - `CheckID` (string, required): The uptimecheck ID.
         - `AlertID` (string, required): The uptimecheck alert ID.
         -
-- **digitalocean-uptimecheck-alert-list**
+- **uptimecheck-alert-list**
     - Get uptime check alert list for the check id.
     - Arguments:
         - `CheckID` (string, required): The uptimecheck ID.
 
-- **digitalocean-uptimecheck-alert-create**
+- **uptimecheck-alert-create**
     - Create a new uptimecheck alert.
     - Arguments:
         - `CheckID` (string, required): The uptimecheck ID.
@@ -79,7 +77,7 @@ Pagination and filtering are supported where applicable.
                 - `Channel` (string, required): The Slack channel to post the alert.
                 - `URL` (string, required): The Slack webhook URL for posting alerts.
 
-- **digitalocean-uptimecheck-alert-update**
+- **uptimecheck-alert-update**
     - Create a new uptimecheck alert.
     - Arguments:
         - `CheckID` (string, required): The uptimecheck ID.
@@ -98,18 +96,18 @@ Pagination and filtering are supported where applicable.
 
 ### Alert Policy
 
-- **digitalocean-alert-policy-get**
+- **alert-policy-get**
     - Get Alert Policy information by UUID.
     - Arguments:
         - `UUID` (string, required): UUID of the Alert Policy to retrieve.
 
-- **digitalocean-alert-policy-list**
+- **alert-policy-list**
     - List all Alert Policies in your account with pagination.
     - Arguments:
         - `Page` (number, default: 1): Page number for pagination.
         - `PerPage` (number, default: 20): Number of items per page.
 
-- **digitalocean-alert-policy-create**
+- **alert-policy-create**
     - Create a new Alert Policy.
     - Arguments:
         - `Type` (string, required): Type of the Alert Policy (e.g., 'v1/insights/droplet/cpu').
@@ -126,13 +124,13 @@ Pagination and filtering are supported where applicable.
                 - `URL` (string): Slack webhook URL.
         - `Enabled` (boolean): Whether the alert policy is enabled.
 
-- **digitalocean-alert-policy-update**
+- **alert-policy-update**
     - Update an existing Alert Policy.
     - Arguments:
         - Same as create, plus:
         - `UUID` (string, required): UUID of the Alert Policy to update.
 
-- **digitalocean-alert-policy-delete**
+- **alert-policy-delete**
     - Delete an Alert Policy permanently.
     - Arguments:
         - `UUID` (string, required): UUID of the Alert Policy to delete.
@@ -142,68 +140,68 @@ Pagination and filtering are supported where applicable.
 ## Example Usage
 
 - Get details for check ID 4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-get`
+    - Tool: `uptimecheck-get`
     - Arguments: `{ "ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 - Get state for check ID 4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-get-state`
+    - Tool: `uptimecheck-get-state`
     - Arguments: `{ "ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 - List uptimechecks (page 2, 50 per page):
-    - Tool: `digitalocean-uptimecheck-list`
+    - Tool: `uptimecheck-list`
     - Arguments: `{ "Page": 2, "PerPage": 50 }`
 
 - Create a new uptime check:
-    - Tool: `digitalocean-uptimecheck-create`
+    - Tool: `uptimecheck-create`
     - Arguments:
       `{ "Name": "Landing page check", "type": "https", "target": "https://www.landingpage.com", "regions": ["us_east","eu_west"], "enabled": true}`
 
 - Update a existing uptime check:
-    - Tool: `digitalocean-uptimecheck-update`
+    - Tool: `uptimecheck-update`
     - Arguments:
       `{"ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6"  "Name": "Landing page check", "type": "https", "target": "https://www.landingpage.com", "regions": ["us_east","eu_west"], "enabled": true}`
 
 - Delete uptimecheck with ID 4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-delete`
+    - Tool: `uptimecheck-delete`
     - Arguments: `{ "ID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 
 - Get details for uptimecheck Alert by CheckId 4de7ac8b-495b-4884-9a69-1050c6793ci8 and Alert ID
   4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-alert-get`
+    - Tool: `uptimecheck-alert-get`
     - Arguments:
       `{ "CheckID":"4de7ac8b-495b-4884-9a69-1050c6793ci8" "AlertID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 - Create a new uptimecheck alert:
-    - Tool: `digitalocean-uptimecheck-alert-create`
+    - Tool: `uptimecheck-alert-create`
     - Arguments:
       `{ "CheckID":"4de7ac8b-495b-4884-9a69-1050c6793ci8" "name": "Landing page degraded performance" "type": "latency" "threshold": 300 "comparison": "greater_than" "email": ["bob@example.com"] "slack": [{"channel": "Production Alerts","url": "https://hooks.slack.com/services/T1234567/AAAAAAAA/ZZZZZZ" }] "period": "2m"}`
 
 - Update a existing uptimecheck alert:
-    - Tool: `digitalocean-uptimecheck-alert-update`
+    - Tool: `uptimecheck-alert-update`
     - Arguments:
       `{ "CheckID":"4de7ac8b-495b-4884-9a69-1050c6793ci8"  "AlertID": "4de7ac8b-495b-4884-9a69-1050c6793cd6"  "name": "Landing page degraded performance" "type": "latency" "threshold": 300 "comparison": "greater_than"  "email": ["bob@example.com"] "slack": [{"channel": "Production Alerts","url": "https://hooks.slack.com/services/T1234567/AAAAAAAA/ZZZZZZ" }] "period": "2m"}`
 
 - Delete uptimecheck Alert by CheckId 4de7ac8b-495b-4884-9a69-1050c6793ci8 and AlertID
   4de7ac8b-495b-4884-9a69-1050c6793cd6:
-    - Tool: `digitalocean-uptimecheck-alert-delete`
+    - Tool: `uptimecheck-alert-delete`
     - Arguments:
       `{ "CheckID":"4de7ac8b-495b-4884-9a69-1050c6793ci8" "AlertID": "4de7ac8b-495b-4884-9a69-1050c6793cd6" }`
 
 - List uptimechecks alerts (page 2, 50 per page):
-    - Tool: `digitalocean-uptimechecks-alert-list`
+    - Tool: `uptimechecks-alert-list`
     - Arguments: `{ "CheckID": "4de7ac8b-495b-4884-9a69-1050c6793cd6", "Page": 2, "PerPage": 50 }`
 
 - Get details for Alert Policy with UUID 2dacd69e-44f3-409d-ab58-70df9cf64b92:
-    - Tool: `digitalocean-alert-policy-get`
+    - Tool: `alert-policy-get`
     - Arguments: `{ "UUID": "2dacd69e-44f3-409d-ab58-70df9cf64b92" }`
 
 - List Alert Policies (page 2, 50 per page):
-    - Tool: `digitalocean-alert-policy-list`
+    - Tool: `alert-policy-list`
     - Arguments: `{ "Page": 2, "PerPage": 50 }`
 
 - Create a new Alert Policy for CPU monitoring:
-    - Tool: `digitalocean-alert-policy-create`
+    - Tool: `alert-policy-create`
     - Arguments:
       ```json
       {
@@ -228,7 +226,7 @@ Pagination and filtering are supported where applicable.
       ```
 
 - Update an existing Alert Policy:
-    - Tool: `digitalocean-alert-policy-update`
+    - Tool: `alert-policy-update`
     - Arguments:
       ```json
       {
@@ -254,7 +252,7 @@ Pagination and filtering are supported where applicable.
       ```
 
 - Delete Alert Policy with UUID 2dacd69e-44f3-409d-ab58-70df9cf64b92:
-    - Tool: `digitalocean-alert-policy-delete`
+    - Tool: `alert-policy-delete`
     - Arguments: `{ "UUID": "2dacd69e-44f3-409d-ab58-70df9cf64b92" }`
 
 ---

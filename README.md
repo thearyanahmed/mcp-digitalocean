@@ -14,7 +14,7 @@ Prerequisites:
 #### Local Installation
 
 ```bash
-npx @digitalocean/mcp --services apps,droplets --log-level debug
+npx @digitalocean/mcp --services apps 
 ```
 
 #### Using Cursor IDE
@@ -57,21 +57,30 @@ npx @digitalocean/mcp --services apps,droplets --log-level debug
 }
 ```
 
+## Configuring Tools
+
+To configure tools, you use the `--services` flag to specify which service you want to enable. It is highly recommended to only
+enable the services you need to reduce context size and improve accuracy. See list of supported services below.
+
+```bash
+npx @digitalocean/mcp --services apps,droplets
+```
+
 ## Supported Services
 
 The MCP DigitalOcean Integration supports the following services, allowing users to manage their DigitalOcean infrastructure effectively
 
 | **Service**     | **Description**                                                                                                    |
 |-----------------|--------------------------------------------------------------------------------------------------------------------|
-| **Apps**        | Manage DigitalOcean App Platform applications, including deployments and configurations.                           |
-| **Droplets**    | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                         |
-| **Account**     | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                         |
-| **Networking**  | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.   |
-| **Insights**    | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring. |
-| **Spaces**      | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage.                               |
-| **Databases**   | Provision, manage, and monitor managed database clusters (Postgres, MySQL, Redis, etc.).                           |
-| **Marketplace** | Discover and manage DigitalOcean Marketplace applications.                                                         |
-| **DOKS**        | Manage DigitalOcean Kubernetes clusters and node pools.                                                            |                                                   |
+| **apps**        | Manage DigitalOcean App Platform applications, including deployments and configurations.                           |
+| **droplets**    | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean.                         |
+| **account**     | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys.                         |
+| **networking**  | Manage domains, DNS records, certificates, firewalls, reserved IPs, VPCs, CDNs, and Partner Network attachments.   |
+| **insights**    | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring. |
+| **spaces**      | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage.                               |
+| **databases**   | Provision, manage, and monitor managed database clusters (Postgres, MySQL, Redis, etc.).                           |
+| **marketplace** | Discover and manage DigitalOcean Marketplace applications.                                                         |
+| **doks**        | Manage DigitalOcean Kubernetes clusters and node pools.                                                            |                                                   |
 ---
 ### Service Documentation
 
@@ -92,28 +101,17 @@ See the following files for full documentation:
 
 ### Example Tool Usage
 
-- Deploy an app from a GitHub repo: `digitalocean-create-app-from-spec`
-- Resize a droplet: `digitalocean-droplet-resize`
-- Add a new SSH key: `digitalocean-key-create`
-- Create a new domain: `digitalocean-domain-create`
-- Enable backups on a droplet: `digitalocean-droplet-enable-backups`
-- Flush a CDN cache: `digitalocean-cdn-flush-cache`
-- Create a VPC peering connection: `digitalocean-vpc-peering-create`
-- Delete a VPC peering connection: `digitalocean-vpc-peering-delete`
+- Deploy an app from a GitHub repo: `create-app-from-spec`
+- Resize a droplet: `droplet-resize`
+- Add a new SSH key: `key-create`
+- Create a new domain: `domain-create`
+- Enable backups on a droplet: `droplet-enable-backups`
+- Flush a CDN cache: `cdn-flush-cache`
+- Create a VPC peering connection: `vpc-peering-create`
+- Delete a VPC peering connection: `vpc-peering-delete`
 
 ---
 
-
-## Configuring Tools
-
-To configure tools, you use the `--services` flag to specify which service you want to enable. It is highly recommended to only
-enable the services you need to reduce context size and improve accuracy.
-
-```bash
-npx @digitalocean/mcp --services apps,droplets
-```
-
----
 ## Contributing
 
 Contributions are welcome! If you encounter any issues or have ideas for improvements, feel free to open an issue or submit a pull request.

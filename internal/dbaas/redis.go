@@ -72,14 +72,14 @@ func (s *RedisTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getRedisConfig,
-			Tool: mcp.NewTool("digitalocean-db-cluster-get-redis-config",
+			Tool: mcp.NewTool("db-cluster-get-redis-config",
 				mcp.WithDescription("Get the Redis config for a cluster by its id."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateRedisConfig,
-			Tool: mcp.NewTool("digitalocean-db-cluster-update-redis-config",
+			Tool: mcp.NewTool("db-cluster-update-redis-config",
 				mcp.WithDescription("Update the Redis config for a cluster by its id. Accepts a structured config object."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithObject("config",

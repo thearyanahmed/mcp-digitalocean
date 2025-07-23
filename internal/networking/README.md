@@ -8,29 +8,29 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### Domains
 
-- **`digitalocean-domain-create`**
+- **domain-create**
   Create a new domain.
   **Arguments:**
   - `Name` (string, required): Name of the domain
   - `IPAddress` (string, required): IP address for the domain
 
-- **`digitalocean-domain-delete`**
+- **domain-delete**
   Delete a domain.
   - `Name` (string, required): Name of the domain to delete
 
-- **`digitalocean-domain-record-create`**
+- **domain-record-create**
   Create a new domain record.
   - `Domain` (string, required): Domain name
   - `Type` (string, required): Record type (e.g., A, CNAME, TXT)
   - `Name` (string, required): Record name
   - `Data` (string, required): Record data
 
-- **`digitalocean-domain-record-delete`**
+- **domain-record-delete**
   Delete a domain record.
   - `Domain` (string, required): Domain name
   - `RecordID` (number, required): ID of the record to delete
 
-- **`digitalocean-domain-record-edit`**
+- **domain-record-edit**
   Edit a domain record.
   - `Domain` (string, required): Domain name
   - `RecordID` (number, required): ID of the record to edit
@@ -38,21 +38,21 @@ This directory contains tools and resources for managing DigitalOcean networking
   - `Name` (string, required): Record name
   - `Data` (string, required): Record data
 
-- **`digitalocean-domain-get`**  
+- **domain-get**  
   Get domain information by name.  
   - `Name` (string, required): Name of the domain
 
-- **`digitalocean-domain-list`**  
+- **domain-list**  
   List domains with pagination.  
   - `Page` (number, default: 1): Page number  
   - `PerPage` (number, default: 20): Items per page
 
-- **`digitalocean-domain-record-get`**  
-  Get a domain record by domain name and record ID.  
-  - `Domain` (string, required): Domain name  
-  - `RecordID` (number, required): ID of the domain record
+- **domain-record-get**  
+  Get a domain record by ID.  
+  - `Domain` (string, required): Domain name
+  - `RecordID` (number, required): ID of the record
 
-- **`digitalocean-domain-record-list`**  
+- **domain-record-list**  
   List domain records for a domain with pagination.  
   - `Domain` (string, required): Domain name  
   - `Page` (number, default: 1): Page number  
@@ -62,27 +62,27 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### Certificates
 
-- **`digitalocean-custom-certificate-create`**
+- **custom-certificate-create**
   Create a new custom certificate.
   - `Name` (string, required): Name of the certificate
   - `PrivateKey` (string, required): Private key for the certificate
   - `LeafCertificate` (string, required): Leaf certificate
   - `CertificateChain` (string, required): Certificate chain
 
-- **`digitalocean-lets-encrypt-certificate-create`**
+- **lets-encrypt-certificate-create**
   Create a new Let's Encrypt certificate.
   - `Name` (string, required): Name of the certificate
   - `DnsNames` (array of strings, required): DNS names of the certificate, including wildcard domains
 
-- **`digitalocean-certificate-delete`**
+- **certificate-delete**
   Delete a certificate.
   - `ID` (string, required): ID of the certificate to delete
 
-- **`digitalocean-certificate-get`**  
+- **certificate-get**  
   Get certificate information by ID.  
   - `ID` (string, required): ID of the certificate
 
-- **`digitalocean-certificate-list`**  
+- **certificate-list**  
   List certificates with pagination.  
   - `Page` (number, default: 1): Page number  
   - `PerPage` (number, default: 20): Items per page
@@ -91,7 +91,7 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### Firewalls
 
-- **`digitalocean-firewall-create`**
+- **firewall-create**
   Create a new firewall.
   - `Name` (string, required): Name of the firewall
   - `InboundProtocol` (string, required): Protocol for inbound rule
@@ -103,31 +103,31 @@ This directory contains tools and resources for managing DigitalOcean networking
   - `DropletIDs` (array of numbers, optional): Droplet IDs to apply the firewall to
   - `Tags` (array of strings, optional): Tags to apply the firewall to
 
-- **`digitalocean-firewall-delete`**
+- **firewall-delete**
   Delete a firewall.
   - `ID` (string, required): ID of the firewall to delete
 
-- **`digitalocean-firewall-add-tags`**
+- **firewall-add-tags**
   Add one or more tags to a firewall.
   - `ID` (string, required): ID of the firewall to update tags
   - `Tags` (array of strings, required): Tags to apply the firewall to
 
-- **`digitalocean-firewall-remove-tags`**
+- **firewall-remove-tags**
   Remove one or more tags from a firewall.
   - `ID` (string, required): ID of the firewall to update tags
   - `Tags` (array of strings, required): Tags to remove from the firewall
 
-- **`digitalocean-firewall-add-droplets`**
+- **firewall-add-droplets**
   Add one or more droplets to a firewall.
   - `ID` (string, required): ID of the firewall to apply to droplets
   - `DropletIDs` (array of numbers, required): Droplet IDs to apply the firewall to
 
-- **`digitalocean-firewall-remove-droplets`**
+- **firewall-remove-droplets**
   Remove one or more droplets from a firewall.
   - `ID` (string, required): ID of the firewall to remove droplets from
   - `DropletIDs` (array of numbers, required): Droplet IDs to remove from the firewall
 
-- **`digitalocean-firewall-add-rules`**
+- **firewall-add-rules**
   Add one or more rules to a firewall.
   - `ID` (string, required): ID of the firewall to add rules to
   - `InboundRules` (array of objects, optional): Inbound rules to add
@@ -139,7 +139,7 @@ This directory contains tools and resources for managing DigitalOcean networking
     - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
     - `Destinations` (array of strings, required): Destination IP addresses or CIDR blocks
 
-- **`digitalocean-firewall-remove-rules`**
+- **firewall-remove-rules**
   Remove one or more rules from a firewall.
   - `ID` (string, required): ID of the firewall to remove rules from
   - `InboundRules` (array of objects, optional): Inbound rules to remove
@@ -151,11 +151,11 @@ This directory contains tools and resources for managing DigitalOcean networking
     - `PortRange` (string, required): Port range (e.g., '80', '443', '8000-8080')
     - `Destinations` (array of strings, required): Destination IP addresses or CIDR blocks
 
-- **`digitalocean-firewall-get`**  
+- **firewall-get**  
   Get firewall information by ID.  
   - `ID` (string, required): ID of the firewall
 
-- **`digitalocean-firewall-list`**  
+- **firewall-list**  
   List firewalls with pagination.  
   - `Page` (number, default: 1): Page number  
   - `PerPage` (number, default: 20): Items per page
@@ -165,52 +165,52 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### Reserved IPs
 
-- **`digitalocean-reserved-ip-reserve`**
+- **reserved-ip-reserve**
   Reserve a new IPv4 or IPv6.
   - `Region` (string, required): Region to reserve the IP in
   - `Type` (string, required): Type of IP to reserve (`ipv4` or `ipv6`)
 
-- **`digitalocean-reserved-ip-release`**
+- **reserved-ip-release**
   Release a reserved IPv4 or IPv6.
   - `IP` (string, required): The reserved IP to release
   - `Type` (string, required): Type of IP to release (`ipv4` or `ipv6`)
 
-- **`digitalocean-reserved-ip-assign`**
+- **reserved-ip-assign**
   Assign a reserved IP to a droplet.
   - `IP` (string, required): The reserved IP to assign
   - `DropletID` (number, required): The ID of the droplet
   - `Type` (string, required): Type of IP (`ipv4` or `ipv6`)
 
-- **`digitalocean-reserved-ip-unassign`**
+- **reserved-ip-unassign**
   Unassign a reserved IP from a droplet.
   - `IP` (string, required): The reserved IP to unassign
   - `Type` (string, required): Type of IP (`ipv4` or `ipv6`)
 
-- **`digitalocean-reserved-ipv4-list`**
+- **reserved-ipv4-list**
   List reserved IPv4 addresses with pagination.
   - `Page` (number, optional, default: 1): Page number
   - `PerPage` (number, optional, default: 20): Items per page
 
-- **`digitalocean-reserved-ipv6-list`**
+- **reserved-ipv6-list**
   List reserved IPv6 addresses with pagination.
   - `Page` (number, optional, default: 1): Page number
   - `PerPage` (number, optional, default: 20): Items per page
 
-- **`digitalocean-reserved-ipv4-list`**  
+- **reserved-ipv4-list**  
   List reserved IPv4 addresses with pagination.  
   - `Page` (number, optional, default: 1): Page number  
   - `PerPage` (number, optional, default: 20): Items per page
 
-- **`digitalocean-reserved-ipv6-list`**  
+- **reserved-ipv6-list**  
   List reserved IPv6 addresses with pagination.  
   - `Page` (number, optional, default: 1): Page number  
   - `PerPage` (number, optional, default: 20): Items per page
 
-- **`digitalocean-reserved-ipv4-get`**  
+- **reserved-ipv4-get**  
   Get reserved IPv4 information by IP.  
   - `IP` (string, required): The reserved IPv4 address
 
-- **`digitalocean-reserved-ipv6-get`**  
+- **reserved-ipv6-get**  
   Get reserved IPv6 information by IP.  
   - `IP` (string, required): The reserved IPv6 address
   
@@ -218,21 +218,21 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### VPC Peering
 
-- **`digitalocean-vpc-peering-create`**
+- **vpc-peering-create**
   Create a new VPC Peering connection between two VPCs.
   - `Name` (string, required): Name for the Peering connection
   - `Vpc1` (string, required): ID of the first VPC
   - `Vpc2` (string, required): ID of the second VPC
 
-- **`digitalocean-vpc-peering-delete`**
+- **vpc-peering-delete**
   Delete a VPC Peering connection.
   - `ID` (string, required): ID of the VPC Peering connection to delete
 
-- **`digitalocean-vpc-peering-get`**  
+- **vpc-peering-get**  
   Get VPC Peering information by ID.  
   - `ID` (string, required): ID of the VPC Peering connection
 
-- **`digitalocean-vpc-peering-list`**  
+- **vpc-peering-list**  
   List VPC Peering connections with pagination.  
   - `Page` (number, default: 1): Page number  
   - `PerPage` (number, default: 20): Items per page
@@ -241,26 +241,26 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### VPCs
 
-- **`digitalocean-vpc-create`**
+- **vpc-create**
   Create a new VPC.
   - `Name` (string, required): Name of the VPC
   - `Region` (string, required): Region slug (e.g., nyc3)
   - `Subnet` (string, optional): Optional subnet CIDR block (e.g., 10.10.0.0/20)
   - `Description` (string, optional): Optional description for the VPC
 
-- **`digitalocean-vpc-list-members`**
+- **vpc-list-members**
   List members of a VPC.
   - `ID` (string, required): ID of the VPC
 
-- **`digitalocean-vpc-delete`**
+- **vpc-delete**
   Delete a VPC.
   - `ID` (string, required): ID of the VPC to delete
 
-- **`digitalocean-vpc-get`**  
+- **vpc-get**  
   Get VPC information by ID.  
   - `ID` (string, required): ID of the VPC
 
-- **`digitalocean-vpc-list`**  
+- **vpc-list**  
   List VPCs with pagination.  
   - `Page` (number, default: 1): Page number  
   - `PerPage` (number, default: 20): Items per page
@@ -269,35 +269,35 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ### Partner Attachments
 
-- **`digitalocean-partner-attachment-create`**
+- **partner-attachment-create**
   Create a new partner attachment.
   - `Name` (string, required): Name of the partner attachment
   - `Region` (string, required): Region for the partner attachment
   - `Bandwidth` (number, required): Bandwidth in Mbps
 
-- **`digitalocean-partner-attachment-delete`**
+- **partner-attachment-delete**
   Delete a partner attachment.
   - `ID` (string, required): ID of the partner attachment
 
-- **`digitalocean-partner-attachment-get-service-key`**
+- **partner-attachment-get-service-key**
   Get the service key of a partner attachment.
   - `ID` (string, required): ID of the partner attachment
 
-- **`digitalocean-partner-attachment-get-bgp-config`**
+- **partner-attachment-get-bgp-config**
   Get the BGP configuration of a partner attachment.
   - `ID` (string, required): ID of the partner attachment
 
-- **`digitalocean-partner-attachment-update`**
+- **partner-attachment-update**
   Update a partner attachment.
   - `ID` (string, required): ID of the partner attachment
   - `Name` (string, required): New name
   - `VPCIDs` (array of strings, required): VPC IDs to associate
 
-- **`digitalocean-partner-attachment-get`**  
+- **partner-attachment-get**  
   Get partner attachment information by ID.  
   - `ID` (string, required): ID of the partner attachment
 
-- **`digitalocean-partner-attachment-list`**  
+- **partner-attachment-list**  
   List partner attachments with pagination.  
   - `Page` (number, default: 1): Page number  
   - `PerPage` (number, default: 20): Items per page
@@ -328,6 +328,6 @@ This directory contains tools and resources for managing DigitalOcean networking
 - All resource identifiers (IDs, names, IPs) must be replaced with actual values in your queries.
 - All responses are returned in JSON format for easy parsing and integration.
 - For endpoints that require an ID, name, or IP, replace the placeholder with the appropriate value.
-- Use the tools to automate and manage all aspects of DigitalOcean networking from domains and DNS to VPCs, firewalls, and advanced partner connectivity.
+- Use the tools to automate and manage all aspects of networking from domains and DNS to VPCs, firewalls, and advanced partner connectivity.
 
 ---

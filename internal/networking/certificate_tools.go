@@ -135,14 +135,14 @@ func (c *CertificateTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: c.getCertificate,
-			Tool: mcp.NewTool("digitalocean-certificate-get",
+			Tool: mcp.NewTool("certificate-get",
 				mcp.WithDescription("Get certificate information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the certificate")),
 			),
 		},
 		{
 			Handler: c.listCertificates,
-			Tool: mcp.NewTool("digitalocean-certificate-list",
+			Tool: mcp.NewTool("certificate-list",
 				mcp.WithDescription("List certificates with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -150,7 +150,7 @@ func (c *CertificateTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.createCustomCertificate,
-			Tool: mcp.NewTool("digitalocean-custom-certificate-create",
+			Tool: mcp.NewTool("custom-certificate-create",
 				mcp.WithDescription("Create a new custom certificate"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the certificate")),
 				mcp.WithString("PrivateKey", mcp.Required(), mcp.Description("Private key for the certificate")),
@@ -160,7 +160,7 @@ func (c *CertificateTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.createLetsEncryptCertificate,
-			Tool: mcp.NewTool("digitalocean-lets-encrypt-certificate-create",
+			Tool: mcp.NewTool("lets-encrypt-certificate-create",
 				mcp.WithDescription("Create a new let's encrypt certificate"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the certificate")),
 				mcp.WithArray("DnsNames", mcp.Required(), mcp.Description("DNS names of the certificate"), mcp.Items(map[string]any{
@@ -171,7 +171,7 @@ func (c *CertificateTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.deleteCertificate,
-			Tool: mcp.NewTool("digitalocean-certificate-delete",
+			Tool: mcp.NewTool("certificate-delete",
 				mcp.WithDescription("Delete a certificate"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the certificate to delete")),
 			),

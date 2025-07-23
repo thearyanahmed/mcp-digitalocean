@@ -205,14 +205,14 @@ func (d *DomainsTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: d.getDomain,
-			Tool: mcp.NewTool("digitalocean-domain-get",
+			Tool: mcp.NewTool("domain-get",
 				mcp.WithDescription("Get domain information by name"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the domain")),
 			),
 		},
 		{
 			Handler: d.listDomains,
-			Tool: mcp.NewTool("digitalocean-domain-list",
+			Tool: mcp.NewTool("domain-list",
 				mcp.WithDescription("List domains with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -220,7 +220,7 @@ func (d *DomainsTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.getDomainRecord,
-			Tool: mcp.NewTool("digitalocean-domain-record-get",
+			Tool: mcp.NewTool("domain-record-get",
 				mcp.WithDescription("Get a domain record by domain name and record ID"),
 				mcp.WithString("Domain", mcp.Required(), mcp.Description("Domain name")),
 				mcp.WithNumber("RecordID", mcp.Required(), mcp.Description("ID of the domain record")),
@@ -228,7 +228,7 @@ func (d *DomainsTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.listDomainRecords,
-			Tool: mcp.NewTool("digitalocean-domain-record-list",
+			Tool: mcp.NewTool("domain-record-list",
 				mcp.WithDescription("List domain records for a domain with pagination"),
 				mcp.WithString("Domain", mcp.Required(), mcp.Description("Domain name")),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
@@ -237,7 +237,7 @@ func (d *DomainsTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.createDomain,
-			Tool: mcp.NewTool("digitalocean-domain-create",
+			Tool: mcp.NewTool("domain-create",
 				mcp.WithDescription("Create a new domain"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the domain")),
 				mcp.WithString("IPAddress", mcp.Required(), mcp.Description("IP address for the domain")),
@@ -245,14 +245,14 @@ func (d *DomainsTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.deleteDomain,
-			Tool: mcp.NewTool("digitalocean-domain-delete",
+			Tool: mcp.NewTool("domain-delete",
 				mcp.WithDescription("Delete a domain"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the domain to delete")),
 			),
 		},
 		{
 			Handler: d.createRecord,
-			Tool: mcp.NewTool("digitalocean-domain-record-create",
+			Tool: mcp.NewTool("domain-record-create",
 				mcp.WithDescription("Create a new domain record"),
 				mcp.WithString("Domain", mcp.Required(), mcp.Description("Domain name")),
 				mcp.WithString("Type", mcp.Required(), mcp.Description("Record type (e.g., A, CNAME, TXT)")),
@@ -262,7 +262,7 @@ func (d *DomainsTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.deleteRecord,
-			Tool: mcp.NewTool("digitalocean-domain-record-delete",
+			Tool: mcp.NewTool("domain-record-delete",
 				mcp.WithDescription("Delete a domain record"),
 				mcp.WithString("Domain", mcp.Required(), mcp.Description("Domain name")),
 				mcp.WithNumber("RecordID", mcp.Required(), mcp.Description("ID of the record to delete")),
@@ -270,7 +270,7 @@ func (d *DomainsTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: d.editRecord,
-			Tool: mcp.NewTool("digitalocean-domain-record-edit",
+			Tool: mcp.NewTool("domain-record-edit",
 				mcp.WithDescription("Edit a domain record"),
 				mcp.WithString("Domain", mcp.Required(), mcp.Description("Domain name")),
 				mcp.WithNumber("RecordID", mcp.Required(), mcp.Description("ID of the record to edit")),

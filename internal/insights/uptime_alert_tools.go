@@ -230,7 +230,7 @@ func (c *UptimeCheckAlertTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: c.getUptimeCheckAlert,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-alert-get",
+			Tool: mcp.NewTool("uptimecheck-alert-get",
 				mcp.WithDescription("Get UptimeCheck Alert information by CheckID and AlertID"),
 				mcp.WithString("CheckID", mcp.Required(), mcp.Description("A unique identifier for a check")),
 				mcp.WithString("AlertID", mcp.Required(), mcp.Description("A unique identifier for a alert")),
@@ -238,7 +238,7 @@ func (c *UptimeCheckAlertTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.listUptimeCheckAlerts,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-alert-list",
+			Tool: mcp.NewTool("uptimecheck-alert-list",
 				mcp.WithDescription("List UptimeChecks Alerts with pagination"),
 				mcp.WithString("CheckID", mcp.Required(), mcp.Description("A unique identifier for a check")),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultAlertsPage), mcp.Description("Page number")),
@@ -247,7 +247,7 @@ func (c *UptimeCheckAlertTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.createUptimeCheckAlert,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-alert-create",
+			Tool: mcp.NewTool("uptimecheck-alert-create",
 				mcp.WithDescription("Create a new UptimeCheck"),
 				mcp.WithString("CheckID", mcp.Required(), mcp.Description("A unique identifier for a check")),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the UptimeCheck Alert")),
@@ -275,7 +275,7 @@ func (c *UptimeCheckAlertTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.updateUptimeCheckAlert,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-alert-update",
+			Tool: mcp.NewTool("uptimecheck-alert-update",
 				mcp.WithDescription("Update a UptimeCheck"),
 				mcp.WithString("CheckID", mcp.Required(), mcp.Description("A unique identifier for a check")),
 				mcp.WithString("AlertID", mcp.Required(), mcp.Description("A unique identifier for a check alert")),
@@ -304,7 +304,7 @@ func (c *UptimeCheckAlertTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: c.deleteUptimeCheckAlert,
-			Tool: mcp.NewTool("digitalocean-uptimecheck-alert-delete",
+			Tool: mcp.NewTool("uptimecheck-alert-delete",
 				mcp.WithDescription("Delete a uptimeCheck"),
 				mcp.WithString("CheckID", mcp.Required(), mcp.Description("A unique identifier for a check")),
 				mcp.WithString("AlertID", mcp.Required(), mcp.Description("A unique identifier for a alert")),

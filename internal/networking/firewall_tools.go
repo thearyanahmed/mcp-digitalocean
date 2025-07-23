@@ -352,14 +352,14 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: f.getFirewall,
-			Tool: mcp.NewTool("digitalocean-firewall-get",
+			Tool: mcp.NewTool("firewall-get",
 				mcp.WithDescription("Get firewall information by ID"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall")),
 			),
 		},
 		{
 			Handler: f.listFirewalls,
-			Tool: mcp.NewTool("digitalocean-firewall-list",
+			Tool: mcp.NewTool("firewall-list",
 				mcp.WithDescription("List firewalls with pagination"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page")),
@@ -367,7 +367,7 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: f.createFirewall,
-			Tool: mcp.NewTool("digitalocean-firewall-create",
+			Tool: mcp.NewTool("firewall-create",
 				mcp.WithDescription("Create a new firewall"),
 				mcp.WithString("Name", mcp.Required(), mcp.Description("Name of the firewall")),
 				mcp.WithString("InboundProtocol", mcp.Required(), mcp.Description("Protocol for inbound rule")),
@@ -388,14 +388,14 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: f.deleteFirewall,
-			Tool: mcp.NewTool("digitalocean-firewall-delete",
+			Tool: mcp.NewTool("firewall-delete",
 				mcp.WithDescription("Delete a firewall"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to delete")),
 			),
 		},
 		{
 			Handler: f.addDroplets,
-			Tool: mcp.NewTool("digitalocean-firewall-add-droplets",
+			Tool: mcp.NewTool("firewall-add-droplets",
 				mcp.WithDescription("Adds one or more droplets to a firewall"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to apply to droplets")),
 				mcp.WithArray("DropletIDs", mcp.Required(), mcp.Description("Droplet IDs to apply the firewall to"), mcp.Items(map[string]any{
@@ -406,7 +406,7 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: f.addTags,
-			Tool: mcp.NewTool("digitalocean-firewall-add-tags",
+			Tool: mcp.NewTool("firewall-add-tags",
 				mcp.WithDescription("Adds one or more tags to a firewall"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to update tags")),
 				mcp.WithArray("Tags", mcp.Required(), mcp.Description("Tags to apply the firewall to"), mcp.Items(map[string]any{
@@ -418,7 +418,7 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 
 		{
 			Handler: f.removeDroplets,
-			Tool: mcp.NewTool("digitalocean-firewall-remove-droplets",
+			Tool: mcp.NewTool("firewall-remove-droplets",
 				mcp.WithDescription("Removes one or more droplets from a firewall"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to remove droplets from")),
 				mcp.WithArray("DropletIDs", mcp.Required(), mcp.Description("Droplet IDs to remove from the firewall"), mcp.Items(map[string]any{
@@ -429,7 +429,7 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: f.removeTags,
-			Tool: mcp.NewTool("digitalocean-firewall-remove-tags",
+			Tool: mcp.NewTool("firewall-remove-tags",
 				mcp.WithDescription("Removes one or more tags from a firewall"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to update tags")),
 				mcp.WithArray("Tags", mcp.Required(), mcp.Description("Tags to remove from the firewall"), mcp.Items(map[string]any{
@@ -440,7 +440,7 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: f.addRules,
-			Tool: mcp.NewTool("digitalocean-firewall-add-rules",
+			Tool: mcp.NewTool("firewall-add-rules",
 				mcp.WithDescription("Add one or more rules to a firewall"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to add rules to")),
 				mcp.WithArray("InboundRules", mcp.Description("Inbound rules to add"), mcp.Items(map[string]any{
@@ -493,7 +493,7 @@ func (f *FirewallTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: f.removeRules,
-			Tool: mcp.NewTool("digitalocean-firewall-remove-rules",
+			Tool: mcp.NewTool("firewall-remove-rules",
 				mcp.WithDescription("Remove one or more rules from a firewall"),
 				mcp.WithString("ID", mcp.Required(), mcp.Description("ID of the firewall to remove rules from")),
 				mcp.WithArray("InboundRules", mcp.Description("Inbound rules to remove"), mcp.Items(map[string]any{

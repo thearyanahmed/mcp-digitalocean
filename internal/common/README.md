@@ -14,7 +14,7 @@ The `common` package is designed to:
 
 ### Regions Tool
 
-- **digitalocean-region-list**
+- **region-list**
   - Lists all available DigitalOcean regions, including their features and droplet size availability.
   - Supports pagination.
   - **Arguments:**
@@ -24,11 +24,11 @@ The `common` package is designed to:
 #### Example Usage
 
 - List all regions (default pagination):
-  - Tool: `digitalocean-region-list`
+  - Tool: `region-list`
   - Arguments: `{}`
 
 - List regions, page 2, 20 per page:
-  - Tool: `digitalocean-region-list`
+  - Tool: `region-list`
   - Arguments: `{ "Page": 2, "PerPage": 20 }`
 
 ## Notes
