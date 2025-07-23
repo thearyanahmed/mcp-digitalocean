@@ -85,14 +85,14 @@ func (s *FirewallTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getFirewallRules,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-get-firewall-rules",
+			Tool: mcp.NewTool("digitalocean-db-cluster-get-firewall-rules",
 				mcp.WithDescription("Get firewall rules for a database cluster."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateFirewallRules,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-update-firewall-rules",
+			Tool: mcp.NewTool("digitalocean-db-cluster-update-firewall-rules",
 				mcp.WithDescription("Update firewall rules for a cluster using a structured list of rules."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithArray("rules",

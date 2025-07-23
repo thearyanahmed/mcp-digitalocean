@@ -258,7 +258,7 @@ func (s *KafkaTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.listTopics,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-list-topics",
+			Tool: mcp.NewTool("digitalocean-db-cluster-list-topics",
 				mcp.WithDescription("List topics for a Kafka cluster by its ID. Supports pagination and filtering."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The Kafka cluster UUID")),
 				mcp.WithString("page", mcp.Description("Page number (string)")),
@@ -271,7 +271,7 @@ func (s *KafkaTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.createTopic,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-create-topic",
+			Tool: mcp.NewTool("digitalocean-db-cluster-create-topic",
 				mcp.WithDescription("Create a topic for a Kafka cluster."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
@@ -308,7 +308,7 @@ func (s *KafkaTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.getTopic,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-get-topic",
+			Tool: mcp.NewTool("digitalocean-db-cluster-get-topic",
 				mcp.WithDescription("Get a Kafka topic by name."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
@@ -316,7 +316,7 @@ func (s *KafkaTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.deleteTopic,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-delete-topic",
+			Tool: mcp.NewTool("digitalocean-db-cluster-delete-topic",
 				mcp.WithDescription("Delete a Kafka topic by name."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
@@ -324,7 +324,7 @@ func (s *KafkaTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.updateTopic,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-update-topic",
+			Tool: mcp.NewTool("digitalocean-db-cluster-update-topic",
 				mcp.WithDescription("Update a Kafka topic's partition count, replication factor, or config."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
 				mcp.WithString("name", mcp.Required(), mcp.Description("Topic name")),
@@ -361,14 +361,14 @@ func (s *KafkaTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: s.getKafkaConfig,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-get-kafka-config",
+			Tool: mcp.NewTool("digitalocean-db-cluster-get-kafka-config",
 				mcp.WithDescription("Get the Kafka config for a cluster."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateKafkaConfig,
-			Tool: mcp.NewTool("digitalocean-databases-cluster-update-kafka-config",
+			Tool: mcp.NewTool("digitalocean-db-cluster-update-kafka-config",
 				mcp.WithDescription("Update the Kafka cluster configuration."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("Kafka cluster UUID")),
 				mcp.WithObject("config",
