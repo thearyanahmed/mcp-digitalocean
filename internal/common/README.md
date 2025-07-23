@@ -14,7 +14,7 @@ The `common` package is designed to:
 
 ### Regions Tool
 
-- **digitalocean-region-list**
+- **region-list**
   - Lists all available DigitalOcean regions, including their features and droplet size availability.
   - Supports pagination.
   - **Arguments:**

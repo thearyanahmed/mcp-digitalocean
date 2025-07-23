@@ -71,14 +71,14 @@ func (s *OpenSearchTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
 			Handler: s.getOpensearchConfig,
-			Tool: mcp.NewTool("digitalocean-db-cluster-get-opensearch-config",
+			Tool: mcp.NewTool("db-cluster-get-opensearch-config",
 				mcp.WithDescription("Get the Opensearch config for a cluster by its id"),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 			),
 		},
 		{
 			Handler: s.updateOpensearchConfig,
-			Tool: mcp.NewTool("digitalocean-db-cluster-update-os-config",
+			Tool: mcp.NewTool("db-cluster-update-os-config",
 				mcp.WithDescription("Update the Opensearch config for a cluster by its id. Accepts a structured config object."),
 				mcp.WithString("id", mcp.Required(), mcp.Description("The cluster UUID")),
 				mcp.WithObject("config",

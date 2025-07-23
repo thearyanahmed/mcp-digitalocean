@@ -213,13 +213,13 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 	tools := []server.ServerTool{
 		{
 			Handler: a.getDeploymentStatus,
-			Tool: mcp.NewTool("digitalocean-apps-get-deployment-status",
+			Tool: mcp.NewTool("apps-get-deployment-status",
 				mcp.WithDescription("Retrieves the active deployment for an application on DigitalOcean App Platform. This is useful for getting the current state of an app's latest deployment and it's health status."),
 				mcp.WithString("AppID", mcp.Required(), mcp.Description("The application ID of the app to retrieve active deployment for"))),
 		},
 		{
 			Handler: a.listApps,
-			Tool: mcp.NewTool("digitalocean-apps-list",
+			Tool: mcp.NewTool("apps-list",
 				mcp.WithDescription("List all applications on DigitalOcean App Platform"),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultPage), mcp.Description("The page number to retrieve (default is 1)")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultPageSize), mcp.Description("The number of items per page (default is 200)")),
@@ -227,14 +227,14 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: a.deleteApp,
-			Tool: mcp.NewTool("digitalocean-apps-delete",
+			Tool: mcp.NewTool("apps-delete",
 				mcp.WithDescription("Delete an existing app on DigitalOcean App Platform"),
 				mcp.WithString("AppID", mcp.Required(), mcp.Description("The application ID of the app we want to delete.")),
 			),
 		},
 		{
 			Handler: a.getAppInfo,
-			Tool: mcp.NewTool("digitalocean-apps-get-info",
+			Tool: mcp.NewTool("apps-get-info",
 				mcp.WithDescription("Get information about an application on DigitalOcean App Platform"),
 				mcp.WithString("AppID", mcp.Required(), mcp.Description("The application ID of the app to retrieve information for")),
 			),
@@ -249,7 +249,7 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 	appCreateTool := server.ServerTool{
 		Handler: a.createAppFromAppSpec,
 		Tool: mcp.NewToolWithRawSchema(
-			"digitalocean-apps-create-app-from-spec",
+			"apps-create-app-from-spec",
 			"Creates an application from a given app spec. Within the app spec, a source has to be provided. The source can be a Git repository, a Dockerfile, or a container image.",
 			appCreateSchema,
 		),
@@ -263,7 +263,7 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 	appUpdateTool := server.ServerTool{
 		Handler: a.updateApp,
 		Tool: mcp.NewToolWithRawSchema(
-			"digitalocean-apps-update",
+			"apps-update",
 			"Updates an existing application on DigitalOcean App Platform. The app ID and the AppSpec must be provided in the request.",
 			appUpdateSchema,
 		),

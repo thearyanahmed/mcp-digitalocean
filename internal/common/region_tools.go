@@ -60,7 +60,7 @@ func (r *RegionTools) Tools() []server.ServerTool {
 		{
 			Handler: r.listRegions,
 			Tool: mcp.NewTool(
-				"digitalocean-region-list",
+				"region-list",
 				mcp.WithDescription("List all available regions with features and droplet size availability. Supports pagination."),
 				mcp.WithNumber("Page", mcp.DefaultNumber(defaultRegionsPage), mcp.Description("Page number")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(defaultRegionsPageSize), mcp.Description("Items per page")),

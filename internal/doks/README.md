@@ -8,23 +8,23 @@ This directory provides tools for managing DigitalOcean Kubernetes clusters and 
 
 ### Cluster Tools
 
-- **digitalocean-doks-get-cluster**  
+- **doks-get-cluster**  
   Get information about a specific Kubernetes cluster.  
   **Arguments:**
     - `ClusterID` (string, required): ID of the cluster
 
-- **digitalocean-doks-list-clusters**  
+- **doks-list-clusters**  
   List all Kubernetes clusters.  
   **Arguments:**
     - `Page` (number, default: 1): Page number
     - `PerPage` (number, default: 20): Items per page
 
-- **digitalocean-doks-create-cluster**  
+- **doks-create-cluster**  
   Create a new Kubernetes cluster.  
   **Arguments:**
     - See schema in `spec/cluster-create-schema.json`
 
-- **digitalocean-doks-update-cluster**  
+- **doks-update-cluster**  
   Update a Kubernetes cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
@@ -34,28 +34,28 @@ This directory provides tools for managing DigitalOcean Kubernetes clusters and 
     - `SurgeUpgrade` (boolean, optional): Enable surge upgrades
     - `Tags` (array, optional): Tags
 
-- **digitalocean-doks-delete-cluster**  
+- **doks-delete-cluster**  
   Delete a Kubernetes cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
 
-- **digitalocean-doks-upgrade-cluster**  
+- **doks-upgrade-cluster**  
   Upgrade a Kubernetes cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
     - `VersionSlug` (string, required): Kubernetes version
 
-- **digitalocean-doks-get-cluster-upgrades**  
+- **doks-get-cluster-upgrades**  
   Get available upgrades for a cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
 
-- **digitalocean-doks-get-kubeconfig**  
+- **doks-get-kubeconfig**  
   Get kubeconfig for a cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
 
-- **digitalocean-doks-get-credentials**  
+- **doks-get-credentials**  
   Get credentials for a cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
@@ -64,23 +64,23 @@ This directory provides tools for managing DigitalOcean Kubernetes clusters and 
 
 ### Node Pool Tools
 
-- **digitalocean-doks-create-nodepool**  
+- **doks-create-nodepool**  
   Create a new node pool in a cluster.  
   **Arguments:**
     - See schema in `spec/node-pool-create-schema.json`
 
-- **digitalocean-doks-get-nodepool**  
+- **doks-get-nodepool**  
   Get a node pool in a cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
     - `NodePoolID` (string, required): Node pool ID
 
-- **digitalocean-doks-list-nodepools**  
+- **doks-list-nodepools**  
   List all node pools in a cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
 
-- **digitalocean-doks-update-nodepool**  
+- **doks-update-nodepool**  
   Update a node pool in a cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
@@ -94,13 +94,13 @@ This directory provides tools for managing DigitalOcean Kubernetes clusters and 
     - `MinNodes` (number, optional): Minimum nodes
     - `MaxNodes` (number, optional): Maximum nodes
 
-- **digitalocean-doks-delete-nodepool**  
+- **doks-delete-nodepool**  
   Delete a node pool in a cluster.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
     - `NodePoolID` (string, required): Node pool ID
 
-- **digitalocean-doks-delete-node**  
+- **doks-delete-node**  
   Delete a node from a node pool.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
@@ -109,7 +109,7 @@ This directory provides tools for managing DigitalOcean Kubernetes clusters and 
     - `SkipDrain` (boolean, optional): Skip draining
     - `Replace` (boolean, optional): Replace node
 
-- **digitalocean-doks-recycle-nodes**  
+- **doks-recycle-nodes**  
   Recycle specific nodes in a node pool.  
   **Arguments:**
     - `ClusterID` (string, required): Cluster ID
@@ -121,23 +121,23 @@ This directory provides tools for managing DigitalOcean Kubernetes clusters and 
 ## Example Usage
 
 - **Get a cluster:**  
-  Tool: `digitalocean-doks-get-cluster`  
+  Tool: `doks-get-cluster`  
   Arguments:
     - `ClusterID`: `"abcd-1234"`
 
 - **List clusters:**  
-  Tool: `digitalocean-doks-list-clusters`  
+  Tool: `doks-list-clusters`  
   Arguments:
     - `Page`: `1`
     - `PerPage`: `20`
 
 - **Create a node pool:**  
-  Tool: `digitalocean-doks-create-nodepool`  
+  Tool: `doks-create-nodepool`  
   Arguments:
     - See `spec/node-pool-create-schema.json`
 
 - **Recycle nodes:**  
-  Tool: `digitalocean-doks-recycle-nodes`  
+  Tool: `doks-recycle-nodes`  
   Arguments:
     - `ClusterID`: `"abcd-1234"`
     - `NodePoolID`: `"np-5678"`
