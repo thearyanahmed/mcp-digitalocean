@@ -67,7 +67,8 @@ func registerNetworkingTools(s *server.MCPServer, c *godo.Client) error {
 	s.AddTools(networking.NewDomainsTool(c).Tools()...)
 	s.AddTools(networking.NewFirewallTool(c).Tools()...)
 	s.AddTools(networking.NewReservedIPTool(c).Tools()...)
-	s.AddTools(networking.NewPartnerAttachmentTool(c).Tools()...)
+	// Partner attachments doesn't have much users so this has been disabled
+	// s.AddTools(networking.NewPartnerAttachmentTool(c).Tools()...)
 	s.AddTools(networking.NewVPCTool(c).Tools()...)
 	s.AddTools(networking.NewVPCPeeringTool(c).Tools()...)
 	return nil

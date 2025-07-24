@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/netip"
 
 	"github.com/digitalocean/godo"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -23,13 +24,25 @@ func NewReservedIPTool(client *godo.Client) *ReservedIPTool {
 	}
 }
 
-// getReservedIPv4 fetches reserved IPv4 information by IP
-func (t *ReservedIPTool) getReservedIPv4(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+// getReservedIP fetches reserved IPv4 or IPv6 information by IP
+func (t *ReservedIPTool) getReservedIP(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ip, ok := req.GetArguments()["IP"].(string)
 	if !ok || ip == "" {
 		return mcp.NewToolResultError("IPv4 address is required"), nil
 	}
-	reservedIP, _, err := t.client.ReservedIPs.Get(ctx, ip)
+
+	netip, err := netip.ParseAddr(ip)
+	if err != nil {
+		return mcp.NewToolResultError("invalid IP address format"), nil
+	}
+	var reservedIP any
+	if netip.Is4() {
+		reservedIP, _, err = t.client.ReservedIPs.Get(ctx, ip)
+	} else if netip.Is6() {
+		reservedIP, _, err = t.client.ReservedIPV6s.Get(ctx, ip)
+	} else {
+		return mcp.NewToolResultError("unsupported IP address type"), nil
+	}
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -40,8 +53,8 @@ func (t *ReservedIPTool) getReservedIPv4(ctx context.Context, req mcp.CallToolRe
 	return mcp.NewToolResultText(string(jsonData)), nil
 }
 
-// listReservedIPv4s lists reserved IPv4 addresses with pagination
-func (t *ReservedIPTool) listReservedIPv4s(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+// listReservedIPs lists reserved IP addresses with pagination
+func (t *ReservedIPTool) listReservedIPs(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	page := 1
 	perPage := 20
 	if v, ok := req.GetArguments()["Page"].(float64); ok && v > 0 {
@@ -50,51 +63,23 @@ func (t *ReservedIPTool) listReservedIPv4s(ctx context.Context, req mcp.CallTool
 	if v, ok := req.GetArguments()["PerPage"].(float64); ok && v > 0 {
 		perPage = int(v)
 	}
+
 	opts := &godo.ListOptions{Page: page, PerPage: perPage}
-	ips, _, err := t.client.ReservedIPs.List(ctx, opts)
+	var ips any
+	var err error
+	ipType := req.GetArguments()["Type"].(string) // "ipv4" or "ipv6"
+	switch ipType {
+	case "ipv4":
+		ips, _, err = t.client.ReservedIPs.List(ctx, opts)
+	case "ipv6":
+		ips, _, err = t.client.ReservedIPV6s.List(ctx, opts)
+	default:
+		return mcp.NewToolResultErrorFromErr("invalid IP type. Use 'ipv4' or 'ipv6'", errors.New("invalid IP type")), nil
+	}
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
 	jsonData, err := json.MarshalIndent(ips, "", "  ")
-	if err != nil {
-		return nil, fmt.Errorf("marshal error: %w", err)
-	}
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// listReservedIPv6s lists reserved IPv6 addresses with pagination
-func (t *ReservedIPTool) listReservedIPv6s(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	page := 1
-	perPage := 20
-	if v, ok := req.GetArguments()["Page"].(float64); ok && v > 0 {
-		page = int(v)
-	}
-	if v, ok := req.GetArguments()["PerPage"].(float64); ok && v > 0 {
-		perPage = int(v)
-	}
-	opts := &godo.ListOptions{Page: page, PerPage: perPage}
-	ips, _, err := t.client.ReservedIPV6s.List(ctx, opts)
-	if err != nil {
-		return mcp.NewToolResultErrorFromErr("api error", err), nil
-	}
-	jsonData, err := json.MarshalIndent(ips, "", "  ")
-	if err != nil {
-		return nil, fmt.Errorf("marshal error: %w", err)
-	}
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// getReservedIPv6 fetches reserved IPv6 information by IP
-func (t *ReservedIPTool) getReservedIPv6(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	ip, ok := req.GetArguments()["IP"].(string)
-	if !ok || ip == "" {
-		return mcp.NewToolResultError("IPv6 address is required"), nil
-	}
-	reservedIP, _, err := t.client.ReservedIPV6s.Get(ctx, ip)
-	if err != nil {
-		return mcp.NewToolResultErrorFromErr("api error", err), nil
-	}
-	jsonData, err := json.MarshalIndent(reservedIP, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal error: %w", err)
 	}
@@ -215,31 +200,17 @@ func (t *ReservedIPTool) unassignIP(ctx context.Context, req mcp.CallToolRequest
 func (t *ReservedIPTool) Tools() []server.ServerTool {
 	return []server.ServerTool{
 		{
-			Handler: t.getReservedIPv4,
-			Tool: mcp.NewTool("reserved-ipv4-get",
-				mcp.WithDescription("Get reserved IPv4 information by IP"),
-				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IPv4 address")),
+			Handler: t.getReservedIP,
+			Tool: mcp.NewTool("reserved-ip-get",
+				mcp.WithDescription("Get reserved IPv4 or IPv6 information by IP"),
+				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IPv4 or IPv6 address")),
 			),
 		},
 		{
-			Handler: t.listReservedIPv4s,
-			Tool: mcp.NewTool("reserved-ipv4-list",
-				mcp.WithDescription("List reserved IPv4 addresses with pagination"),
-				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number (default: 1)")),
-				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page (default: 20)")),
-			),
-		},
-		{
-			Handler: t.getReservedIPv6,
-			Tool: mcp.NewTool("reserved-ipv6-get",
-				mcp.WithDescription("Get reserved IPv6 information by IP"),
-				mcp.WithString("IP", mcp.Required(), mcp.Description("The reserved IPv6 address")),
-			),
-		},
-		{
-			Handler: t.listReservedIPv6s,
-			Tool: mcp.NewTool("reserved-ipv6-list",
-				mcp.WithDescription("List reserved IPv6 addresses with pagination"),
+			Handler: t.listReservedIPs,
+			Tool: mcp.NewTool("reserved-ip-list",
+				mcp.WithDescription("List reserved IPv4 or IPv6 addresses with pagination"),
+				mcp.WithString("Type", mcp.Required(), mcp.Description("Type of IP to list ('ipv4' or 'ipv6')")),
 				mcp.WithNumber("Page", mcp.DefaultNumber(1), mcp.Description("Page number (default: 1)")),
 				mcp.WithNumber("PerPage", mcp.DefaultNumber(20), mcp.Description("Items per page (default: 20)")),
 			),
