@@ -1,6 +1,6 @@
 # Networking MCP Tools
 
-This directory contains tools and resources for managing DigitalOcean networking features via the MCP Server. These tools enable you to create, modify, and query networking resources such as domains, certificates, firewalls, reserved IPs, VPCs, CDNs, and partner attachments.
+This directory contains tools and resources for managing DigitalOcean networking features via the MCP Server. These tools enable you to create, modify, and query networking resources such as domains, certificates, firewalls, reserved IPs, VPCs, and CDNs.
 
 ---
 
@@ -186,34 +186,16 @@ This directory contains tools and resources for managing DigitalOcean networking
   - `IP` (string, required): The reserved IP to unassign
   - `Type` (string, required): Type of IP (`ipv4` or `ipv6`)
 
-- **reserved-ipv4-list**
+- **reserved-ip-list**
   List reserved IPv4 addresses with pagination.
+  - `Type` (string, required): Type of IP (`ipv4` or `ipv6`)
   - `Page` (number, optional, default: 1): Page number
   - `PerPage` (number, optional, default: 20): Items per page
 
-- **reserved-ipv6-list**
-  List reserved IPv6 addresses with pagination.
-  - `Page` (number, optional, default: 1): Page number
-  - `PerPage` (number, optional, default: 20): Items per page
-
-- **reserved-ipv4-list**  
-  List reserved IPv4 addresses with pagination.  
-  - `Page` (number, optional, default: 1): Page number  
-  - `PerPage` (number, optional, default: 20): Items per page
-
-- **reserved-ipv6-list**  
-  List reserved IPv6 addresses with pagination.  
-  - `Page` (number, optional, default: 1): Page number  
-  - `PerPage` (number, optional, default: 20): Items per page
-
-- **reserved-ipv4-get**  
+- **reserved-ip-get**  
   Get reserved IPv4 information by IP.  
-  - `IP` (string, required): The reserved IPv4 address
+  - `IP` (string, required): The reserved IPv4 or IPv6 address
 
-- **reserved-ipv6-get**  
-  Get reserved IPv6 information by IP.  
-  - `IP` (string, required): The reserved IPv6 address
-  
 ---
 
 ### VPC Peering
@@ -267,42 +249,6 @@ This directory contains tools and resources for managing DigitalOcean networking
 
 ---
 
-### Partner Attachments
-
-- **partner-attachment-create**
-  Create a new partner attachment.
-  - `Name` (string, required): Name of the partner attachment
-  - `Region` (string, required): Region for the partner attachment
-  - `Bandwidth` (number, required): Bandwidth in Mbps
-
-- **partner-attachment-delete**
-  Delete a partner attachment.
-  - `ID` (string, required): ID of the partner attachment
-
-- **partner-attachment-get-service-key**
-  Get the service key of a partner attachment.
-  - `ID` (string, required): ID of the partner attachment
-
-- **partner-attachment-get-bgp-config**
-  Get the BGP configuration of a partner attachment.
-  - `ID` (string, required): ID of the partner attachment
-
-- **partner-attachment-update**
-  Update a partner attachment.
-  - `ID` (string, required): ID of the partner attachment
-  - `Name` (string, required): New name
-  - `VPCIDs` (array of strings, required): VPC IDs to associate
-
-- **partner-attachment-get**  
-  Get partner attachment information by ID.  
-  - `ID` (string, required): ID of the partner attachment
-
-- **partner-attachment-list**  
-  List partner attachments with pagination.  
-  - `Page` (number, default: 1): Page number  
-  - `PerPage` (number, default: 20): Items per page
-
----
 
 ## Example Queries Using Networking MCP Tools
 
@@ -319,7 +265,6 @@ This directory contains tools and resources for managing DigitalOcean networking
 - Assign reserved IP "198.51.100.5" to droplet 987654.
 - Create a new VPC named "private-net" in region "sfo2".
 - Flush the cache for CDN with ID "cdn-xyz" for file "/static/logo.png".
-- Create a partner attachment named "fast-connect" in region "nyc3" with 1000 Mbps bandwidth.
 
 ---
 

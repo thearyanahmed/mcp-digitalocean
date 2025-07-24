@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/netip"
 	"testing"
 
 	"reflect"
@@ -28,24 +29,35 @@ func setupReservedIPToolWithMocks(
 	return NewReservedIPTool(client)
 }
 
-func TestReservedIPTool_getReservedIPv4(t *testing.T) {
+func TestReservedIPTool_getReservedIP(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	testIPv4 := &godo.ReservedIP{IP: "192.0.2.1", Region: &godo.Region{Slug: "nyc3"}}
+	testIPv6 := &godo.ReservedIPV6{IP: "2604::2001", RegionSlug: "nyc3"}
 	tests := []struct {
 		name        string
 		ip          string
-		mockSetup   func(*MockReservedIPsService)
+		mockSetup   func(*MockReservedIPsService, *MockReservedIPV6sService)
 		expectError bool
 	}{
 		{
 			name: "Successful get IPv4",
 			ip:   "192.0.2.1",
-			mockSetup: func(m *MockReservedIPsService) {
+			mockSetup: func(m *MockReservedIPsService, m6 *MockReservedIPV6sService) {
 				m.EXPECT().
 					Get(gomock.Any(), "192.0.2.1").
 					Return(testIPv4, nil, nil).
+					Times(1)
+			},
+		},
+		{
+			name: "Successful get IPv6",
+			ip:   "2604::2001",
+			mockSetup: func(m *MockReservedIPsService, m6 *MockReservedIPV6sService) {
+				m6.EXPECT().
+					Get(gomock.Any(), "2604::2001").
+					Return(testIPv6, nil, nil).
 					Times(1)
 			},
 		},
@@ -58,7 +70,7 @@ func TestReservedIPTool_getReservedIPv4(t *testing.T) {
 		{
 			name: "API error",
 			ip:   "203.0.113.1",
-			mockSetup: func(m *MockReservedIPsService) {
+			mockSetup: func(m *MockReservedIPsService, m6 *MockReservedIPV6sService) {
 				m.EXPECT().
 					Get(gomock.Any(), "203.0.113.1").
 					Return(nil, nil, errors.New("api error")).
@@ -73,7 +85,7 @@ func TestReservedIPTool_getReservedIPv4(t *testing.T) {
 			mockIPv4 := NewMockReservedIPsService(ctrl)
 			mockIPv6 := NewMockReservedIPV6sService(ctrl)
 			if tc.mockSetup != nil {
-				tc.mockSetup(mockIPv4)
+				tc.mockSetup(mockIPv4, mockIPv6)
 			}
 			tool := setupReservedIPToolWithMocks(mockIPv4, mockIPv6, nil, nil)
 			args := map[string]any{}
@@ -81,7 +93,7 @@ func TestReservedIPTool_getReservedIPv4(t *testing.T) {
 				args["IP"] = tc.ip
 			}
 			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-			resp, err := tool.getReservedIPv4(context.Background(), req)
+			resp, err := tool.getReservedIP(context.Background(), req)
 			if tc.expectError {
 				require.NotNil(t, resp)
 				require.True(t, resp.IsError)
@@ -90,14 +102,21 @@ func TestReservedIPTool_getReservedIPv4(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 			require.False(t, resp.IsError)
-			var outIP godo.ReservedIP
-			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outIP))
-			require.Equal(t, testIPv4.IP, outIP.IP)
+			if netip.MustParseAddr(tc.ip).Is4() {
+				var outIP godo.ReservedIP
+				require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outIP))
+				require.Equal(t, testIPv4.IP, outIP.IP)
+			} else {
+				var outIP godo.ReservedIPV6
+				require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outIP))
+				require.Equal(t, testIPv6.IP, outIP.IP)
+
+			}
 		})
 	}
 }
 
-func TestReservedIPTool_listReservedIPv4s(t *testing.T) {
+func TestReservedIPTool_listReservedIPs(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -105,17 +124,21 @@ func TestReservedIPTool_listReservedIPv4s(t *testing.T) {
 		{IP: "192.0.2.1", Region: &godo.Region{Slug: "nyc3"}},
 		{IP: "192.0.2.2", Region: &godo.Region{Slug: "sfo2"}},
 	}
+	testIPv6s := []godo.ReservedIPV6{
+		{IP: "2001::2002", RegionSlug: "nyc3"},
+		{IP: "2001::2003", RegionSlug: "sfo2"},
+	}
 	tests := []struct {
 		name        string
 		args        map[string]any
-		mockSetup   func(*MockReservedIPsService)
+		mockSetup   func(*MockReservedIPsService, *MockReservedIPV6sService)
 		expectError bool
 		expectIPs   []string
 	}{
 		{
 			name: "List IPv4s default pagination",
-			args: map[string]any{},
-			mockSetup: func(m *MockReservedIPsService) {
+			args: map[string]any{"Type": "ipv4"},
+			mockSetup: func(m *MockReservedIPsService, m6 *MockReservedIPV6sService) {
 				m.EXPECT().
 					List(gomock.Any(), &godo.ListOptions{Page: 1, PerPage: 20}).
 					Return(testIPs, nil, nil).
@@ -124,9 +147,20 @@ func TestReservedIPTool_listReservedIPv4s(t *testing.T) {
 			expectIPs: []string{"192.0.2.1", "192.0.2.2"},
 		},
 		{
+			name: "List IPv6s default pagination",
+			args: map[string]any{"Type": "ipv6"},
+			mockSetup: func(m *MockReservedIPsService, m6 *MockReservedIPV6sService) {
+				m6.EXPECT().
+					List(gomock.Any(), &godo.ListOptions{Page: 1, PerPage: 20}).
+					Return(testIPv6s, nil, nil).
+					Times(1)
+			},
+			expectIPs: []string{"2001::2002", "2001::2003"},
+		},
+		{
 			name: "List IPv4s custom pagination",
-			args: map[string]any{"Page": float64(2), "PerPage": float64(1)},
-			mockSetup: func(m *MockReservedIPsService) {
+			args: map[string]any{"Page": float64(2), "PerPage": float64(1), "Type": "ipv4"},
+			mockSetup: func(m *MockReservedIPsService, m6 *MockReservedIPV6sService) {
 				m.EXPECT().
 					List(gomock.Any(), &godo.ListOptions{Page: 2, PerPage: 1}).
 					Return(testIPs[:1], nil, nil).
@@ -136,8 +170,8 @@ func TestReservedIPTool_listReservedIPv4s(t *testing.T) {
 		},
 		{
 			name: "API error",
-			args: map[string]any{},
-			mockSetup: func(m *MockReservedIPsService) {
+			args: map[string]any{"Type": "ipv4"},
+			mockSetup: func(m *MockReservedIPsService, m6 *MockReservedIPV6sService) {
 				m.EXPECT().
 					List(gomock.Any(), &godo.ListOptions{Page: 1, PerPage: 20}).
 					Return(nil, nil, errors.New("api error")).
@@ -152,11 +186,11 @@ func TestReservedIPTool_listReservedIPv4s(t *testing.T) {
 			mockIPv4 := NewMockReservedIPsService(ctrl)
 			mockIPv6 := NewMockReservedIPV6sService(ctrl)
 			if tc.mockSetup != nil {
-				tc.mockSetup(mockIPv4)
+				tc.mockSetup(mockIPv4, mockIPv6)
 			}
 			tool := setupReservedIPToolWithMocks(mockIPv4, mockIPv6, nil, nil)
 			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
-			resp, err := tool.listReservedIPv4s(context.Background(), req)
+			resp, err := tool.listReservedIPs(context.Background(), req)
 			if tc.expectError {
 				require.NotNil(t, resp)
 				require.True(t, resp.IsError)
@@ -165,161 +199,25 @@ func TestReservedIPTool_listReservedIPv4s(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 			require.False(t, resp.IsError)
-			var out []godo.ReservedIP
-			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &out))
-			gotIPs := make([]string, len(out))
-			for i, ip := range out {
-				gotIPs[i] = ip.IP
-			}
-			require.True(t, reflect.DeepEqual(tc.expectIPs, gotIPs))
-		})
-	}
-}
 
-func TestReservedIPTool_listReservedIPv6s(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+			if tc.args["Type"] == "ipv4" {
+				var out []godo.ReservedIP
+				require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &out))
+				gotIPs := make([]string, len(out))
+				for i, ip := range out {
+					gotIPs[i] = ip.IP
+				}
+				require.True(t, reflect.DeepEqual(tc.expectIPs, gotIPs))
+			} else {
+				var out []godo.ReservedIPV6
+				require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &out))
+				gotIPs := make([]string, len(out))
+				for i, ip := range out {
+					gotIPs[i] = ip.IP
+				}
+				require.True(t, reflect.DeepEqual(tc.expectIPs, gotIPs))
 
-	testIPs := []godo.ReservedIPV6{
-		{IP: "2001:db8::1", RegionSlug: "nyc3"},
-		{IP: "2001:db8::2", RegionSlug: "sfo2"},
-	}
-	tests := []struct {
-		name        string
-		args        map[string]any
-		mockSetup   func(*MockReservedIPV6sService)
-		expectError bool
-		expectIPs   []string
-	}{
-		{
-			name: "List IPv6s default pagination",
-			args: map[string]any{},
-			mockSetup: func(m *MockReservedIPV6sService) {
-				m.EXPECT().
-					List(gomock.Any(), &godo.ListOptions{Page: 1, PerPage: 20}).
-					Return(testIPs, nil, nil).
-					Times(1)
-			},
-			expectIPs: []string{"2001:db8::1", "2001:db8::2"},
-		},
-		{
-			name: "List IPv6s custom pagination",
-			args: map[string]any{"Page": float64(2), "PerPage": float64(1)},
-			mockSetup: func(m *MockReservedIPV6sService) {
-				m.EXPECT().
-					List(gomock.Any(), &godo.ListOptions{Page: 2, PerPage: 1}).
-					Return(testIPs[:1], nil, nil).
-					Times(1)
-			},
-			expectIPs: []string{"2001:db8::1"},
-		},
-		{
-			name: "API error",
-			args: map[string]any{},
-			mockSetup: func(m *MockReservedIPV6sService) {
-				m.EXPECT().
-					List(gomock.Any(), &godo.ListOptions{Page: 1, PerPage: 20}).
-					Return(nil, nil, errors.New("api error")).
-					Times(1)
-			},
-			expectError: true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			mockIPv4 := NewMockReservedIPsService(ctrl)
-			mockIPv6 := NewMockReservedIPV6sService(ctrl)
-			if tc.mockSetup != nil {
-				tc.mockSetup(mockIPv6)
 			}
-			tool := setupReservedIPToolWithMocks(mockIPv4, mockIPv6, nil, nil)
-			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: tc.args}}
-			resp, err := tool.listReservedIPv6s(context.Background(), req)
-			if tc.expectError {
-				require.NotNil(t, resp)
-				require.True(t, resp.IsError)
-				return
-			}
-			require.NoError(t, err)
-			require.NotNil(t, resp)
-			require.False(t, resp.IsError)
-			var out []godo.ReservedIPV6
-			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &out))
-			gotIPs := make([]string, len(out))
-			for i, ip := range out {
-				gotIPs[i] = ip.IP
-			}
-			require.True(t, reflect.DeepEqual(tc.expectIPs, gotIPs))
-		})
-	}
-}
-
-func TestReservedIPTool_getReservedIPv6(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	testIPv6 := &godo.ReservedIPV6{IP: "2001:db8::1", RegionSlug: "nyc3"}
-	tests := []struct {
-		name        string
-		ip          string
-		mockSetup   func(*MockReservedIPV6sService)
-		expectError bool
-	}{
-		{
-			name: "Successful get IPv6",
-			ip:   "2001:db8::1",
-			mockSetup: func(m *MockReservedIPV6sService) {
-				m.EXPECT().
-					Get(gomock.Any(), "2001:db8::1").
-					Return(testIPv6, nil, nil).
-					Times(1)
-			},
-		},
-		{
-			name:        "Missing IP argument",
-			ip:          "",
-			mockSetup:   nil,
-			expectError: true,
-		},
-		{
-			name: "API error",
-			ip:   "2001:db8::dead:beef",
-			mockSetup: func(m *MockReservedIPV6sService) {
-				m.EXPECT().
-					Get(gomock.Any(), "2001:db8::dead:beef").
-					Return(nil, nil, errors.New("api error")).
-					Times(1)
-			},
-			expectError: true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			mockIPv4 := NewMockReservedIPsService(ctrl)
-			mockIPv6 := NewMockReservedIPV6sService(ctrl)
-			if tc.mockSetup != nil {
-				tc.mockSetup(mockIPv6)
-			}
-			tool := setupReservedIPToolWithMocks(mockIPv4, mockIPv6, nil, nil)
-			args := map[string]any{}
-			if tc.name != "Missing IP argument" {
-				args["IP"] = tc.ip
-			}
-			req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: args}}
-			resp, err := tool.getReservedIPv6(context.Background(), req)
-			if tc.expectError {
-				require.NotNil(t, resp)
-				require.True(t, resp.IsError)
-				return
-			}
-			require.NoError(t, err)
-			require.NotNil(t, resp)
-			require.False(t, resp.IsError)
-			var outIP godo.ReservedIPV6
-			require.NoError(t, json.Unmarshal([]byte(resp.Content[0].(mcp.TextContent).Text), &outIP))
-			require.Equal(t, testIPv6.IP, outIP.IP)
 		})
 	}
 }
