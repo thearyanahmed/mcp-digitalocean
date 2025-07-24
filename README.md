@@ -16,6 +16,71 @@ Prerequisites:
 ```bash
 npx @digitalocean/mcp --services apps 
 ```
+---
+
+#### Using with Claude Code
+
+To add the DigitalOcean MCP server to [Claude Code](https://www.anthropic.com/claude-code), run the following command in your terminal:
+
+```bash
+claude mcp add digitalocean-mcp \
+  -e DIGITALOCEAN_API_TOKEN=YOUR_DO_API_TOKEN \
+  -- npx @digitalocean/mcp --services apps,databases
+```
+
+This will:
+
+* Add the MCP server under the **default (local)** scope — meaning it's only available inside the current folder.
+* Register it with the name `digitalocean-mcp`.
+* Enable the `apps` and `databases` services.
+* Pass your DigitalOcean API token securely to the server.
+* Store the configuration in your global Claude config at `~/.claude.json`, scoped to the current folder.
+
+To confirm it's been added:
+
+```bash
+claude mcp list
+```
+
+To inspect details:
+
+```bash
+claude mcp get digitalocean-mcp
+```
+
+To remove it:
+
+```bash
+claude mcp remove digitalocean-mcp
+```
+
+---
+
+### Want to use it everywhere?
+**Local scope** is great when you're testing or only using the server in one project.
+**User scope** is better if you want it available everywhere.
+
+If you’d like to make the server available **globally** (so you don’t have to re-add it in each project), you can use the `user` scope:
+
+```bash
+claude mcp add -s user digitalocean-mcp-user-scope \
+  -e DIGITALOCEAN_API_TOKEN=YOUR_DO_API_TOKEN \
+  -- npx @digitalocean/mcp --services apps,databases
+```
+
+This will:
+
+* Make the server available in **all folders**, not just the one you’re in
+* Scope it to **your user account**
+* Store it in your global Claude config at `~/.claude.json`
+
+To remove it:
+
+```bash
+claude mcp remove -s user digitalocean-mcp-user-scope
+```
+
+---
 
 #### Using Cursor IDE
 
