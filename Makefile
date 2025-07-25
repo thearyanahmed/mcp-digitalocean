@@ -30,6 +30,7 @@ gen:
 
 install-deps:
 	go install github.com/mgechev/revive@latest
+	go install github.com/goreleaser/goreleaser/v2@latest
 
 inspector:
 	SERVICES=apps,droplets,accounts,networking,insights,spaces,databases,marketplace,doks npm run inspector
