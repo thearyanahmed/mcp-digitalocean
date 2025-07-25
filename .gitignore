@@ -31,4 +31,4 @@ scripts/npm/dist/
 
 .vscode/
 docode/*
-dist/
+# dist/
