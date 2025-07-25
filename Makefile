@@ -28,5 +28,8 @@ format-check:
 gen:
 	go generate ./...
 
+install-deps:
+	go install github.com/mgechev/revive@latest
+
 inspector:
 	SERVICES=apps,droplets,accounts,networking,insights,spaces,databases,marketplace,doks npm run inspector
