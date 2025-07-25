@@ -28,5 +28,5 @@ format-check:
 gen:
 	go generate ./...
 
-inspector: build-dist
+inspector:
 	SERVICES=apps,droplets,accounts,networking,insights,spaces,databases,marketplace,doks npm run inspector
