@@ -4,7 +4,7 @@ build-dist: build-bin dist
 build-bin:
 	goreleaser build --auto-snapshot --clean --skip validate
 
-.PHONY: dist
+.PHONY: dist inspector
 dist:
 	mkdir -p ./scripts/npm/dist
 	cp ./README.md ./scripts/npm/README.md
@@ -27,3 +27,6 @@ format-check:
 
 gen:
 	go generate ./...
+
+inspector: build-dist
+	SERVICES=apps,droplets,accounts,networking,insights,spaces,databases,marketplace,doks npm run inspector
