@@ -4,9 +4,9 @@
   "description": "MCP Inspector for DigitalOcean MCP Server",
   "main": "index.js",
   "scripts": {
-    "start": "npx -y @modelcontextprotocol/inspector --cli npx @digitalocean/mcp --services apps --digitalocean-api-token $DIGITALOCEAN_TOKEN",
+    "start": "BROWSER=none npx -y @modelcontextprotocol/inspector npx @digitalocean/mcp --services apps --digitalocean-api-token $DIGITALOCEAN_TOKEN",
     "dev": "npx -y @modelcontextprotocol/inspector npx @digitalocean/mcp --services apps,droplets,databases --digitalocean-api-token $DIGITALOCEAN_TOKEN",
-    "inspector": "npx -y @modelcontextprotocol/inspector --cli npx @digitalocean/mcp --services $SERVICES --digitalocean-api-token $DIGITALOCEAN_TOKEN"
+    "inspector": "BROWSER=none npx -y @modelcontextprotocol/inspector npx @digitalocean/mcp --services $SERVICES --digitalocean-api-token $DIGITALOCEAN_TOKEN"
   },
   "engines": {
     "node": ">=18.0.0"
