@@ -542,12 +542,12 @@ func TestProposeApp(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		args           map[string]any
-		mock           func(*MockAppsService)
-		mcpResult      *mcp.CallToolResult
-		expectError    bool
-		handlerError   bool
+		name         string
+		args         map[string]any
+		mock         func(*MockAppsService)
+		mcpResult    *mcp.CallToolResult
+		expectError  bool
+		handlerError bool
 	}{
 		{
 			name: "Successful propose without app_id",
@@ -559,8 +559,8 @@ func TestProposeApp(t *testing.T) {
 					Spec: baseSpec,
 				}).Return(&godo.AppProposeResponse{
 					AppNameAvailable: true,
-					AppCost:         25.50,
-					AppIsStarter:    false,
+					AppCost:          25.50,
+					AppIsStarter:     false,
 				}, nil, nil).Times(1)
 			},
 			mcpResult: &mcp.CallToolResult{
@@ -569,8 +569,8 @@ func TestProposeApp(t *testing.T) {
 						Type: "text",
 						Text: toJSONString(&godo.AppProposeResponse{
 							AppNameAvailable: true,
-							AppCost:         25.50,
-							AppIsStarter:    false,
+							AppCost:          25.50,
+							AppIsStarter:     false,
 						}),
 					},
 				},
@@ -588,8 +588,8 @@ func TestProposeApp(t *testing.T) {
 					AppID: "app-123",
 				}).Return(&godo.AppProposeResponse{
 					AppNameAvailable: true,
-					AppCost:         30.75,
-					AppIsStarter:    false,
+					AppCost:          30.75,
+					AppIsStarter:     false,
 				}, nil, nil).Times(1)
 			},
 			mcpResult: &mcp.CallToolResult{
@@ -598,8 +598,8 @@ func TestProposeApp(t *testing.T) {
 						Type: "text",
 						Text: toJSONString(&godo.AppProposeResponse{
 							AppNameAvailable: true,
-							AppCost:         30.75,
-							AppIsStarter:    false,
+							AppCost:          30.75,
+							AppIsStarter:     false,
 						}),
 					},
 				},
