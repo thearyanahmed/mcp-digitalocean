@@ -550,9 +550,9 @@ func TestProposeApp(t *testing.T) {
 		handlerError bool
 	}{
 		{
-			name: "Successful propose without app_id",
+			name: "Successful propose without AppID",
 			args: map[string]any{
-				"spec": baseSpec,
+				"Spec": baseSpec,
 			},
 			mock: func(app *MockAppsService) {
 				app.EXPECT().Propose(gomock.Any(), &godo.AppProposeRequest{
@@ -577,10 +577,10 @@ func TestProposeApp(t *testing.T) {
 			},
 		},
 		{
-			name: "Successful propose with app_id",
+			name: "Successful propose with AppID",
 			args: map[string]any{
-				"spec":   baseSpec,
-				"app_id": "app-123",
+				"Spec":  baseSpec,
+				"AppID": "app-123",
 			},
 			mock: func(app *MockAppsService) {
 				app.EXPECT().Propose(gomock.Any(), &godo.AppProposeRequest{
@@ -606,9 +606,9 @@ func TestProposeApp(t *testing.T) {
 			},
 		},
 		{
-			name: "Missing spec argument",
+			name: "Missing Spec argument",
 			args: map[string]any{
-				"app_id": "app-123",
+				"AppID": "app-123",
 			},
 			mcpResult: &mcp.CallToolResult{
 				IsError: true,
@@ -623,7 +623,7 @@ func TestProposeApp(t *testing.T) {
 		{
 			name: "API error",
 			args: map[string]any{
-				"spec": baseSpec,
+				"Spec": baseSpec,
 			},
 			mock: func(app *MockAppsService) {
 				app.EXPECT().Propose(gomock.Any(), &godo.AppProposeRequest{
@@ -633,9 +633,9 @@ func TestProposeApp(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name: "Invalid spec format",
+			name: "Invalid Spec format",
 			args: map[string]any{
-				"spec": "invalid_json",
+				"Spec": "invalid_json",
 			},
 			expectError: true,
 		},

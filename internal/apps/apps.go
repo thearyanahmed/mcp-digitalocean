@@ -247,15 +247,15 @@ func (a *AppPlatformTool) updateApp(ctx context.Context, req mcp.CallToolRequest
 
 // proposeApp validates an app spec and provides cost estimates without creating the app
 func (a *AppPlatformTool) proposeApp(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	// Extract spec - required parameter
-	spec, ok := req.GetArguments()["spec"]
+	// Extract Spec - required parameter
+	spec, ok := req.GetArguments()["Spec"]
 	if !ok {
 		return mcp.NewToolResultError("App spec is required"), nil
 	}
 
-	// Extract optional app_id parameter
+	// Extract optional AppID parameter
 	var appID string
-	if id, exists := req.GetArguments()["app_id"].(string); exists {
+	if id, exists := req.GetArguments()["AppID"].(string); exists {
 		appID = id
 	}
 
@@ -349,9 +349,9 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 		{
 			Handler: a.proposeApp,
 			Tool: mcp.NewTool("apps-propose-app",
-				mcp.WithDescription("Validates an app spec and provides cost estimates without creating the app. An optional app_id can be provided to validate the spec as an update to an existing app."),
-				mcp.WithObject("spec", mcp.Required(), mcp.Description("The app specification to validate")),
-				mcp.WithString("app_id", mcp.Description("Optional. If provided, the spec will be validated as an update to this existing app"))),
+				mcp.WithDescription("Validates an app spec and provides cost estimates without creating the app. An optional AppID can be provided to validate the spec as an update to an existing app."),
+				mcp.WithObject("Spec", mcp.Required(), mcp.Description("The app specification to validate")),
+				mcp.WithString("AppID", mcp.Description("Optional. If provided, the spec will be validated as an update to this existing app"))),
 		},
 	}
 
