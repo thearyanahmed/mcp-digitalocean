@@ -247,21 +247,35 @@ func (a *AppPlatformTool) updateApp(ctx context.Context, req mcp.CallToolRequest
 
 // proposeApp validates an app spec and provides cost estimates without creating the app
 func (a *AppPlatformTool) proposeApp(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	jsonBytes, err := json.Marshal(req.GetArguments())
-	if err != nil {
-		return nil, fmt.Errorf("marshal error: %w", err)
-	}
-
-	var proposeReq godo.AppProposeRequest
-	if err := json.Unmarshal(jsonBytes, &proposeReq); err != nil {
-		return mcp.NewToolResultErrorFromErr("parse propose request", err), nil
-	}
-
-	if proposeReq.Spec == nil {
+	// Extract spec - required parameter
+	spec, ok := req.GetArguments()["spec"]
+	if !ok {
 		return mcp.NewToolResultError("App spec is required"), nil
 	}
 
-	response, _, err := a.client.Apps.Propose(ctx, &proposeReq)
+	// Extract optional app_id parameter
+	var appID string
+	if id, exists := req.GetArguments()["app_id"].(string); exists {
+		appID = id
+	}
+
+	// Convert spec to AppSpec
+	specJSON, err := json.Marshal(spec)
+	if err != nil {
+		return nil, fmt.Errorf("marshal spec error: %w", err)
+	}
+
+	var appSpec godo.AppSpec
+	if err := json.Unmarshal(specJSON, &appSpec); err != nil {
+		return mcp.NewToolResultErrorFromErr("parse app spec", err), nil
+	}
+
+	proposeReq := &godo.AppProposeRequest{
+		Spec:  &appSpec,
+		AppID: appID,
+	}
+
+	response, _, err := a.client.Apps.Propose(ctx, proposeReq)
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("api error", err), nil
 	}
@@ -334,11 +348,10 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 		},
 		{
 			Handler: a.proposeApp,
-			Tool: mcp.NewToolWithRawSchema(
-				"apps-propose-app",
-				"Validates an app spec and provides cost estimates without creating the app. An optional app_id can be provided to validate the spec as an update to an existing app.",
-				appCreateSchema,
-			),
+			Tool: mcp.NewTool("apps-propose-app",
+				mcp.WithDescription("Validates an app spec and provides cost estimates without creating the app. An optional app_id can be provided to validate the spec as an update to an existing app."),
+				mcp.WithObject("spec", mcp.Required(), mcp.Description("The app specification to validate")),
+				mcp.WithString("app_id", mcp.Description("Optional. If provided, the spec will be validated as an update to this existing app"))),
 		},
 	}
 
