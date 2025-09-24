@@ -526,3 +526,150 @@ func TestGetDeploymentStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestProposeApp(t *testing.T) {
+	baseSpec := &godo.AppSpec{
+		Name: "test-app",
+		Services: []*godo.AppServiceSpec{
+			{
+				Name: "test-service",
+				Git: &godo.GitSourceSpec{
+					RepoCloneURL: "https://repo-clone-url.com/test/repo.git",
+					Branch:       "main",
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name           string
+		args           map[string]any
+		mock           func(*MockAppsService)
+		mcpResult      *mcp.CallToolResult
+		expectError    bool
+		handlerError   bool
+	}{
+		{
+			name: "Successful propose without app_id",
+			args: map[string]any{
+				"spec": baseSpec,
+			},
+			mock: func(app *MockAppsService) {
+				app.EXPECT().Propose(gomock.Any(), &godo.AppProposeRequest{
+					Spec: baseSpec,
+				}).Return(&godo.AppProposeResponse{
+					AppNameAvailable: true,
+					AppCost:         25.50,
+					AppIsStarter:    false,
+				}, nil, nil).Times(1)
+			},
+			mcpResult: &mcp.CallToolResult{
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: "text",
+						Text: toJSONString(&godo.AppProposeResponse{
+							AppNameAvailable: true,
+							AppCost:         25.50,
+							AppIsStarter:    false,
+						}),
+					},
+				},
+			},
+		},
+		{
+			name: "Successful propose with app_id",
+			args: map[string]any{
+				"spec":   baseSpec,
+				"app_id": "app-123",
+			},
+			mock: func(app *MockAppsService) {
+				app.EXPECT().Propose(gomock.Any(), &godo.AppProposeRequest{
+					Spec:  baseSpec,
+					AppID: "app-123",
+				}).Return(&godo.AppProposeResponse{
+					AppNameAvailable: true,
+					AppCost:         30.75,
+					AppIsStarter:    false,
+				}, nil, nil).Times(1)
+			},
+			mcpResult: &mcp.CallToolResult{
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: "text",
+						Text: toJSONString(&godo.AppProposeResponse{
+							AppNameAvailable: true,
+							AppCost:         30.75,
+							AppIsStarter:    false,
+						}),
+					},
+				},
+			},
+		},
+		{
+			name: "Missing spec argument",
+			args: map[string]any{
+				"app_id": "app-123",
+			},
+			mcpResult: &mcp.CallToolResult{
+				IsError: true,
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: "text",
+						Text: "App spec is required",
+					},
+				},
+			},
+		},
+		{
+			name: "API error",
+			args: map[string]any{
+				"spec": baseSpec,
+			},
+			mock: func(app *MockAppsService) {
+				app.EXPECT().Propose(gomock.Any(), &godo.AppProposeRequest{
+					Spec: baseSpec,
+				}).Return(nil, nil, fmt.Errorf("api error")).Times(1)
+			},
+			expectError: true,
+		},
+		{
+			name: "Invalid spec format",
+			args: map[string]any{
+				"spec": "invalid_json",
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			client, appService := setupMock(t)
+			tool := &AppPlatformTool{client: client}
+			if tc.mock != nil {
+				tc.mock(appService)
+			}
+
+			req := mcp.CallToolRequest{
+				Params: mcp.CallToolParams{Arguments: tc.args},
+			}
+
+			resp, err := tool.proposeApp(context.Background(), req)
+
+			if tc.expectError {
+				if tc.handlerError {
+					require.Error(t, err)
+					require.Nil(t, resp)
+				} else {
+					require.NoError(t, err)
+					require.NotNil(t, resp)
+					require.True(t, resp.IsError)
+				}
+				return
+			}
+
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, tc.mcpResult, resp)
+		})
+	}
+}
