@@ -245,6 +245,35 @@ func (a *AppPlatformTool) updateApp(ctx context.Context, req mcp.CallToolRequest
 	return mcp.NewToolResultText(string(appJSON)), nil
 }
 
+// proposeApp validates an app spec and provides cost estimates without creating the app
+func (a *AppPlatformTool) proposeApp(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	jsonBytes, err := json.Marshal(req.GetArguments())
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	var proposeReq godo.AppProposeRequest
+	if err := json.Unmarshal(jsonBytes, &proposeReq); err != nil {
+		return mcp.NewToolResultErrorFromErr("parse propose request", err), nil
+	}
+
+	if proposeReq.Spec == nil {
+		return mcp.NewToolResultError("App spec is required"), nil
+	}
+
+	response, _, err := a.client.Apps.Propose(ctx, &proposeReq)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	responseJSON, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+
+	return mcp.NewToolResultText(string(responseJSON)), nil
+}
+
 func (a *AppPlatformTool) Tools() []server.ServerTool {
 
 	appCreateSchema, err := loadSchema("app-create-schema.json")
@@ -301,6 +330,14 @@ func (a *AppPlatformTool) Tools() []server.ServerTool {
 				"apps-update",
 				"Updates an existing application on DigitalOcean App Platform. The app ID and the AppSpec must be provided in the request.",
 				appUpdateSchema,
+			),
+		},
+		{
+			Handler: a.proposeApp,
+			Tool: mcp.NewToolWithRawSchema(
+				"apps-propose-app",
+				"Validates an app spec and provides cost estimates without creating the app. An optional app_id can be provided to validate the spec as an update to an existing app.",
+				appCreateSchema,
 			),
 		},
 	}
