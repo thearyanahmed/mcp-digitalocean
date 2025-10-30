@@ -111,6 +111,9 @@ func main() {
 		services...,
 	)
 
+	// wrap all tools with logging middleware
+	middleware.WrapServerWithLogging(svr, logger)
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
