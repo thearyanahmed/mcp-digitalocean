@@ -22,8 +22,9 @@ import (
 )
 
 const (
-	mcpName    = "mcp-digitalocean"
-	mcpVersion = "1.0.17"
+	mcpName                 = "mcp-digitalocean"
+	mcpVersion              = "1.0.17"
+	wsLoggingContextTimeout = 15 * time.Second
 )
 
 // getEnv retrieves the value of the environment variable named by the key.
@@ -60,19 +61,42 @@ func main() {
 		level = slog.LevelInfo
 	}
 
+	// setup signal context for graceful shutdown
+	// This context is cancelled when the user presses Ctrl+C or the process receives SIGTERM/SIGINT.
+	// It is used to signal all long-running goroutines (like WebSocket handlers) to stop their work.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
+
 	// create WebSocket logging handler (drop-in replacement for slog.NewJSONHandler)
-	handler := wslogging.NewHandler(os.Stderr, &slog.HandlerOptions{Level: level})
+	wsLoggingHandler := wslogging.NewHandler(os.Stderr, &slog.HandlerOptions{Level: level})
 
 	// configure WebSocket logging if URL is provided
 	if *wsLoggingURL != "" {
-		if err := handler.ConfigureWebSocket(*wsLoggingURL, *wsLoggingToken); err != nil {
+		if err := wsLoggingHandler.ConfigureWebSocket(*wsLoggingURL, *wsLoggingToken); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to configure WebSocket logging: %v\n", err)
 			os.Exit(1)
 		}
-		defer handler.Close()
+
+		// start WebSocket logging with signal context for graceful shutdown
+		// The context passed here controls when the background goroutines should stop.
+		// When a signal is received, ctx is cancelled and the goroutines exit their loops.
+		wsLoggingHandler.Start(ctx)
+
+		defer func() {
+			// give the handler time to flush remaining logs before shutdown
+			// we are not reusing the signal context because:
+			// 1. The signal context (ctx) is already cancelled at this point
+			// 2. Close() needs time to flush buffered logs, so we give it a new wsLoggingContextTimeout (15-second)
+			// which ensures logs are properly flushed even during shutdown
+			closeCtx, cancel := context.WithTimeout(context.Background(), wsLoggingContextTimeout)
+			defer cancel()
+			if err := wsLoggingHandler.Close(closeCtx); err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to close WebSocket handler: %v\n", err)
+			}
+		}()
 	}
 
-	logger := slog.New(handler)
+	logger := slog.New(wsLoggingHandler)
 	token := *tokenFlag
 	if token == "" && *transport == "stdio" {
 		logger.Error("DigitalOcean API token not provided. Use --digitalocean-api-token flag or set DIGITALOCEAN_API_TOKEN environment variable")
@@ -113,9 +137,6 @@ func main() {
 
 	// wrap all tools with logging middleware
 	middleware.WrapServerWithLogging(svr, logger)
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	defer stop()
 
 	// start our server.
 	err = runServer(ctx, svr, logger, *bindAddr, transport)

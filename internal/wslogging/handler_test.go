@@ -26,8 +26,8 @@ func TestNewHandler(t *testing.T) {
 		t.Fatal("NewHandler returned nil")
 	}
 
-	if handler.fallbackHandler == nil {
-		t.Error("fallbackHandler is nil")
+	if handler.stderrHandler == nil {
+		t.Error("stderrHandler is nil")
 	}
 
 	if handler.wsEnabled {
@@ -168,13 +168,14 @@ func TestHandler_Close(t *testing.T) {
 	})
 
 	// close should not error even without WebSocket
-	err := handler.Close()
+	ctx := context.Background()
+	err := handler.Close(ctx)
 	if err != nil {
 		t.Errorf("Close() returned error: %v", err)
 	}
 
 	// multiple closes should be safe
-	err = handler.Close()
+	err = handler.Close(ctx)
 	if err != nil {
 		t.Errorf("Second Close() returned error: %v", err)
 	}
@@ -242,7 +243,11 @@ func TestHandler_WebSocket_SendsLogs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ConfigureWebSocket() error: %v", err)
 	}
-	defer handler.Close()
+
+	// start WebSocket with background context
+	ctx := context.Background()
+	handler.Start(ctx)
+	defer handler.Close(context.Background())
 
 	// wait for connection
 	time.Sleep(100 * time.Millisecond)
@@ -281,6 +286,73 @@ func TestHandler_WebSocket_SendsLogs(t *testing.T) {
 	}
 }
 
+// TestHandler_DualLogging tests that logs appear in BOTH stderr and WebSocket when WebSocket is enabled
+func TestHandler_DualLogging(t *testing.T) {
+	server, messages := mockWebSocketServer(t, "test-token")
+	defer server.Close()
+
+	wsURL := httpToWebSocketURL(server.URL)
+
+	var buf bytes.Buffer
+	handler := NewHandler(&buf, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+
+	// configure WebSocket
+	err := handler.ConfigureWebSocket(wsURL, "test-token")
+	if err != nil {
+		t.Fatalf("ConfigureWebSocket() error: %v", err)
+	}
+
+	// start WebSocket with background context
+	ctx := context.Background()
+	handler.Start(ctx)
+	defer handler.Close(context.Background())
+
+	// wait for connection
+	time.Sleep(100 * time.Millisecond)
+
+	// send a log message
+	logger := slog.New(handler)
+	logger.Info("dual logging test", "destination", "both")
+
+	// verify the log appears in stderr (buf)
+	stderrOutput := buf.String()
+	if !strings.Contains(stderrOutput, "dual logging test") {
+		t.Errorf("stderr missing log message: %s", stderrOutput)
+	}
+	if !strings.Contains(stderrOutput, "destination") {
+		t.Errorf("stderr missing attribute key: %s", stderrOutput)
+	}
+	if !strings.Contains(stderrOutput, "both") {
+		t.Errorf("stderr missing attribute value: %s", stderrOutput)
+	}
+
+	// verify the log also appears in WebSocket
+	select {
+	case msg := <-messages:
+		var logEntry map[string]any
+		if err := json.Unmarshal(msg, &logEntry); err != nil {
+			t.Fatalf("failed to unmarshal WebSocket log entry: %v", err)
+		}
+
+		if logEntry["message"] != "dual logging test" {
+			t.Errorf("WebSocket message = %v, want 'dual logging test'", logEntry["message"])
+		}
+
+		if logEntry["level"] != "INFO" {
+			t.Errorf("WebSocket level = %v, want 'INFO'", logEntry["level"])
+		}
+
+		if logEntry["destination"] != "both" {
+			t.Errorf("WebSocket destination = %v, want 'both'", logEntry["destination"])
+		}
+
+	case <-time.After(2 * time.Second):
+		t.Fatal("timeout waiting for WebSocket message")
+	}
+}
+
 // TestHandler_WebSocket_WithAuth tests WebSocket with authentication
 func TestHandler_WebSocket_WithAuth(t *testing.T) {
 	server, messages := mockWebSocketServer(t, "secret-token")
@@ -298,7 +370,11 @@ func TestHandler_WebSocket_WithAuth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ConfigureWebSocket() error: %v", err)
 	}
-	defer handler.Close()
+
+	// start WebSocket with background context
+	ctx := context.Background()
+	handler.Start(ctx)
+	defer handler.Close(context.Background())
 
 	// wait for connection
 	time.Sleep(100 * time.Millisecond)
@@ -389,7 +465,11 @@ func TestHandler_WebSocket_Reconnection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ConfigureWebSocket() error: %v", err)
 	}
-	defer h.Close()
+
+	// start WebSocket with background context
+	ctx := context.Background()
+	h.Start(ctx)
+	defer h.Close(context.Background())
 
 	// wait for initial connection (poll until connected)
 	waitForCondition(t, 5*time.Second, 50*time.Millisecond, func() bool {
@@ -419,14 +499,18 @@ func TestHandler_WebSocket_Reconnection(t *testing.T) {
 
 	// reconfigure with new URL (simulates reconnection to new endpoint)
 	wsURL2 := httpToWebSocketURL(server2.URL)
-	h.Close()
+	h.Close(context.Background())
 
 	h2 := NewHandler(&buf, &slog.HandlerOptions{Level: slog.LevelInfo})
 	err = h2.ConfigureWebSocket(wsURL2, "test-token")
 	if err != nil {
 		t.Fatalf("ConfigureWebSocket() error on reconnect: %v", err)
 	}
-	defer h2.Close()
+
+	// start WebSocket with background context
+	ctx2 := context.Background()
+	h2.Start(ctx2)
+	defer h2.Close(context.Background())
 
 	// wait for reconnection (poll until second connection established)
 	waitForCondition(t, 5*time.Second, 50*time.Millisecond, func() bool {
@@ -467,7 +551,11 @@ func TestHandler_WebSocket_BufferFull(t *testing.T) {
 
 	// configure with invalid URL so connection fails
 	_ = handler.ConfigureWebSocket("ws://localhost:1/invalid", "token")
-	defer handler.Close()
+
+	// start WebSocket with background context
+	ctx := context.Background()
+	handler.Start(ctx)
+	defer handler.Close(context.Background())
 
 	// send many messages rapidly
 	logger := slog.New(handler)
@@ -596,7 +684,7 @@ func TestConfigureWebSocket_URLValidation(t *testing.T) {
 					return
 				}
 				// clean up
-				handler.Close()
+				handler.Close(context.Background())
 			}
 		})
 	}
@@ -674,7 +762,11 @@ func TestHandler_WebSocket_PingPong(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ConfigureWebSocket() error: %v", err)
 	}
-	defer h.Close()
+
+	// start WebSocket with background context
+	ctx := context.Background()
+	h.Start(ctx)
+	defer h.Close(context.Background())
 
 	// wait a moment for connection to be fully established
 	time.Sleep(100 * time.Millisecond)
