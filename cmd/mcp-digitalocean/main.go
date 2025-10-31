@@ -23,7 +23,7 @@ import (
 
 const (
 	mcpName                 = "mcp-digitalocean"
-	mcpVersion              = "1.0.17"
+	mcpVersion              = "1.0.18"
 	wsLoggingContextTimeout = 15 * time.Second
 )
 
@@ -96,16 +96,25 @@ func main() {
 		}()
 	}
 
+	var services []string
+	if *serviceFlag != "" {
+		services = strings.Split(*serviceFlag, ",")
+	}
+
+	// add enabled_services as persistent attribute for context/metrics
+	// this helps with filtering and understanding server configuration
+	if *serviceFlag != "" {
+		wsLoggingHandler = wsLoggingHandler.WithAttrs([]slog.Attr{
+			slog.String("enabled_services", *serviceFlag),
+		}).(*wslogging.Handler)
+	}
+
+	// create logger after adding service attributes
 	logger := slog.New(wsLoggingHandler)
 	token := *tokenFlag
 	if token == "" && *transport == "stdio" {
 		logger.Error("DigitalOcean API token not provided. Use --digitalocean-api-token flag or set DIGITALOCEAN_API_TOKEN environment variable")
 		os.Exit(1)
-	}
-
-	var services []string
-	if *serviceFlag != "" {
-		services = strings.Split(*serviceFlag, ",")
 	}
 
 	svr := server.NewMCPServer(mcpName, mcpVersion)
@@ -134,9 +143,6 @@ func main() {
 		getClientFn,
 		services...,
 	)
-
-	// wrap all tools with logging middleware
-	middleware.WrapServerWithLogging(svr, logger)
 
 	// start our server.
 	err = runServer(ctx, svr, logger, *bindAddr, transport)

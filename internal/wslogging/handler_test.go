@@ -138,6 +138,43 @@ func TestHandler_WithAttrs(t *testing.T) {
 	}
 }
 
+// TestHandler_WithAttrs_EnabledServices tests that enabled_services attribute persists across logs
+func TestHandler_WithAttrs_EnabledServices(t *testing.T) {
+	var buf bytes.Buffer
+	handler := NewHandler(&buf, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+
+	// add enabled_services attribute (simulates what main.go does)
+	handler2 := handler.WithAttrs([]slog.Attr{
+		slog.String("enabled_services", "apps,networking,databases"),
+	})
+
+	logger := slog.New(handler2)
+
+	// send multiple log messages
+	logger.Info("first message")
+	logger.Info("second message")
+	logger.Warn("warning message")
+
+	output := buf.String()
+
+	// verify enabled_services appears in all log entries
+	lines := strings.Split(strings.TrimSpace(output), "\n")
+	if len(lines) < 3 {
+		t.Fatalf("expected at least 3 log lines, got %d", len(lines))
+	}
+
+	for i, line := range lines {
+		if !strings.Contains(line, "enabled_services") {
+			t.Errorf("line %d missing enabled_services: %s", i, line)
+		}
+		if !strings.Contains(line, "apps,networking,databases") {
+			t.Errorf("line %d missing enabled_services value: %s", i, line)
+		}
+	}
+}
+
 // TestHandler_WithGroup tests group nesting
 func TestHandler_WithGroup(t *testing.T) {
 	var buf bytes.Buffer
@@ -238,22 +275,27 @@ func TestHandler_WebSocket_SendsLogs(t *testing.T) {
 		Level: slog.LevelInfo,
 	})
 
+	// add enabled_services attribute (simulates main.go)
+	handlerWithServices := handler.WithAttrs([]slog.Attr{
+		slog.String("enabled_services", "apps,networking"),
+	}).(*Handler)
+
 	// configure WebSocket
-	err := handler.ConfigureWebSocket(wsURL, "test-token")
+	err := handlerWithServices.ConfigureWebSocket(wsURL, "test-token")
 	if err != nil {
 		t.Fatalf("ConfigureWebSocket() error: %v", err)
 	}
 
 	// start WebSocket with background context
 	ctx := context.Background()
-	handler.Start(ctx)
-	defer handler.Close(context.Background())
+	handlerWithServices.Start(ctx)
+	defer handlerWithServices.Close(context.Background())
 
 	// wait for connection
 	time.Sleep(100 * time.Millisecond)
 
 	// send a log message
-	logger := slog.New(handler)
+	logger := slog.New(handlerWithServices)
 	logger.Info("websocket test", "key", "value")
 
 	// wait for message to arrive
@@ -279,6 +321,13 @@ func TestHandler_WebSocket_SendsLogs(t *testing.T) {
 		// check for standard fields
 		if _, ok := logEntry["timestamp"]; !ok {
 			t.Error("missing timestamp field")
+		}
+
+		// check for enabled_services field
+		if enabledServices, ok := logEntry["enabled_services"]; !ok {
+			t.Error("missing enabled_services field")
+		} else if enabledServices != "apps,networking" {
+			t.Errorf("enabled_services = %v, want 'apps,networking'", enabledServices)
 		}
 
 	case <-time.After(2 * time.Second):
@@ -541,6 +590,45 @@ func TestHandler_WebSocket_Reconnection(t *testing.T) {
 	}
 }
 
+// TestHandler_WebSocket_UnlimitedRetries tests that handler is configured for unlimited retries when maxReconnects = -1
+func TestHandler_WebSocket_UnlimitedRetries(t *testing.T) {
+	var buf bytes.Buffer
+	handler := NewHandler(&buf, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+
+	// verify default is unlimited retries
+	if handler.wsMaxReconnects != -1 {
+		t.Errorf("expected wsMaxReconnects = -1 (unlimited), got %d", handler.wsMaxReconnects)
+	}
+
+	// verify that reconnectDelay is set
+	if handler.wsReconnectDelay <= 0 {
+		t.Errorf("expected wsReconnectDelay > 0, got %v", handler.wsReconnectDelay)
+	}
+
+	t.Logf("Handler configured for unlimited retries: wsMaxReconnects = %d, wsReconnectDelay = %v",
+		handler.wsMaxReconnects, handler.wsReconnectDelay)
+}
+
+// TestHandler_WebSocket_LimitedRetries tests that handler configuration can be changed to limited retries
+func TestHandler_WebSocket_LimitedRetries(t *testing.T) {
+	var buf bytes.Buffer
+	handler := NewHandler(&buf, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+
+	// override to use limited retries
+	handler.wsMaxReconnects = 5
+
+	// verify configuration
+	if handler.wsMaxReconnects != 5 {
+		t.Errorf("expected wsMaxReconnects = 5, got %d", handler.wsMaxReconnects)
+	}
+
+	t.Logf("Handler configured for limited retries: wsMaxReconnects = %d", handler.wsMaxReconnects)
+}
+
 // TestHandler_WebSocket_BufferFull tests behavior when buffer is full
 func TestHandler_WebSocket_BufferFull(t *testing.T) {
 	// create handler but don't start server
@@ -552,8 +640,12 @@ func TestHandler_WebSocket_BufferFull(t *testing.T) {
 	// configure with invalid URL so connection fails
 	_ = handler.ConfigureWebSocket("ws://localhost:1/invalid", "token")
 
-	// start WebSocket with background context
-	ctx := context.Background()
+	// override max reconnects to avoid infinite retries in this test
+	handler.wsMaxReconnects = 1
+
+	// start WebSocket with a timeout context to prevent infinite retries
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
 	handler.Start(ctx)
 	defer handler.Close(context.Background())
 

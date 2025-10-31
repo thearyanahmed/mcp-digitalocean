@@ -22,7 +22,9 @@ const (
 	// reconnectDelay is the delay between reconnection attempts
 	reconnectDelay = 5 * time.Second
 	// maxReconnects is the maximum number of reconnection attempts before giving up
-	maxReconnects = 5
+	// Set to -1 for unlimited retries (recommended for production)
+	// Set to a positive integer (e.g., 5) for limited retries
+	maxReconnects = -1
 	// bufferSize is the size of the log buffer channel
 	bufferSize = 1000
 	// handshakeTimeout is the timeout for WebSocket handshake
@@ -35,6 +37,10 @@ const (
 	pingInterval = 30 * time.Second
 	// pongWait is the timeout for receiving pong responses
 	pongWait = 60 * time.Second
+	// flushBufferTicker is the interval for polling the buffer during flush
+	flushBufferTicker = 100 * time.Millisecond
+	// flushBufferDeadline is the timeout for flushing the buffer
+	flushBufferDeadline = 5 * time.Second
 )
 
 // Handler implements slog.Handler interface with optional WebSocket logging support.
@@ -93,7 +99,12 @@ func (h *Handler) Enabled(ctx context.Context, level slog.Level) bool {
 // If WebSocket logging is enabled, logs are also sent to the WebSocket endpoint asynchronously (complementary destination).
 // Both destinations are independent - failure in one does not affect the other.
 func (h *Handler) Handle(ctx context.Context, r slog.Record) error {
-	if h.closed {
+	// Check if handler is closed (thread-safe check with mutex)
+	h.wsMu.Lock()
+	closed := h.closed
+	h.wsMu.Unlock()
+
+	if closed {
 		return nil
 	}
 
@@ -118,12 +129,21 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) error {
 			entry := h.buildLogEntry(r)
 			data, err := json.Marshal(entry)
 			if err != nil {
-				// We use fmt.Fprintf directly to stderr here rather than stderrHandler.Handle() because this is infrastructure
-				// diagnostic logging about the logging system itself, not application-level logging. Using fmt.Fprintf keeps this
+				// We use logDiagnostic to stderr here rather than stderrHandler.Handle() because this is infrastructure
+				// diagnostic logging about the logging system itself, not application-level logging. Using logDiagnostic keeps this
 				// simple, avoids any potential recursion or complexity from trying to log about logging failures, and ensures
 				// this diagnostic message will always reach stderr even if there are issues with the handler or its configuration.
-				// The [wslogging] prefix helps developers identify these as internal logging system messages.
-				fmt.Fprintf(os.Stderr, "[wslogging] failed to marshal log entry: %v\n", err)
+				logDiagnostic(os.Stderr, "failed to marshal log entry: %v\n", err)
+				return
+			}
+
+			// Check again if closed before attempting to send to buffer
+			// This prevents panic from writing to a closed channel during shutdown
+			h.wsMu.Lock()
+			closed := h.closed
+			h.wsMu.Unlock()
+
+			if closed {
 				return
 			}
 
@@ -240,7 +260,7 @@ func (h *Handler) ConfigureWebSocket(wsURL, token string) error {
 
 	// warn if no token provided
 	if token == "" {
-		fmt.Fprintf(os.Stderr, "[wslogging] WARNING: no authentication token provided - this is a security risk\n")
+		logDiagnostic(os.Stderr, "WARNING: no authentication token provided - this is a security risk\n")
 	}
 
 	h.wsMu.Lock()
@@ -254,7 +274,7 @@ func (h *Handler) ConfigureWebSocket(wsURL, token string) error {
 	h.wsBuffer = make(chan []byte, bufferSize)
 
 	// log startup diagnostic to stdout
-	fmt.Fprintf(os.Stdout, "[wslogging] configuring WebSocket logging to %s\n", wsURL)
+	logDiagnostic(os.Stdout, "configuring WebSocket logging to %s\n", wsURL)
 	return nil
 }
 
@@ -273,25 +293,43 @@ func (h *Handler) Start(ctx context.Context) {
 // Close gracefully shuts down the handler and closes the WebSocket connection if open.
 // It accepts a context to control the timeout for flushing remaining buffered messages.
 // If the context is nil or has no deadline, it will use a default 5-second timeout.
-// The method attempts to flush all buffered messages before tearing down the connection.
+//
+// Shutdown sequence to prevent race conditions:
+// 1. Mark handler as closed (prevents new messages from being queued)
+// 2. Flush any messages already in the buffer (with timeout)
+// 3. Close the buffer channel (signals logWriter goroutine to exit)
+// 4. Close the WebSocket connection (cleanup network resources)
+//
+// This ordering ensures that no messages are lost during shutdown and prevents panics
+// from writing to a closed channel.
+//
 // This method is safe to call multiple times.
 func (h *Handler) Close(ctx context.Context) error {
 	var err error
 	h.closeOnce.Do(func() {
-		// attempt to flush remaining buffered messages before tearing down
+		// Step 1: Mark as closed to stop accepting new messages
+		// Must be done first to prevent race where new messages arrive after flush starts.
+		// Protected by mutex to ensure thread-safe access from Handle() and other goroutines.
+		h.wsMu.Lock()
+		h.closed = true
+		h.wsMu.Unlock()
+
+		// Step 2: Flush remaining buffered messages before tearing down
+		// At this point no new messages can be queued (closed=true), so we can safely
+		// flush everything that's already in the buffer.
 		if h.wsBuffer != nil && h.wsConn != nil {
 			err = h.flushBuffer(ctx)
 		}
 
-		// mark as closed to stop goroutines
-		h.closed = true
-
-		// close the buffer channel if it exists
+		// Step 3: Close the buffer channel
+		// This signals the logWriter goroutine to exit after it drains any remaining messages.
+		// Safe to do now because no new messages can be added (closed=true).
 		if h.wsBuffer != nil {
 			close(h.wsBuffer)
 		}
 
-		// close WebSocket connection if open
+		// Step 4: Close WebSocket connection
+		// Final cleanup of network resources after all messages are flushed.
 		h.wsMu.Lock()
 		defer h.wsMu.Unlock()
 
@@ -323,11 +361,11 @@ func (h *Handler) flushBuffer(ctx context.Context) error {
 	// if no deadline, use a reasonable default timeout
 	if _, hasDeadline := ctx.Deadline(); !hasDeadline {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, flushBufferDeadline)
 		defer cancel()
 	}
 
-	ticker := time.NewTicker(10 * time.Millisecond)
+	ticker := time.NewTicker(flushBufferTicker)
 	defer ticker.Stop()
 
 	for {
@@ -432,17 +470,23 @@ func (h *Handler) logWriter(ctx context.Context) {
 			return
 		case data, ok := <-h.wsBuffer:
 			if !ok {
-				// channel closed
+				// channel closed - this happens during shutdown after Close() is called
 				return
 			}
 
-			if h.closed {
-				return
-			}
-
-			// lock once, write once
+			// Check if handler is closed (thread-safe check)
 			h.wsMu.Lock()
-			if h.wsConn != nil {
+			closed := h.closed
+			conn := h.wsConn
+			h.wsMu.Unlock()
+
+			if closed {
+				return
+			}
+
+			// write to WebSocket if connection is available
+			if conn != nil {
+				h.wsMu.Lock()
 				err := h.wsConn.WriteMessage(websocket.TextMessage, data)
 				h.wsMu.Unlock()
 
@@ -451,10 +495,8 @@ func (h *Handler) logWriter(ctx context.Context) {
 					// which will set wsConn to nil
 					continue
 				}
-			} else {
-				h.wsMu.Unlock()
-				// no connection available - message is dropped
 			}
+			// if no connection available - message is dropped
 		}
 	}
 }
@@ -474,7 +516,12 @@ func (h *Handler) connectionManager(ctx context.Context) {
 		default:
 		}
 
-		if h.closed {
+		// Check if handler is closed (thread-safe check)
+		h.wsMu.Lock()
+		closed := h.closed
+		h.wsMu.Unlock()
+
+		if closed {
 			return
 		}
 
@@ -484,11 +531,18 @@ func (h *Handler) connectionManager(ctx context.Context) {
 			reconnectAttempts++
 
 			// log connection error to stderr
-			fmt.Fprintf(os.Stderr, "[wslogging] connection failed (attempt %d/%d): %v\n",
-				reconnectAttempts, h.wsMaxReconnects, err)
+			// if maxReconnects is -1, show "unlimited" instead of a number
+			if h.wsMaxReconnects == -1 {
+				logDiagnostic(os.Stderr, "connection failed (attempt %d/unlimited): %v\n",
+					reconnectAttempts, err)
+			} else {
+				logDiagnostic(os.Stderr, "connection failed (attempt %d/%d): %v\n",
+					reconnectAttempts, h.wsMaxReconnects, err)
+			}
 
-			if reconnectAttempts > h.wsMaxReconnects {
-				fmt.Fprintf(os.Stderr, "[wslogging] max reconnection attempts reached, giving up\n")
+			// check if we've exceeded max reconnects (only if not unlimited)
+			if h.wsMaxReconnects != -1 && reconnectAttempts > h.wsMaxReconnects {
+				logDiagnostic(os.Stderr, "max reconnection attempts reached, giving up\n")
 				return
 			}
 
@@ -505,7 +559,7 @@ func (h *Handler) connectionManager(ctx context.Context) {
 		reconnectAttempts = 0
 
 		// log success to stdout
-		fmt.Fprintf(os.Stdout, "[wslogging] WebSocket connection established to %s\n", h.wsURL)
+		logDiagnostic(os.Stdout, "WebSocket connection established to %s\n", h.wsURL)
 
 		h.wsMu.Lock()
 		h.wsConn = conn
@@ -531,7 +585,12 @@ func (h *Handler) connectionManager(ctx context.Context) {
 				break monitorLoop
 
 			case <-pingTicker.C:
-				if h.closed {
+				// Check if handler is closed (thread-safe check)
+				h.wsMu.Lock()
+				closed := h.closed
+				h.wsMu.Unlock()
+
+				if closed {
 					break monitorLoop
 				}
 
@@ -539,13 +598,13 @@ func (h *Handler) connectionManager(ctx context.Context) {
 				err := conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(10*time.Second))
 				if err != nil {
 					// ping failed - connection is lost
-					fmt.Fprintf(os.Stderr, "[wslogging] connection lost: %v\n", err)
+					logDiagnostic(os.Stderr, "connection lost: %v\n", err)
 					break monitorLoop
 				}
 
 			case <-readDone:
 				// read loop exited - connection is lost
-				fmt.Fprintf(os.Stderr, "[wslogging] connection lost: read error\n")
+				logDiagnostic(os.Stderr, "connection lost: read error\n")
 				break monitorLoop
 			}
 		}
@@ -556,10 +615,16 @@ func (h *Handler) connectionManager(ctx context.Context) {
 			h.wsConn = nil
 		}
 		h.wsMu.Unlock()
-		_ = conn.Close()
+		if err := conn.Close(); err != nil {
+			logDiagnostic(os.Stderr, "failed to close connection: %v\n", err)
+		}
 
 		// wait a bit before attempting to reconnect, but also check context
-		if !h.closed {
+		h.wsMu.Lock()
+		closed = h.closed
+		h.wsMu.Unlock()
+
+		if !closed {
 			select {
 			case <-ctx.Done():
 				return
@@ -586,13 +651,17 @@ func (h *Handler) connect() (*websocket.Conn, error) {
 	conn, resp, err := dialer.Dial(h.wsURL, headers)
 	if err != nil {
 		if resp != nil {
-			_ = resp.Body.Close()
+			if closeErr := resp.Body.Close(); closeErr != nil {
+				logDiagnostic(os.Stderr, "failed to close response body after dial error: %v\n", closeErr)
+			}
 		}
 		return nil, fmt.Errorf("failed to connect to WebSocket: %w", err)
 	}
 
 	if resp != nil {
-		_ = resp.Body.Close()
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			logDiagnostic(os.Stderr, "failed to close response body: %v\n", closeErr)
+		}
 	}
 
 	return conn, nil
@@ -610,14 +679,28 @@ func (h *Handler) readLoop(conn *websocket.Conn) {
 
 	// read loop - we don't expect to receive messages, but we need to read to process pongs
 	for {
-		if h.closed {
+		// Check if handler is closed (thread-safe check)
+		h.wsMu.Lock()
+		closed := h.closed
+		h.wsMu.Unlock()
+
+		if closed {
 			return
 		}
 
 		_, _, err := conn.ReadMessage()
 		if err != nil {
 			// connection closed or error - the connectionManager will handle reconnection
+			logDiagnostic(os.Stderr, "read loop error: %v\n", err)
 			return
 		}
 	}
+}
+
+// logDiagnostic writes a diagnostic message about the wslogging infrastructure itself.
+// These messages use [wslogging] prefix to help developers identify internal logging system messages.
+// They are written directly to stdout/stderr rather than through the slog handler to avoid recursion
+// or complexity from trying to log about logging failures.
+func logDiagnostic(w io.Writer, format string, args ...any) {
+	fmt.Fprintf(w, "[wslogging] "+format, args...)
 }
