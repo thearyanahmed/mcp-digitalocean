@@ -144,6 +144,9 @@ func main() {
 		services...,
 	)
 
+	// wrap all tools with logging middleware
+	middleware.WrapServerWithLogging(svr, logger)
+
 	// start our server.
 	err = runServer(ctx, svr, logger, *bindAddr, transport)
 	if err != nil {
