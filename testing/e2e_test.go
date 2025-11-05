@@ -99,11 +99,11 @@ func startMcpServer(ctx context.Context, cfg McpServerConfig) (container testcon
 
 	req := testcontainers.ContainerRequest{
 		FromDockerfile: testcontainers.FromDockerfile{
-			Context:       buildCtx,
-			Dockerfile:    "Dockerfile",
-			KeepImage:     true,  // Keep the image after container stops to enable Docker layer caching
-			Repo:          "mcp-digitalocean",
-			Tag:           "latest",
+			Context:    buildCtx,
+			Dockerfile: "Dockerfile",
+			KeepImage:  true, // Keep the image after container stops to enable Docker layer caching
+			Repo:       "mcp-digitalocean",
+			Tag:        "latest",
 		},
 		ExposedPorts: []string{"8080/tcp"},
 		Env:          cfg.ToMap(),
