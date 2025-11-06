@@ -23,15 +23,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// LogEntry represents a structured log entry from the MCP server
+// LogEntry represents a structured log entry from the MCP server.
+// it captures the standard fields (timestamp, level, message) and any
+// additional fields in the Extra map for flexible validation.
 type LogEntry struct {
 	Timestamp string         `json:"timestamp"`
 	Level     string         `json:"level"`
 	Message   string         `json:"message"`
-	Extra     map[string]any `json:"-"` // All other fields
+	Extra     map[string]any `json:"-"` // all other fields beyond timestamp/level/message
 }
 
-// UnmarshalJSON custom unmarshaler to capture all fields
+// UnmarshalJSON is a custom unmarshaler that captures all fields from the JSON.
+// standard fields go into struct fields, everything else goes into Extra map.
 func (l *LogEntry) UnmarshalJSON(data []byte) error {
 	type Alias LogEntry
 	aux := &struct {
@@ -60,7 +63,8 @@ func (l *LogEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// FakeWebSocketServer is a test WebSocket server that collects log entries
+// FakeWebSocketServer is a test WebSocket server that collects log entries.
+// it simulates a remote logging endpoint for testing WebSocket logging functionality.
 type FakeWebSocketServer struct {
 	server      *httptest.Server
 	url         string
@@ -74,8 +78,12 @@ type FakeWebSocketServer struct {
 	listener    string
 }
 
-// NewFakeWebSocketServer creates and starts a new fake WebSocket server
-// It binds to 0.0.0.0 to accept connections from both IPv4 and IPv6, and from containers
+// NewFakeWebSocketServer creates and starts a new fake WebSocket server.
+// it binds to 0.0.0.0 instead of 127.0.0.1 to accept connections from:
+// - IPv4 clients
+// - IPv6 clients
+// - Docker containers (via host.docker.internal)
+// this cross-platform approach works on both Linux and macOS.
 func NewFakeWebSocketServer(token string) *FakeWebSocketServer {
 	fws := &FakeWebSocketServer{
 		token:      token,
@@ -84,7 +92,7 @@ func NewFakeWebSocketServer(token string) *FakeWebSocketServer {
 	}
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// check authorization if token provided
+		// verify bearer token authentication if configured
 		if fws.token != "" {
 			auth := r.Header.Get("Authorization")
 			expected := "Bearer " + fws.token
@@ -94,50 +102,55 @@ func NewFakeWebSocketServer(token string) *FakeWebSocketServer {
 			}
 		}
 
+		// upgrade HTTP connection to WebSocket
 		conn, err := fws.upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			return
 		}
 
+		// track connection count for testing
 		fws.mu.Lock()
 		fws.connections++
 		fws.mu.Unlock()
 
 		defer conn.Close()
 
-		// read messages and collect them
+		// continuously read and collect log messages
 		for {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				return
+				return // connection closed or error
 			}
 
-			// parse the log entry
+			// parse the log entry from JSON
 			var entry LogEntry
 			if err := json.Unmarshal(message, &entry); err != nil {
-				continue // skip invalid entries
+				continue // skip malformed entries
 			}
 
+			// store the log entry for test assertions
 			fws.mu.Lock()
 			fws.logEntries = append(fws.logEntries, entry)
 			fws.mu.Unlock()
 		}
 	})
 
-	// Create a server that binds to 0.0.0.0 instead of 127.0.0.1
-	// This allows connections from containers via host.docker.internal
+	// create an unstarted server so we can customize the listener
 	fws.server = httptest.NewUnstartedServer(handler)
 
-	// Create a listener on 0.0.0.0 to accept connections from containers
+	// bind to 0.0.0.0:0 (random port) instead of 127.0.0.1
+	// this allows connections from containers via host.docker.internal
 	listener, err := net.Listen("tcp", "0.0.0.0:0")
 	if err != nil {
 		panic(fmt.Sprintf("failed to create listener: %v", err))
 	}
 
+	// assign the custom listener and start the server
 	fws.server.Listener = listener
 	fws.server.Start()
 
-	// Store the listener address and convert to WebSocket URL
+	// store the actual listener address (e.g., "0.0.0.0:54321")
+	// we'll need this to extract the port for container URLs
 	fws.listener = fws.server.Listener.Addr().String()
 	fws.url = "ws://" + fws.listener
 
@@ -151,19 +164,22 @@ func (fws *FakeWebSocketServer) Close() {
 	}
 }
 
-// GetURL returns the WebSocket URL (for use from host)
+// GetURL returns the WebSocket URL for use from the test host.
+// returns something like "ws://0.0.0.0:54321"
 func (fws *FakeWebSocketServer) GetURL() string {
 	return fws.url
 }
 
-// GetContainerURL returns the WebSocket URL that containers can use to reach the host
+// GetContainerURL returns the WebSocket URL that containers can use to reach the host.
+// replaces 0.0.0.0 with host.docker.internal so Docker containers can connect.
+// on Linux: host.docker.internal is mapped to the Docker gateway via ExtraHosts
+// on Mac/Windows: host.docker.internal is natively supported by Docker Desktop
 func (fws *FakeWebSocketServer) GetContainerURL() string {
-	// server binds to 0.0.0.0, replace with host.docker.internal for containers
 	_, port, _ := net.SplitHostPort(fws.listener)
 	return fmt.Sprintf("ws://host.docker.internal:%s", port)
 }
 
-// GetToken returns the authentication token
+// GetToken returns the authentication token used by this server.
 func (fws *FakeWebSocketServer) GetToken() string {
 	return fws.token
 }
