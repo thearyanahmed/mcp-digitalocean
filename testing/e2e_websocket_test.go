@@ -69,7 +69,9 @@ type FakeWebSocketServer struct {
 	logEntries  []LogEntry
 	connections int
 	upgrader    websocket.Upgrader
-	listener    string // the actual listener address
+	// listener stores the actual listener address (0.0.0.0:port) to extract the port
+	// for constructing container-accessible URLs (host.docker.internal:port)
+	listener    string
 }
 
 // NewFakeWebSocketServer creates and starts a new fake WebSocket server
