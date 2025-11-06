@@ -302,7 +302,21 @@ func TestMCPServer_WebSocketLogging(t *testing.T) {
 	// run all test scenarios as sub-tests
 	// the container and WebSocket server are shared across all sub-tests for efficiency
 
-	// Generate logs first - WebSocket connections only happen during batch flushes
+	t.Run("ConnectionEstablishment", func(t *testing.T) {
+		// Generate logs to trigger WebSocket connection (connections only happen during batch flushes)
+		c := initializeClientWithURL(ctx, t, serverURL)
+		defer c.Close()
+
+		_, err := c.ListTools(ctx, mcp.ListToolsRequest{})
+		require.NoError(t, err, "ListTools failed")
+
+		// Wait for connection to be established (triggered by log flush)
+		require.True(t, fakeWS.WaitForConnection(1, 10*time.Second),
+			"WebSocket connection not established within timeout")
+		require.Greater(t, fakeWS.GetConnectionCount(), 0, "No WebSocket connections received")
+		t.Log("WebSocket connection established with correct token")
+	})
+
 	t.Run("LogDelivery", func(t *testing.T) {
 		// create MCP client and make API call to generate logs
 		c := initializeClientWithURL(ctx, t, serverURL)
@@ -315,12 +329,6 @@ func TestMCPServer_WebSocketLogging(t *testing.T) {
 		require.True(t, fakeWS.WaitForLogs(1, 10*time.Second),
 			"No logs received within timeout")
 		t.Log("Logs sent to WebSocket")
-	})
-
-	t.Run("ConnectionEstablishment", func(t *testing.T) {
-		// verify WebSocket connection was established (by LogDelivery test)
-		require.Greater(t, fakeWS.GetConnectionCount(), 0, "No WebSocket connections received")
-		t.Log("WebSocket connection established with correct token")
 	})
 
 	t.Run("LogStructure", func(t *testing.T) {
