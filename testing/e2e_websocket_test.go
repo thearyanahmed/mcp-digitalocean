@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -68,9 +69,11 @@ type FakeWebSocketServer struct {
 	logEntries  []LogEntry
 	connections int
 	upgrader    websocket.Upgrader
+	listener    string // the actual listener address
 }
 
 // NewFakeWebSocketServer creates and starts a new fake WebSocket server
+// It binds to 0.0.0.0 to accept connections from both IPv4 and IPv6, and from containers
 func NewFakeWebSocketServer(token string) *FakeWebSocketServer {
 	fws := &FakeWebSocketServer{
 		token:      token,
@@ -119,9 +122,22 @@ func NewFakeWebSocketServer(token string) *FakeWebSocketServer {
 		}
 	})
 
-	fws.server = httptest.NewServer(handler)
-	// convert http:// to ws://
-	fws.url = "ws" + fws.server.URL[4:]
+	// Create a server that binds to 0.0.0.0 instead of 127.0.0.1
+	// This allows connections from containers via host.docker.internal
+	fws.server = httptest.NewUnstartedServer(handler)
+
+	// Create a listener on 0.0.0.0 to accept connections from containers
+	listener, err := net.Listen("tcp", "0.0.0.0:0")
+	if err != nil {
+		panic(fmt.Sprintf("failed to create listener: %v", err))
+	}
+
+	fws.server.Listener = listener
+	fws.server.Start()
+
+	// Store the listener address and convert to WebSocket URL
+	fws.listener = fws.server.Listener.Addr().String()
+	fws.url = "ws://" + fws.listener
 
 	return fws
 }
@@ -140,9 +156,9 @@ func (fws *FakeWebSocketServer) GetURL() string {
 
 // GetContainerURL returns the WebSocket URL that containers can use to reach the host
 func (fws *FakeWebSocketServer) GetContainerURL() string {
-	// replace 127.0.0.1 with host.docker.internal so containers can reach host
-	// this works on Docker Desktop (Mac/Windows) and OrbStack
-	return strings.Replace(fws.url, "127.0.0.1", "host.docker.internal", 1)
+	// server binds to 0.0.0.0, replace with host.docker.internal for containers
+	_, port, _ := net.SplitHostPort(fws.listener)
+	return fmt.Sprintf("ws://host.docker.internal:%s", port)
 }
 
 // GetToken returns the authentication token
@@ -284,14 +300,7 @@ func TestMCPServer_WebSocketLogging(t *testing.T) {
 	// run all test scenarios as sub-tests
 	// the container and WebSocket server are shared across all sub-tests for efficiency
 
-	t.Run("ConnectionEstablishment", func(t *testing.T) {
-		// verify WebSocket connection is established with correct token
-		require.True(t, fakeWS.WaitForConnection(1, 10*time.Second),
-			"WebSocket connection not established within timeout")
-		require.Greater(t, fakeWS.GetConnectionCount(), 0, "No WebSocket connections received")
-		t.Log("WebSocket connection established with correct token")
-	})
-
+	// Generate logs first - WebSocket connections only happen during batch flushes
 	t.Run("LogDelivery", func(t *testing.T) {
 		// create MCP client and make API call to generate logs
 		c := initializeClientWithURL(ctx, t, serverURL)
@@ -304,6 +313,12 @@ func TestMCPServer_WebSocketLogging(t *testing.T) {
 		require.True(t, fakeWS.WaitForLogs(1, 10*time.Second),
 			"No logs received within timeout")
 		t.Log("Logs sent to WebSocket")
+	})
+
+	t.Run("ConnectionEstablishment", func(t *testing.T) {
+		// verify WebSocket connection was established (by LogDelivery test)
+		require.Greater(t, fakeWS.GetConnectionCount(), 0, "No WebSocket connections received")
+		t.Log("WebSocket connection established with correct token")
 	})
 
 	t.Run("LogStructure", func(t *testing.T) {
@@ -446,9 +461,21 @@ func TestEdgeLogging_Authentication(t *testing.T) {
 	require.NoError(t, err, "Failed to start MCP server")
 	defer container2.Terminate(ctx)
 
-	// poll until connection is established with correct token
-	require.True(t, fakeWS2.WaitForConnection(1, 10*time.Second),
-		"Should connect with correct token within timeout")
+	// get the mapped port and make API call to generate logs
+	port2, err := container2.MappedPort(ctx, "8080/tcp")
+	require.NoError(t, err, "Failed to get mapped port")
+	serverURL2 := fmt.Sprintf("http://localhost:%s/mcp", port2.Port())
+
+	c2 := initializeClientWithURL(ctx, t, serverURL2)
+	defer c2.Close()
+
+	// make API call to generate logs which will trigger WebSocket connection
+	_, err = c2.ListTools(ctx, mcp.ListToolsRequest{})
+	require.NoError(t, err, "ListTools failed")
+
+	// wait for logs to be flushed and connection established
+	require.True(t, fakeWS2.WaitForLogs(1, 10*time.Second),
+		"Should receive logs with correct token")
 
 	require.Greater(t, fakeWS2.GetConnectionCount(), 0, "Should have successful connection")
 }
