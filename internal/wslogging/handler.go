@@ -449,7 +449,7 @@ func (h *Handler) connect(wsURL, token string) (*websocket.Conn, error) {
 // logDiagnostic writes a diagnostic message to the specified writer.
 // This is used for logging infrastructure issues (not application logs).
 // Messages are written as JSON to maintain consistency with application logs.
-// The log level is determined by the writer: stderr produces ERROR level, stdout produces INFO level.
+// The log level is determined by the writer: stderr produces error level, stdout produces info level.
 func logDiagnostic(w io.Writer, format string, args ...any) {
 	message := fmt.Sprintf(format, args...)
 	// trim trailing newline if present (we'll add it back after JSON)
