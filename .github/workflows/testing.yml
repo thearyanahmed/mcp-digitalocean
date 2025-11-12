@@ -1,0 +1,35 @@
+name: testing
+
+on:
+  push:
+    branches:
+      - localhost-update
+
+jobs:
+  integration-tests:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.3"
+
+      - name: Clone mcp-digitalocean repo
+        run: git clone https://github.com/digitalocean-labs/mcp-digitalocean
+
+      - name: Checkout specific tag
+        working-directory: mcp-digitalocean
+        run: |
+          git fetch --tags
+          git -c advice.detachedHead=false checkout ${{ steps.get_tag.outputs.tag }}
+          echo "Running integration tests against tag: digitalocean-labs/mcp-digitalocean@${{ steps.get_tag.outputs.tag }}"
+
+      - name: Run integration tests
+        working-directory: mcp-digitalocean
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.MCP_INFRA_TEST_TOKEN }}
+          GODEBUG: netdns=go+1
+        run: go test -v -tags=integration,logging ./testing/...

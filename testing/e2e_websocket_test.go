@@ -313,7 +313,7 @@ func TestMCPServer_WebSocketLogging(t *testing.T) {
 	// get the mapped port
 	port, err := container.MappedPort(ctx, "8080/tcp")
 	require.NoError(t, err, "Failed to get mapped port")
-	serverURL := fmt.Sprintf("http://localhost:%s/mcp", port.Port())
+	serverURL := fmt.Sprintf("http://127.0.0.1:%s/mcp", port.Port())
 
 	// run all test scenarios as sub-tests
 	// the container and WebSocket server are shared across all sub-tests for efficiency
@@ -531,7 +531,7 @@ func TestEdgeLogging_ConnectOnFlush(t *testing.T) {
 
 	port, err := container.MappedPort(ctx, "8080/tcp")
 	require.NoError(t, err)
-	serverURL := fmt.Sprintf("http://localhost:%s/mcp", port.Port())
+	serverURL := fmt.Sprintf("http://127.0.0.1:%s/mcp", port.Port())
 
 	c := initializeClientWithURL(ctx, t, serverURL)
 	defer c.Close()
