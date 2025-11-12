@@ -490,7 +490,7 @@ func TestEdgeLogging_Authentication(t *testing.T) {
 	// get the mapped port and make API call to generate logs
 	port2, err := container2.MappedPort(ctx, "8080/tcp")
 	require.NoError(t, err, "Failed to get mapped port")
-	serverURL2 := fmt.Sprintf("http://localhost:%s/mcp", port2.Port())
+	serverURL2 := fmt.Sprintf("http://127.0.0.1:%s/mcp", port2.Port())
 
 	c2 := initializeClientWithURL(ctx, t, serverURL2)
 	defer c2.Close()
