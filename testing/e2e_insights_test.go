@@ -15,7 +15,6 @@ import (
 )
 
 // TestUptimeCheckLifecycle tests the full lifecycle of an uptime check:
-// create -> get -> list -> get state -> update -> delete
 func TestUptimeCheckLifecycle(t *testing.T) {
 	ctx, c, _, cleanup := setupTest(t)
 	defer cleanup()
@@ -166,7 +165,6 @@ func TestUptimeCheckLifecycle(t *testing.T) {
 }
 
 // TestUptimeCheckAlertLifecycle tests the full lifecycle of an uptime check alert:
-// create check -> create alert -> get alert -> list alerts -> update alert -> delete alert -> delete check
 func TestUptimeCheckAlertLifecycle(t *testing.T) {
 	ctx, c, _, cleanup := setupTest(t)
 	defer cleanup()
@@ -328,7 +326,6 @@ func TestUptimeCheckAlertLifecycle(t *testing.T) {
 }
 
 // TestAlertPolicyLifecycle tests the full lifecycle of an alert policy:
-// create -> get -> list -> update -> delete
 func TestAlertPolicyLifecycle(t *testing.T) {
 	ctx, c, _, cleanup := setupTest(t)
 	defer cleanup()
