@@ -466,20 +466,3 @@ func TestAlertPolicyLifecycle(t *testing.T) {
 	require.Equal(t, updatedDescription, updatedPolicy.Description)
 	t.Logf("updated policy description to: %s", updatedPolicy.Description)
 }
-
-// assertUptimeCheckExists verifies an uptime check exists by ID
-func assertUptimeCheckExists(ctx context.Context, t *testing.T, c interface {
-	CallTool(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error)
-}, checkID string) {
-	resp, err := c.CallTool(ctx, mcp.CallToolRequest{
-		Params: mcp.CallToolParams{
-			Name: "uptimecheck-get",
-			Arguments: map[string]interface{}{
-				"ID": checkID,
-			},
-		},
-	})
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	require.False(t, resp.IsError, "uptime check %s not found: %v", checkID, resp.Content)
-}
