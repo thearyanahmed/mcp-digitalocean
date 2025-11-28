@@ -468,7 +468,9 @@ func TestAlertPolicyLifecycle(t *testing.T) {
 }
 
 // assertUptimeCheckExists verifies an uptime check exists by ID
-func assertUptimeCheckExists(ctx context.Context, t *testing.T, c interface{ CallTool(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) }, checkID string) {
+func assertUptimeCheckExists(ctx context.Context, t *testing.T, c interface {
+	CallTool(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error)
+}, checkID string) {
 	resp, err := c.CallTool(ctx, mcp.CallToolRequest{
 		Params: mcp.CallToolParams{
 			Name: "uptimecheck-get",
