@@ -121,7 +121,7 @@ func requireFoundInList[T any](t *testing.T, items []T, match func(T) bool, item
 			return
 		}
 	}
-	t.Fatalf("created %s not found in list", itemName)
+	t.Fatalf("%s not found in list", itemName)
 }
 
 // --- Resource Lifecycle Helpers ---
