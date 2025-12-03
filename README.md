@@ -49,7 +49,7 @@ claude mcp add --transport http digitalocean-droplets https://droplets.mcp.digit
   --header "Authorization: Bearer YOUR_DIGITALOCEAN_API_TOKEN"
 ```
 
-See the [Supported Services](#supported-services) section for the complete list of available endpoints.
+See the [Available Services](#available-services) section for the complete list of available endpoints.
 
 #### Local Installation
 
@@ -135,7 +135,7 @@ Add the remote MCP servers to your `claude_desktop_config.json` file:
 }
 ```
 
-You can add any of the endpoints listed in the [Supported Services](#supported-services) section.
+You can add any of the endpoints listed in the [Available Services](#available-services) section.
 
 #### Local Installation
 
@@ -182,7 +182,7 @@ Add the remote MCP servers to your Cursor settings file located at `~/.cursor/co
 }
 ```
 
-You can add any of the endpoints listed in the [Supported Services](#supported-services) section.
+You can add any of the endpoints listed in the [Available Services](#available-services) section.
 
 #### Local Installation
 
@@ -255,7 +255,7 @@ Add the remote MCP servers to your VS Code MCP configuration file:
 }
 ```
 
-You can add any of the endpoints listed in the [Supported Services](#supported-services) section.
+You can add any of the endpoints listed in the [Available Services](#available-services) section.
 
 #### Local Installation
 
@@ -341,22 +341,6 @@ When using the local installation, you use the `--services` flag to specify whic
 ```bash
 npx @digitalocean/mcp --services apps,droplets
 ```
-
-## Supported Services
-
-The MCP DigitalOcean Integration supports the following services, allowing users to manage their DigitalOcean infrastructure effectively
-
-| Service      | Remote MCP URL                              | Description                                                                             |
-|--------------|---------------------------------------------|-----------------------------------------------------------------------------------------|
-| apps         | https://apps.mcp.digitalocean.com/mcp       | Manage DigitalOcean App Platform applications, including deployments and configurations. |
-| droplets     | https://droplets.mcp.digitalocean.com/mcp   | Create, manage, resize, snapshot, and monitor droplets (virtual machines) on DigitalOcean. |
-| accounts     | https://accounts.mcp.digitalocean.com/mcp   | Get information about your DigitalOcean account, billing, balance, invoices, and SSH keys. |
-| networking   | https://networking.mcp.digitalocean.com/mcp | Manage domains, DNS records, certificates, firewalls, load balancers, reserved IPs, BYOIP Prefixes, VPCs, and CDNs. |
-| insights     | https://insights.mcp.digitalocean.com/mcp   | Monitors your resources, endpoints and alert you when they're slow, unavailable, or SSL certificates are expiring. |
-| spaces       | https://spaces.mcp.digitalocean.com/mcp     | DigitalOcean Spaces object storage and Spaces access keys for S3-compatible storage. |
-| databases    | https://databases.mcp.digitalocean.com/mcp  | Provision, manage, and monitor managed database clusters (Postgres, MySQL, Redis, etc.). |
-| marketplace  | https://marketplace.mcp.digitalocean.com/mcp| Discover and manage DigitalOcean Marketplace applications. |
-| doks         | https://doks.mcp.digitalocean.com/mcp       | Manage DigitalOcean Kubernetes clusters and node pools. |
 
 ## Documentation
 
