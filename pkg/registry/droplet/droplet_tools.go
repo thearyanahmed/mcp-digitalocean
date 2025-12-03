@@ -31,6 +31,32 @@ func (d *DropletTool) createDroplet(ctx context.Context, req mcp.CallToolRequest
 	region := args["Region"].(string)
 	backup, _ := args["Backup"].(bool)         // Defaults to false
 	monitoring, _ := args["Monitoring"].(bool) // Defaults to false
+
+	// Handle SSH keys if provided
+	var sshKeys []godo.DropletCreateSSHKey
+	if sshKeysRaw, ok := args["SSHKeys"]; ok && sshKeysRaw != nil {
+		sshKeysList := sshKeysRaw.([]interface{})
+		for _, key := range sshKeysList {
+			switch v := key.(type) {
+			case float64:
+				sshKeys = append(sshKeys, godo.DropletCreateSSHKey{ID: int(v)})
+			case string:
+				sshKeys = append(sshKeys, godo.DropletCreateSSHKey{Fingerprint: v})
+			}
+		}
+	}
+
+	// Handle tags if provided
+	var tags []string
+	if tagsRaw, ok := args["Tags"]; ok && tagsRaw != nil {
+		tagsList := tagsRaw.([]interface{})
+		for _, tag := range tagsList {
+			if tagStr, ok := tag.(string); ok {
+				tags = append(tags, tagStr)
+			}
+		}
+	}
+
 	// Create the droplet
 	dropletCreateRequest := &godo.DropletCreateRequest{
 		Name:       dropletName,
@@ -39,6 +65,8 @@ func (d *DropletTool) createDroplet(ctx context.Context, req mcp.CallToolRequest
 		Region:     region,
 		Backups:    backup,
 		Monitoring: monitoring,
+		SSHKeys:    sshKeys,
+		Tags:       tags,
 	}
 
 	client, err := d.client(ctx)
@@ -168,6 +196,30 @@ func (d *DropletTool) getDropletByID(ctx context.Context, req mcp.CallToolReques
 	return mcp.NewToolResultText(string(jsonData)), nil
 }
 
+// getDropletBackupPolicy returns the backup policy for a droplet.
+func (d *DropletTool) getDropletBackupPolicy(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	id, ok := req.GetArguments()["ID"].(float64)
+	if !ok {
+		return mcp.NewToolResultError("Droplet ID is required"), nil
+	}
+
+	client, err := d.client(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get DigitalOcean client: %w", err)
+	}
+
+	policy, _, err := client.Droplets.GetBackupPolicy(ctx, int(id))
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("api error", err), nil
+	}
+
+	jsonData, err := json.MarshalIndent(policy, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("marshal error: %w", err)
+	}
+	return mcp.NewToolResultText(string(jsonData)), nil
+}
+
 func (d *DropletTool) getDropletActionByID(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	dropletID, ok := req.GetArguments()["DropletID"].(float64)
 	if !ok {
@@ -267,6 +319,8 @@ func (d *DropletTool) Tools() []server.ServerTool {
 				mcp.WithString("Region", mcp.Required(), mcp.Description("Slug of the region (e.g., nyc3)")),
 				mcp.WithBoolean("Backup", mcp.DefaultBool(false), mcp.Description("Whether to enable backups")),
 				mcp.WithBoolean("Monitoring", mcp.DefaultBool(false), mcp.Description("Whether to enable monitoring")),
+				mcp.WithArray("SSHKeys", mcp.Description("Array of SSH key IDs (numbers) or fingerprints (strings) to add to the droplet")),
+				mcp.WithArray("Tags", mcp.Description("Array of tag names to apply to the droplet")),
 			),
 		},
 		{
@@ -294,6 +348,13 @@ func (d *DropletTool) Tools() []server.ServerTool {
 			Handler: d.getDropletByID,
 			Tool: mcp.NewTool("droplet-get",
 				mcp.WithDescription("Get a droplet by its ID"),
+				mcp.WithNumber("ID", mcp.Required(), mcp.Description("Droplet ID")),
+			),
+		},
+		{
+			Handler: d.getDropletBackupPolicy,
+			Tool: mcp.NewTool("droplet-backup-policy",
+				mcp.WithDescription("Get a droplet's backup policy"),
 				mcp.WithNumber("ID", mcp.Required(), mcp.Description("Droplet ID")),
 			),
 		},

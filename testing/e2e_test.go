@@ -48,7 +48,7 @@ func TestMain(m *testing.M) {
 			log.Fatalf("Could not get mapped port: %v", err)
 		}
 		mcpPort = port.Port()
-		mcpServerURL = fmt.Sprintf("http://localhost:%s/mcp", mcpPort)
+		mcpServerURL = fmt.Sprintf("http://127.0.0.1:%s/mcp", mcpPort)
 	} else {
 		fmt.Println("Using existing MCP server at:", mcpServerURL)
 	}
@@ -71,10 +71,11 @@ type McpServerConfig struct {
 // ToMap converts the config to a map of environment variables
 func (cfg McpServerConfig) ToMap() map[string]string {
 	env := map[string]string{
-		"BIND_ADDR":              cfg.BindAddr,
-		"DIGITALOCEAN_API_TOKEN": cfg.DigitalOceanAPIToken,
-		"LOG_LEVEL":              cfg.LogLevel,
-		"TRANSPORT":              cfg.Transport,
+		"BIND_ADDR":                 cfg.BindAddr,
+		"DIGITALOCEAN_API_TOKEN":    cfg.DigitalOceanAPIToken,
+		"LOG_LEVEL":                 cfg.LogLevel,
+		"TRANSPORT":                 cfg.Transport,
+		"ENABLE_TOOL_ERROR_LOGGING": "true",
 	}
 
 	// add optional services configuration if provided
@@ -101,10 +102,17 @@ func startMcpServer(ctx context.Context, cfg McpServerConfig) (container testcon
 		FromDockerfile: testcontainers.FromDockerfile{
 			Context:    buildCtx,
 			Dockerfile: "Dockerfile",
+			KeepImage:  true, // Keep the image after container stops to enable Docker layer caching
+			Repo:       "mcp-digitalocean",
+			Tag:        "latest",
 		},
 		ExposedPorts: []string{"8080/tcp"},
 		Env:          cfg.ToMap(),
 		WaitingFor:   wait.ForListeningPort("8080/tcp").WithStartupTimeout(60 * time.Second), // 60s
+		// Add host.docker.internal mapping for containers to reach the host
+		// This is needed for WebSocket logging tests where the fake WS server runs on the host
+		// Using "host-gateway" which Docker automatically resolves to the host's gateway IP
+		ExtraHosts: []string{"host.docker.internal:host-gateway"},
 	}
 
 	return testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
