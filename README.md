@@ -34,19 +34,19 @@ To add a remote DigitalOcean MCP server to [Claude Code](https://www.anthropic.c
 
 ```bash
 claude mcp add --transport http digitalocean-apps https://apps.mcp.digitalocean.com/mcp \
-  --header "Authorization: Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+  --header "Authorization: Bearer YOUR_API_TOKEN"
 ```
 
-Replace `YOUR_DIGITALOCEAN_API_TOKEN` with your actual DigitalOcean API token.
+Replace `YOUR_API_TOKEN` with your actual DigitalOcean API token.
 
 You can add multiple services by running the command for each endpoint:
 
 ```bash
 claude mcp add --transport http digitalocean-databases https://databases.mcp.digitalocean.com/mcp \
-  --header "Authorization: Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+  --header "Authorization: Bearer YOUR_API_TOKEN"
 
 claude mcp add --transport http digitalocean-droplets https://droplets.mcp.digitalocean.com/mcp \
-  --header "Authorization: Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+  --header "Authorization: Bearer YOUR_API_TOKEN"
 ```
 
 See the [Available Services](#available-services) section for the complete list of available endpoints.
@@ -122,13 +122,13 @@ Add the remote MCP servers to your `claude_desktop_config.json` file:
     "digitalocean-apps": {
       "url": "https://apps.mcp.digitalocean.com/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+        "Authorization": "Bearer YOUR_API_TOKEN"
       }
     },
     "digitalocean-databases": {
       "url": "https://databases.mcp.digitalocean.com/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+        "Authorization": "Bearer YOUR_API_TOKEN"
       }
     }
   }
@@ -169,13 +169,13 @@ Add the remote MCP servers to your Cursor settings file located at `~/.cursor/co
     "digitalocean-apps": {
       "url": "https://apps.mcp.digitalocean.com/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+        "Authorization": "Bearer YOUR_API_TOKEN"
       }
     },
     "digitalocean-databases": {
       "url": "https://databases.mcp.digitalocean.com/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+        "Authorization": "Bearer YOUR_API_TOKEN"
       }
     }
   }
@@ -241,13 +241,13 @@ Add the remote MCP servers to your VS Code MCP configuration file:
       "digitalocean-apps": {
         "url": "https://apps.mcp.digitalocean.com/mcp",
         "headers": {
-          "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+          "Authorization": "Bearer YOUR_API_TOKEN"
         }
       },
       "digitalocean-databases": {
         "url": "https://databases.mcp.digitalocean.com/mcp",
         "headers": {
-          "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+          "Authorization": "Bearer YOUR_API_TOKEN"
         }
       }
     }
